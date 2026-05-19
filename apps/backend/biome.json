@@ -1,0 +1,13 @@
+{
+  "extends": "//",
+  "files": {
+    "includes": ["src/**", "test/**", "!src/generated/**"]
+  },
+  "linter": {
+    "rules": {
+      "style": {
+        "useImportType": "off"
+      }
+    }
+  }
+}
