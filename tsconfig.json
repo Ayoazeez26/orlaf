@@ -1,0 +1,21 @@
+// {
+//   "compilerOptions": {
+//     "target": "ES2022",
+//     "module": "ESNext",
+//     "moduleResolution": "bundler",
+//     "skipLibCheck": true,
+//     "strict": true
+//   }
+// }
+
+
+{
+  "files": [],
+  "references": [
+    { "path": "./apps/creator-web" },
+    { "path": "./apps/admin-web" },
+    { "path": "./apps/backend" },
+    { "path": "./apps/mobile" },
+    { "path": "./packages/ui" }
+  ]
+}
