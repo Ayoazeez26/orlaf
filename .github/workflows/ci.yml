@@ -37,6 +37,8 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        env:
+          DATABASE_URL: "postgresql://dummy-ci-to-pass"
 
       - name: Lint
         run: pnpm lint
