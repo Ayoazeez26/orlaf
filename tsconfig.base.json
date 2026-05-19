@@ -13,7 +13,7 @@
 
     "verbatimModuleSyntax": true,
     "noEmit": true,
-    
+
     "paths": {
       "@workspace/ui/*": ["packages/ui/src/*"]
     }

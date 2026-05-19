@@ -6,12 +6,13 @@
   "license": "MIT",
   "scripts": {
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "format": "biome format --write .",
+    
     "start": "nest start",
     "dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "lint": "turbo lint",
+    "lint": "biome check .",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
