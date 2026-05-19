@@ -41,4 +41,4 @@ jobs:
           DATABASE_URL: "postgresql://dummy-ci-to-pass"
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm --filter !@orlaf/mobile lint

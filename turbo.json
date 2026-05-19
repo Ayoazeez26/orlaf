@@ -7,10 +7,18 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".output/**"]
     },
-    "lint": {},
-    "format": {},
+    "lint": {
+      "cache": true
+    },
+    "format": {
+      "cache": true
+    },
     "typecheck": {
       "dependsOn": ["^typecheck"]
+    },
+    "test": {
+      "cache": true,
+      "inputs": ["$TURBO_DEFAULT$"]
     },
     "dev": {
       "cache": false,
