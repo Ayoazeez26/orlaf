@@ -98,7 +98,7 @@ export function GetStartedStep({
           {STUDIO_TOOL_ITEMS.map((item) => (
             <li
               key={item.label}
-              className="flex items-center gap-3 rounded-xl border border-border px-4 py-3.5"
+              className="flex items-center gap-3 rounded-xl border border-border bg-input-bg px-4 py-3.5"
             >
               <item.icon className="size-5 shrink-0 text-muted-foreground" />
               <span className="flex-1 font-medium text-sm">{item.label}</span>

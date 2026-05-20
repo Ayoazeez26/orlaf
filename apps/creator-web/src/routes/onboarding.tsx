@@ -19,9 +19,10 @@ function OnboardingPage() {
 
 function OnboardingFallback() {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center bg-[#f4f4f5] px-4 py-10">
-      <p className="mb-6 font-semibold text-lg">
-        <span className="font-bold">Sable</span> Creators
+    <div className="flex min-h-svh flex-col items-center justify-center bg-background px-4 py-10">
+      <p className="mb-6 font-semibold text-foreground text-lg">
+        <span className="font-bold">OrlAf</span>{" "}
+        <span className="text-muted-foreground">Creators</span>
       </p>
       <div className="w-full max-w-lg animate-pulse rounded-2xl border border-border bg-card p-8 shadow-sm">
         <div className="mx-auto h-8 w-3/4 rounded-lg bg-muted" />

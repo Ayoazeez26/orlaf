@@ -25,7 +25,7 @@ export function SelectionCard({
         "relative flex flex-1 flex-col items-start gap-3 rounded-xl border-2 p-5 text-left transition-all",
         selected
           ? "border-primary bg-primary/5"
-          : "border-border bg-background hover:border-muted-foreground/40"
+          : "border-border bg-input-bg hover:border-muted-foreground/40"
       )}
     >
       {selected && (

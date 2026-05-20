@@ -19,7 +19,7 @@ function DashboardPage() {
 
 function DashboardFallback() {
   return (
-    <div className="flex min-h-svh items-center justify-center bg-[#f4f4f5] p-6">
+    <div className="flex min-h-svh items-center justify-center bg-background p-6">
       <div className="h-48 w-full max-w-2xl animate-pulse rounded-2xl bg-muted" />
     </div>
   )
@@ -36,7 +36,7 @@ function DashboardContent() {
   }, [])
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center bg-[#f4f4f5] p-6">
+    <div className="flex min-h-svh flex-col items-center justify-center bg-background p-6">
       <div className="w-full max-w-2xl rounded-2xl border border-border bg-card p-8 shadow-sm">
         <h1 className="font-bold text-2xl">Welcome to Creator Studio</h1>
         <p className="mt-2 text-muted-foreground text-sm">

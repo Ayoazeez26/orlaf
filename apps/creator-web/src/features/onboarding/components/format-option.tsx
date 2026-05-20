@@ -22,7 +22,7 @@ export function FormatOption({
         "flex w-full items-center gap-3 rounded-xl border-2 px-4 py-3.5 text-left font-medium text-sm transition-all",
         selected
           ? "border-primary text-primary"
-          : "border-border text-foreground hover:border-muted-foreground/40"
+          : "border-border bg-input-bg text-foreground hover:border-muted-foreground/40"
       )}
     >
       <Icon
