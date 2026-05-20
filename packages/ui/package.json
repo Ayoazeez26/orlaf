@@ -9,9 +9,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@fontsource-variable/geist": "^5.2.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "input-otp": "^1.4.2",
     "lucide-react": "^1.16.0",
     "radix-ui": "^1.4.3",
     "react": "^19.2.4",
