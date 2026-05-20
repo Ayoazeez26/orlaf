@@ -23,11 +23,11 @@ export function OnboardingShell({
   wide = false,
 }: OnboardingShellProps) {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center bg-[#f4f4f5] px-4 py-10">
+    <div className="flex min-h-svh flex-col items-center justify-center bg-background px-4 py-10">
       <div
         className={cn(
-          "w-full rounded-2xl border border-border bg-card p-8 shadow-sm",
-          wide ? "max-w-3xl" : "max-w-lg",
+          "w-full max-w-lg rounded-2xl border border-border bg-card p-8 shadow-sm",
+          wide && "max-w-3xl",
           className
         )}
       >
