@@ -25,7 +25,7 @@ export function OnboardingNav({
           type="button"
           onClick={onSkip}
           className={cn(
-            "px-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
+            "px-2 font-medium text-muted-foreground text-sm transition-colors hover:text-foreground",
             className
           )}
         >

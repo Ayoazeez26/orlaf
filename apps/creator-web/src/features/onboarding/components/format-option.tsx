@@ -19,7 +19,7 @@ export function FormatOption({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-3 rounded-xl border-2 px-4 py-3.5 text-left text-sm font-medium transition-all",
+        "flex w-full items-center gap-3 rounded-xl border-2 px-4 py-3.5 text-left font-medium text-sm transition-all",
         selected
           ? "border-primary text-primary"
           : "border-border text-foreground hover:border-muted-foreground/40"

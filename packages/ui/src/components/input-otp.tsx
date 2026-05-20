@@ -50,7 +50,7 @@ function InputOTPSlot({
       data-slot="input-otp-slot"
       data-active={isActive}
       className={cn(
-        "relative flex size-11 items-center justify-center rounded-lg border border-input bg-background text-sm font-medium shadow-xs transition-all outline-none data-[active=true]:z-10 data-[active=true]:border-primary data-[active=true]:ring-3 data-[active=true]:ring-primary/20",
+        "relative flex size-11 items-center justify-center rounded-lg border border-input bg-background font-medium text-sm shadow-xs outline-none transition-all data-[active=true]:z-10 data-[active=true]:border-primary data-[active=true]:ring-3 data-[active=true]:ring-primary/20",
         className
       )}
       {...props}
@@ -67,10 +67,10 @@ function InputOTPSlot({
 
 function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
   return (
-    <div data-slot="input-otp-separator" role="separator" {...props}>
+    <div data-slot="input-otp-separator" aria-hidden {...props}>
       <MinusIcon />
     </div>
   )
 }
 
-export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator }
+export { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot }

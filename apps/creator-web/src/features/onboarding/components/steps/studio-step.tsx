@@ -66,8 +66,8 @@ export function StudioStep({
       footer={<OnboardingNav onSkip={onSkip} onNext={handleSubmit(onSubmit)} />}
     >
       <div>
-        <h1 className="text-2xl font-semibold">About your studio</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <h1 className="font-semibold text-2xl">About your studio</h1>
+        <p className="mt-2 text-muted-foreground text-sm">
           Help us set up your team workspace.
         </p>
       </div>
@@ -82,7 +82,7 @@ export function StudioStep({
             {...register("name")}
           />
           {errors.name && (
-            <p className="text-xs text-destructive">{errors.name.message}</p>
+            <p className="text-destructive text-xs">{errors.name.message}</p>
           )}
         </div>
 
@@ -104,7 +104,7 @@ export function StudioStep({
             {...register("website")}
           />
           {errors.website && (
-            <p className="text-xs text-destructive">{errors.website.message}</p>
+            <p className="text-destructive text-xs">{errors.website.message}</p>
           )}
         </div>
       </form>

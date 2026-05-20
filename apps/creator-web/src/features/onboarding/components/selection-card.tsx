@@ -41,7 +41,7 @@ export function SelectionCard({
       />
       <div>
         <p className="font-semibold text-foreground">{title}</p>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+        <p className="mt-1 text-muted-foreground text-sm">{description}</p>
       </div>
     </button>
   )

@@ -49,10 +49,8 @@ export function CreatorTypeStep({
       }
     >
       <div>
-        <h1 className="text-2xl font-semibold">
-          How do you create?
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <h1 className="font-semibold text-2xl">How do you create?</h1>
+        <p className="mt-2 text-muted-foreground text-sm">
           This helps us tailor your Creator Studio experience.
         </p>
       </div>

@@ -21,7 +21,7 @@ export function SegmentedControl<T extends string>({
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              "rounded-lg border px-4 py-2 text-sm font-medium transition-all",
+              "rounded-lg border px-4 py-2 font-medium text-sm transition-all",
               selected
                 ? "border-primary text-primary"
                 : "border-border text-foreground hover:border-muted-foreground/50"

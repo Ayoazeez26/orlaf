@@ -56,13 +56,13 @@ export function WelcomeStep({ progress, onAuthSelect }: WelcomeStepProps) {
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center bg-[#f4f4f5] px-4 py-10">
-      <p className="mb-6 text-lg font-semibold"><span className="font-bold">Sable</span> Creators</p>
+      <p className="mb-6 font-semibold text-lg">
+        <span className="font-bold">Sable</span> Creators
+      </p>
       <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-8 shadow-sm">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold">
-            Let&apos;s get you started
-          </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <h1 className="font-semibold text-2xl">Let&apos;s get you started</h1>
+          <p className="mt-2 text-muted-foreground text-sm">
             Your Creator Studio for short dramas &amp; series
           </p>
         </div>
@@ -72,7 +72,7 @@ export function WelcomeStep({ progress, onAuthSelect }: WelcomeStepProps) {
             type="button"
             variant="outline"
             size="lg"
-            className="h-12 w-full justify-center gap-3 cursor-pointer rounded-xl text-base font-medium"
+            className="h-12 w-full cursor-pointer justify-center gap-3 rounded-xl font-medium text-base"
             onClick={() => handleAuth("google")}
           >
             <GoogleIcon />
@@ -82,7 +82,7 @@ export function WelcomeStep({ progress, onAuthSelect }: WelcomeStepProps) {
             type="button"
             variant="outline"
             size="lg"
-            className="h-12 w-full justify-center gap-3 cursor-pointer rounded-xl text-base font-medium"
+            className="h-12 w-full cursor-pointer justify-center gap-3 rounded-xl font-medium text-base"
             onClick={() => handleAuth("apple")}
           >
             <AppleIcon />
@@ -91,7 +91,7 @@ export function WelcomeStep({ progress, onAuthSelect }: WelcomeStepProps) {
 
           <div className="relative my-2">
             <Separator />
-            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-xs text-muted-foreground">
+            <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-card px-3 text-muted-foreground text-xs">
               or
             </span>
           </div>
@@ -100,7 +100,7 @@ export function WelcomeStep({ progress, onAuthSelect }: WelcomeStepProps) {
             type="button"
             variant="outline"
             size="lg"
-            className="h-12 w-full justify-center gap-3 cursor-pointer rounded-xl text-base font-medium"
+            className="h-12 w-full cursor-pointer justify-center gap-3 rounded-xl font-medium text-base"
             onClick={() => handleAuth("email")}
           >
             <Mail className="size-5 text-muted-foreground" />
@@ -108,7 +108,7 @@ export function WelcomeStep({ progress, onAuthSelect }: WelcomeStepProps) {
           </Button>
         </div>
 
-        <p className="mt-6 text-center text-xs text-muted-foreground">
+        <p className="mt-6 text-center text-muted-foreground text-xs">
           By signing up, you agree to our{" "}
           <button type="button" className="text-primary hover:underline">
             Terms
@@ -119,12 +119,9 @@ export function WelcomeStep({ progress, onAuthSelect }: WelcomeStepProps) {
           </button>
         </p>
 
-        <p className="mt-4 text-center text-sm text-muted-foreground">
+        <p className="mt-4 text-center text-muted-foreground text-sm">
           Have an account?{" "}
-          <button
-            type="button"
-            className="text-primary hover:underline"
-          >
+          <button type="button" className="text-primary hover:underline">
             Log in
           </button>
         </p>

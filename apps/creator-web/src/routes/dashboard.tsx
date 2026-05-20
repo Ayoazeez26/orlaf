@@ -38,8 +38,8 @@ function DashboardContent() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center bg-[#f4f4f5] p-6">
       <div className="w-full max-w-2xl rounded-2xl border border-border bg-card p-8 shadow-sm">
-        <h1 className="text-2xl font-bold">Welcome to Creator Studio</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <h1 className="font-bold text-2xl">Welcome to Creator Studio</h1>
+        <p className="mt-2 text-muted-foreground text-sm">
           Onboarding complete. Your profile summary:
         </p>
         <pre className="mt-6 max-h-96 overflow-auto rounded-lg bg-muted p-4 text-xs">

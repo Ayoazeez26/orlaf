@@ -50,20 +50,14 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
       showBack
       onBack={onBack}
       footer={
-        <Button
-          type="submit"
-          form="signup-form"
-          className="min-w-32"
-        >
+        <Button type="submit" form="signup-form" className="min-w-32">
           Get Started
         </Button>
       }
     >
       <div>
-        <h1 className="text-2xl font-semibold">
-          Tell us about yourself
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <h1 className="font-semibold text-2xl">Tell us about yourself</h1>
+        <p className="mt-2 text-muted-foreground text-sm">
           Create your OrlAf Creator account
         </p>
       </div>
@@ -83,7 +77,7 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
               {...register("firstName")}
             />
             {errors.firstName && (
-              <p className="text-xs text-destructive">
+              <p className="text-destructive text-xs">
                 {errors.firstName.message}
               </p>
             )}
@@ -97,7 +91,7 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
               {...register("lastName")}
             />
             {errors.lastName && (
-              <p className="text-xs text-destructive">
+              <p className="text-destructive text-xs">
                 {errors.lastName.message}
               </p>
             )}
@@ -114,7 +108,7 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
             {...register("email")}
           />
           {errors.email && (
-            <p className="text-xs text-destructive">{errors.email.message}</p>
+            <p className="text-destructive text-xs">{errors.email.message}</p>
           )}
         </div>
 
@@ -128,7 +122,7 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
             {...register("password")}
           />
           {errors.password && (
-            <p className="text-xs text-destructive">
+            <p className="text-destructive text-xs">
               {errors.password.message}
             </p>
           )}

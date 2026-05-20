@@ -65,10 +65,10 @@ export function GetStartedStep({
       }
     >
       <div>
-        <h1 className="text-2xl font-semibold">
+        <h1 className="font-semibold text-2xl">
           How do you want to get started?
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-2 text-muted-foreground text-sm">
           Upload episodes or create your first series from scratch.
         </p>
       </div>
@@ -91,7 +91,7 @@ export function GetStartedStep({
       </div>
 
       <div className="mt-8">
-        <p className="mb-3 text-xs font-medium tracking-wider text-muted-foreground uppercase">
+        <p className="mb-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
           Studio Tools
         </p>
         <ul className="flex flex-col gap-2">
@@ -101,7 +101,7 @@ export function GetStartedStep({
               className="flex items-center gap-3 rounded-xl border border-border px-4 py-3.5"
             >
               <item.icon className="size-5 shrink-0 text-muted-foreground" />
-              <span className="flex-1 text-sm font-medium">{item.label}</span>
+              <span className="flex-1 font-medium text-sm">{item.label}</span>
               <ChevronRight className="size-4 text-muted-foreground" />
             </li>
           ))}

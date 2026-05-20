@@ -41,8 +41,8 @@ export function VerifyEmailStep({
         <div className="mb-6 flex size-14 items-center justify-center rounded-full bg-primary/10">
           <Mail className="size-7 text-primary" />
         </div>
-        <h1 className="text-2xl font-semibold">Verify your email</h1>
-        <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+        <h1 className="font-semibold text-2xl">Verify your email</h1>
+        <p className="mt-2 max-w-sm text-muted-foreground text-sm">
           We sent a 6-digit code to your inbox. Enter it below.
         </p>
       </div>
@@ -66,7 +66,7 @@ export function VerifyEmailStep({
         Verify
       </Button>
 
-      <p className="mt-6 text-center text-sm text-muted-foreground">
+      <p className="mt-6 text-center text-muted-foreground text-sm">
         Didn&apos;t get the code?{" "}
         <button
           type="button"
