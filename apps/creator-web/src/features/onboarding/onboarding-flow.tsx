@@ -14,8 +14,6 @@ import { useOnboardingNavigation } from "./use-onboarding-navigation"
 export function OnboardingFlow() {
   const navigate = useNavigate()
   const { data } = useOnboarding()
-  const { currentStep, progress, goNext, goBack, goTo } =
-    useOnboardingNavigation()
 
   const handleAuthSelect = (method: AuthMethod) => {
     if (method === "email") {
@@ -27,8 +25,11 @@ export function OnboardingFlow() {
 
   const handleComplete = () => {
     sessionStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(data))
-    navigate({ to: "/dashboard" })
+    navigate({ to: "/dashboard", replace: true })
   }
+
+  const navigation = useOnboardingNavigation("welcome", handleComplete)
+  const { currentStep, progress, goNext, goBack, goTo } = navigation
 
   switch (currentStep) {
     case "welcome":
@@ -71,7 +72,7 @@ export function OnboardingFlow() {
         <GetStartedStep
           progress={progress}
           onBack={goBack}
-          onComplete={handleComplete}
+          onNext={goNext}
           onSkip={handleComplete}
         />
       )

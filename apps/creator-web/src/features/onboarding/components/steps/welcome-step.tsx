@@ -1,7 +1,6 @@
 import { Button } from "@workspace/ui/components/button"
 import { Separator } from "@workspace/ui/components/separator"
 import { Mail } from "lucide-react"
-import { ThemeSwitcher } from "@/components/theme-switcher"
 import { useOnboarding } from "../../onboarding-context"
 import type { AuthMethod } from "../../types"
 import { OnboardingProgress } from "../onboarding-progress"
@@ -56,10 +55,7 @@ export function WelcomeStep({ progress, onAuthSelect }: WelcomeStepProps) {
   }
 
   return (
-    <div className="relative flex min-h-svh flex-col items-center justify-center bg-background px-4 py-10">
-      <div className="absolute top-4 right-4">
-        <ThemeSwitcher />
-      </div>
+    <div className="flex min-h-svh flex-col items-center justify-center bg-background px-4 py-10">
       <p className="mb-6 font-semibold text-foreground text-lg">
         <span className="font-bold">OrlAf</span>{" "}
         <span className="text-muted-foreground">Creators</span>
