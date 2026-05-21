@@ -4,7 +4,8 @@ import { getNextStep, getPrevStep, getProgress } from "./steps"
 import type { OnboardingStep } from "./types"
 
 export function useOnboardingNavigation(
-  initialStep: OnboardingStep = "welcome"
+  initialStep: OnboardingStep = "welcome",
+  onComplete?: () => void
 ) {
   const { data } = useOnboarding()
   const [currentStep, setCurrentStep] = useState<OnboardingStep>(initialStep)
@@ -17,8 +18,12 @@ export function useOnboardingNavigation(
 
   const goNext = useCallback(() => {
     const next = getNextStep(currentStep, data)
-    if (next) setCurrentStep(next)
-  }, [currentStep, data])
+    if (next) {
+      setCurrentStep(next)
+    } else {
+      onComplete?.()
+    }
+  }, [currentStep, data, onComplete])
 
   const goBack = useCallback(() => {
     const prev = getPrevStep(currentStep, data)

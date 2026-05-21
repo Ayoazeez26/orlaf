@@ -16,7 +16,7 @@ import { SelectionCard } from "../selection-card"
 interface GetStartedStepProps {
   progress: { currentIndex: number; total: number }
   onBack: () => void
-  onComplete: () => void
+  onNext: () => void
   onSkip: () => void
 }
 
@@ -29,7 +29,7 @@ const STUDIO_TOOL_ITEMS = [
 export function GetStartedStep({
   progress,
   onBack,
-  onComplete,
+  onNext,
   onSkip,
 }: GetStartedStepProps) {
   const { data, dispatch } = useOnboarding()
@@ -42,11 +42,11 @@ export function GetStartedStep({
     dispatch({ type: "SET_GET_STARTED_MODE", payload: mode })
   }
 
-  const handleComplete = () => {
+  const handleNext = () => {
     if (selected) {
       dispatch({ type: "SET_GET_STARTED_MODE", payload: selected })
     }
-    onComplete()
+    onNext()
   }
 
   return (
@@ -58,8 +58,8 @@ export function GetStartedStep({
       footer={
         <OnboardingNav
           onSkip={onSkip}
-          onNext={handleComplete}
-          nextLabel="Get Started"
+          onNext={handleNext}
+          nextLabel="Continue to Dashboard"
           nextDisabled={false}
         />
       }
