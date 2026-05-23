@@ -15,6 +15,7 @@
     { "path": "./apps/admin-web" },
     { "path": "./apps/backend" },
     { "path": "./apps/mobile" },
-    { "path": "./packages/ui" }
+    { "path": "./packages/ui" },
+    { "path": "./packages/contracts" }
   ]
 }
