@@ -1,0 +1,23 @@
+name: sable-infra
+runtime:
+  name: nodejs
+  options:
+    typescript: true
+description: Sable platform AWS infrastructure
+
+backend:
+  url: s3://sable-infra-state?region=us-east-1
+
+config:
+  rootDomain:
+    type: string
+    description: Root domain for the platform (e.g. sable.app). Placeholder until Phase 3.
+  dbInstanceClass:
+    type: string
+    description: RDS instance class (e.g. db.t3.micro for dev, db.t3.medium for prod)
+  appRunnerCpu:
+    type: string
+    description: App Runner vCPU allocation (e.g. "0.5 vCPU")
+  appRunnerMemory:
+    type: string
+    description: App Runner memory allocation (e.g. "1 GB")

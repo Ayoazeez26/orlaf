@@ -1,0 +1,11 @@
+node_modules/
+bin/
+
+# Pulumi state — state lives in S3, not git
+.pulumi/
+
+# Local stack config overrides — never commit these
+*.local.yaml
+
+# Secrets passphrase — set as env var, never committed
+.env
