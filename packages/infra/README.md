@@ -124,17 +124,32 @@ export PULUMI_CONFIG_PASSPHRASE="get-this-from-1password"
 
 ```bash
 cd infra
-AWS_PROFILE=sable-dev pulumi login s3://sable-infra-state
+AWS_PROFILE=sable-dev pulumi login 's3://sable-infra-state?region=us-east-1'
 ```
 
-### 7. Smoke check
+### 7. Add environment variables to your shell
+
+Add these to your `~/.zshrc` or `~/.bashrc` so you don't have to prefix every command:
 
 ```bash
-pulumi stack select dev
-pulumi preview
+export AWS_PROFILE=sable-dev
+export PULUMI_BACKEND_URL='s3://sable-infra-state?region=us-east-1'
+export PULUMI_CONFIG_PASSPHRASE="get-this-from-1password"
 ```
 
-Expected output with no resources yet:
+Then reload:
+```bash
+source ~/.zshrc
+```
+
+### 8. Smoke check
+
+```bash
+cd infra
+pnpm preview:dev
+```
+
+Expected output:
 ```
 Previewing update (dev):
 
@@ -164,6 +179,37 @@ This creates in the `sable-dev` AWS account:
 
 ---
 
+## Known gotchas
+
+These are real issues we hit during setup — saved here so the next person doesn't spend time debugging them.
+
+**Config namespace is `sable-infra:`, not `sable:`**
+The project is named `sable-infra` so all config keys use that as the namespace. When setting config manually always use `sable-infra:`:
+```bash
+pulumi config set sable-infra:rootDomain sable.example --stack dev
+```
+Using `sable:` looks like it works (exit code 0) but the values are silently ignored.
+
+**`pulumi config set` exits 0 even when it fails**
+If `PULUMI_CONFIG_PASSPHRASE` is not set, Pulumi prompts for the passphrase interactively. If the prompt isn't answered correctly the command exits 0 but writes nothing. Always set `PULUMI_CONFIG_PASSPHRASE` as an env var before running any config commands.
+
+**S3 backend URL must include the region**
+`s3://sable-infra-state` alone causes a `MissingRegion` error. Always use the full URL:
+```bash
+pulumi login 's3://sable-infra-state?region=us-east-1'
+```
+
+**`prod` stack is selected by default after bootstrap**
+After `pulumi stack init`, the last stack initialised becomes active. Always check which stack is active before running commands:
+```bash
+pulumi stack ls   # look for the * next to the active stack
+```
+
+**`Pulumi.dev.yaml` is not the source of truth after stack init**
+The stack YAML files are only read when Pulumi initialises a new stack. Once a stack exists in the S3 backend, config must be set via `pulumi config set` — editing the YAML directly has no effect on the running stack. The YAML files are committed to git as documentation of what values should be set, but the backend is what Pulumi actually reads.
+
+---
+
 ## Daily workflow
 
 ### Start of session — log in to AWS
@@ -177,8 +223,10 @@ aws sso login --profile sable-dev
 ### Log in to Pulumi state backend
 
 ```bash
-AWS_PROFILE=sable-dev pulumi login s3://sable-infra-state
+AWS_PROFILE=sable-dev pulumi login 's3://sable-infra-state?region=us-east-1'
 ```
+
+> If you set `PULUMI_BACKEND_URL` in your shell (recommended), you can skip this — Pulumi logs in automatically.
 
 ### Select a stack
 
@@ -320,6 +368,38 @@ For secrets, use `config.requireSecret()` — Pulumi encrypts the value in the s
 
 ```bash
 pulumi config set --secret sable:dbPassword hunter2 --stack dev
+```
+
+---
+
+## Networking
+
+We use the **default VPC** for MVP — no custom VPC, subnets, route tables, or NAT gateway.
+
+### Security groups
+
+| Name | Stack resource | Purpose |
+|------|---------------|---------|
+| `sable-app-runner-connector-<stack>` | `appRunnerConnectorSg` | Attached to the App Runner VPC connector. Allows all outbound, no inbound. |
+| `sable-rds-postgres-<stack>` | `rdsPostgresSg` | Attached to RDS. Allows inbound on port 5432 from `appRunnerConnectorSg` only. |
+
+### Stack outputs
+
+After `pulumi up`, retrieve the security group IDs:
+
+```bash
+pulumi stack output --stack dev
+```
+
+| Output | Used by |
+|--------|---------|
+| `appRunnerConnectorSg` | App Runner VPC connector resource (KAN-44) |
+| `rdsPostgresSg` | RDS instance resource (KAN-43) |
+
+Reference them in other resource modules:
+
+```typescript
+import { appRunnerConnectorSg, rdsPostgresSg } from "./index";
 ```
 
 ---

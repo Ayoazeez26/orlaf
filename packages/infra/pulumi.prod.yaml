@@ -1,8 +1,1 @@
-config:
-  aws:region: us-east-1
-  aws:profile: sable-prod
-
-  sable:rootDomain: sable.example
-  sable:dbInstanceClass: db.t3.medium
-  sable:appRunnerCpu: 2 vCPU
-  sable:appRunnerMemory: 4 GB
+encryptionsalt: v1:BLa/JOYwieo=:v1:Da03qnyq6AxeLC+w:T9fNUafhMWk9ohjBda5LYSSE4tfwQQ==

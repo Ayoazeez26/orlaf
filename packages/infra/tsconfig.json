@@ -1,24 +1,22 @@
 {
-  "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "bin",
-    "rootDir": ".",
-    "strict": true,
     "target": "ES2020",
     "module": "commonjs",
     "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",
+
+    "outDir": "bin",
+    "rootDir": ".",
     "sourceMap": true,
-    "experimentalDecorators": true,
-    "pretty": true,
+
+    "strict": true,
+    "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true
+
+    "verbatimModuleSyntax": false,
+    "noEmit": false,
+
+    "experimentalDecorators": true
   },
-  "include": [
-    "*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "bin"
-  ]
+  "include": ["*.ts"],
+  "exclude": ["node_modules", "bin"]
 }
