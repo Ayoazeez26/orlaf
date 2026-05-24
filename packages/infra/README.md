@@ -13,72 +13,172 @@ All infrastructure changes go through this directory and are reviewed in PRs. No
 | Pulumi CLI | `brew install pulumi` |
 | Node.js ≥ 20 | [nodejs.org](https://nodejs.org) |
 | AWS CLI | `brew install awscli` |
-| Named AWS profiles | See below |
 
-### AWS CLI profiles
+---
 
-Two profiles are required — one per account:
+## AWS account structure
 
-```bash
-# ~/.aws/config
+We use **AWS IAM Identity Center (SSO)** with **AWS Organizations** for authentication. There are no long-lived access keys — credentials are short-lived (8 hours) and obtained via browser login.
 
-[profile sable-dev]
-region = us-east-1
-# ... credentials or SSO config
+| Profile | Account | Purpose |
+|---------|---------|---------|
+| `sable-dev` | Company AWS account | All development and testing |
+| `sable-prod` | Separate AWS account (future) | Production — added when going live |
 
-[profile sable-prod]
-region = us-east-1
-# ... credentials or SSO config
+---
+
+## One-time AWS console setup (done once by account owner)
+
+These steps only need to be done once in the AWS console. If you're joining an existing team, skip to [First-time local setup](#first-time-local-setup).
+
+### 1. Enable IAM Identity Center
+
+1. In the AWS console, search for **IAM Identity Center**
+2. Click **Enable** and accept the AWS Organizations prompt
+3. Leave the identity source as **Identity Center directory** (default)
+4. Region should be **US East (N. Virginia) / us-east-1**
+
+### 2. Create a permission set
+
+1. IAM Identity Center → **Permission sets → Create permission set**
+2. Choose **Predefined permission set** → `AdministratorAccess`
+3. Keep the default name and create it
+
+### 3. Create a user for each developer
+
+1. IAM Identity Center → **Users → Add user**
+2. Enter their email and name
+3. They'll receive a confirmation email to set their password
+
+### 4. Assign each user to the AWS account
+
+1. IAM Identity Center → **AWS accounts** (left sidebar)
+2. Check your account → **Assign users or groups**
+3. Select the user → Next
+4. Select the `AdministratorAccess` permission set → Submit
+
+### 5. Note the SSO start URL
+
+IAM Identity Center → **Dashboard** → copy the **AWS access portal URL**. It looks like:
+```
+https://something.awsapps.com/start
 ```
 
-Verify access:
+Share this URL with all developers — they need it for local setup.
+
+---
+
+## First-time local setup
+
+Every developer runs this once on their machine.
+
+### 1. Install tools
+
+```bash
+brew install pulumi awscli
+```
+
+### 2. Configure the AWS SSO profile
+
+```bash
+aws configure sso --profile sable-dev
+```
+
+When prompted:
+```
+SSO session name:        sable
+SSO start URL:           https://something.awsapps.com/start   # get this from account owner
+SSO region:              us-east-1
+SSO registration scopes: sso:account:access
+CLI default region:      us-east-1
+CLI default output:      json
+```
+
+A browser window will open — log in with your IAM Identity Center credentials and click **Allow**.
+
+### 3. Verify access
+
 ```bash
 aws sts get-caller-identity --profile sable-dev
-aws sts get-caller-identity --profile sable-prod
 ```
 
----
+You should see your account ID and user ARN. If you see that, you're in.
 
-## First-time setup
-
-**This only needs to be done once**, by whoever bootstraps the project.
+### 4. Install infra dependencies
 
 ```bash
-# 1. Install Pulumi
-brew install pulumi
-
-# 2. Install infra dependencies
 cd infra
 pnpm install
-
-# 3. Run the bootstrap script — creates the S3 state bucket,
-#    DynamoDB lock table, and initializes both stacks.
-bash bootstrap.sh
 ```
 
-The bootstrap script creates in the `sable-dev` AWS account:
-- S3 bucket `sable-infra-state` — versioned, encrypted, private
-- DynamoDB table `sable-infra-state-lock` — for deploy locking
+### 5. Set the Pulumi secrets passphrase
 
-After bootstrap, every developer on the team just needs to log in:
+Pulumi uses this to encrypt secrets in the stack config files. Get the passphrase from 1Password (or whoever set up the project) and add it to your shell:
 
 ```bash
-cd infra
-pulumi login s3://sable-infra-state
+# Add to ~/.zshrc or ~/.bashrc
+export PULUMI_CONFIG_PASSPHRASE="get-this-from-1password"
 ```
 
----
-
-## Daily workflow
-
-### Log in to the state backend
+### 6. Log in to the Pulumi state backend
 
 ```bash
 cd infra
 AWS_PROFILE=sable-dev pulumi login s3://sable-infra-state
 ```
 
-You only need to do this once per terminal session (or after a logout).
+### 7. Smoke check
+
+```bash
+pulumi stack select dev
+pulumi preview
+```
+
+Expected output with no resources yet:
+```
+Previewing update (dev):
+
+Resources:
+    No changes.
+```
+
+You're set up.
+
+---
+
+## Bootstrap (first person only)
+
+The very first person setting up the project needs to create the S3 state bucket and DynamoDB lock table. Everyone else skips this.
+
+```bash
+# Log in to AWS first
+aws sso login --profile sable-dev
+
+# Run the bootstrap script
+bash infra/bootstrap.sh
+```
+
+This creates in the `sable-dev` AWS account:
+- S3 bucket `sable-infra-state` — versioned, encrypted, private — stores Pulumi state
+- DynamoDB table `sable-infra-state-lock` — prevents two simultaneous deploys corrupting state
+
+---
+
+## Daily workflow
+
+### Start of session — log in to AWS
+
+SSO credentials expire after 8 hours. Re-login when they expire:
+
+```bash
+aws sso login --profile sable-dev
+```
+
+### Log in to Pulumi state backend
+
+```bash
+AWS_PROFILE=sable-dev pulumi login s3://sable-infra-state
+```
 
 ### Select a stack
 
@@ -96,16 +196,11 @@ pulumi stack ls
 ### Preview changes (dry-run — always do this first)
 
 ```bash
-# Via pnpm scripts
 pnpm preview:dev
 pnpm preview:prod
-
-# Or directly
-pulumi preview --stack dev
-pulumi preview --stack prod
 ```
 
-`preview` never changes anything in AWS. It shows exactly what *would* be created, updated, or destroyed.
+`preview` never touches AWS. It shows exactly what would be created, updated, or destroyed.
 
 ### Deploy
 
@@ -118,11 +213,11 @@ pnpm preview:prod
 pnpm up:prod
 ```
 
-`pulumi up` will show the preview again and ask for confirmation before making any changes.
+`pulumi up` shows the preview again and asks for confirmation before making any changes.
 
 ### Refresh state
 
-If someone made a manual change in the AWS console (please don't), sync the state file:
+If a manual console change was made (please don't), sync the state file:
 
 ```bash
 pnpm refresh:dev
@@ -138,6 +233,28 @@ Never run destroy against prod without a team discussion.
 
 ---
 
+## Adding a prod account (when going live)
+
+Because you're already using AWS Organizations, adding a prod account is straightforward:
+
+1. **AWS Organizations → Create an account** → name it `sable-prod`
+2. **IAM Identity Center → AWS accounts** → assign developers to the new account with `AdministratorAccess`
+3. Each developer runs:
+   ```bash
+   aws configure sso --profile sable-prod
+   # Use the same SSO start URL, select the prod account when prompted
+   ```
+4. Deploy:
+   ```bash
+   pulumi stack select prod
+   pulumi preview
+   pulumi up
+   ```
+
+Nothing else changes — `Pulumi.prod.yaml` already has `aws:profile: sable-prod` set.
+
+---
+
 ## Project structure
 
 ```
@@ -146,7 +263,7 @@ infra/
 ├── Pulumi.yaml           ← Project definition, state backend URL, config schema
 ├── Pulumi.dev.yaml       ← Dev stack config values
 ├── Pulumi.prod.yaml      ← Prod stack config values
-├── bootstrap.sh          ← One-time state backend setup script
+├── bootstrap.sh          ← One-time state backend setup (first person only)
 ├── package.json
 ├── tsconfig.json
 └── README.md
@@ -163,7 +280,7 @@ infra/
 
 ## Config schema
 
-All config keys are declared in `Pulumi.yaml` and validated before every preview/up. Values are set per-stack in `Pulumi.<stack>.yaml`.
+All config keys are declared in `Pulumi.yaml` and validated before every preview/up.
 
 | Key | Dev | Prod | Description |
 |-----|-----|------|-------------|
@@ -188,30 +305,21 @@ config:
 2. Set the value in both stack files:
 
 ```bash
-# Pulumi.dev.yaml
 pulumi config set sable:myNewKey some-dev-value --stack dev
-
-# Pulumi.prod.yaml
 pulumi config set sable:myNewKey some-prod-value --stack prod
 ```
 
-Or edit the YAML files directly — they're just config files.
-
-3. Read it in `index.ts` (or any resource module):
+3. Read it in TypeScript:
 
 ```typescript
 const config = new pulumi.Config("sable");
 const myNewKey = config.require("myNewKey");
 ```
 
-For secrets (API keys, passwords), use `config.requireSecret()` instead — Pulumi encrypts the value in the stack file:
+For secrets, use `config.requireSecret()` — Pulumi encrypts the value in the stack file:
 
 ```bash
 pulumi config set --secret sable:dbPassword hunter2 --stack dev
-```
-
-```typescript
-const dbPassword = config.requireSecret("dbPassword");
 ```
 
 ---
@@ -248,35 +356,38 @@ Outputs exported from `index.ts` are visible after deploy:
 pulumi stack output --stack dev
 ```
 
-They're also importable into other Pulumi stacks via stack references (useful when networking and app infra are split across stacks).
-
 ---
 
 ## Secrets
 
-Never commit secrets to `Pulumi.<stack>.yaml` in plaintext. Use:
+Never commit secrets to `Pulumi.<stack>.yaml` in plaintext:
 
 ```bash
 pulumi config set --secret sable:someSecret <value> --stack dev
 ```
 
-Pulumi encrypts it in the YAML using the stack's secrets provider (passphrase by default — the `PULUMI_CONFIG_PASSPHRASE` env var).
-
-In CI, set `PULUMI_CONFIG_PASSPHRASE` as a repository secret.
+Pulumi encrypts it using the `PULUMI_CONFIG_PASSPHRASE` env var. Store the passphrase in 1Password. In CI, set it as a repository secret.
 
 ---
 
 ## CI
 
-Add to your GitHub Actions workflow to run preview on every PR that touches `infra/`:
+Add to your GitHub Actions workflow to run preview on every PR touching `infra/`:
 
 ```yaml
+- name: Configure AWS SSO credentials
+  uses: aws-actions/configure-aws-credentials@v4
+  with:
+    role-to-assume: arn:aws:iam::<account-id>:role/GitHubActionsRole
+    aws-region: us-east-1
+
 - name: Pulumi preview (dev)
   working-directory: infra
   env:
-    AWS_PROFILE: sable-dev
     PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
   run: |
     pulumi login s3://sable-infra-state
     pnpm preview:dev
 ```
+
+> Note: CI uses an IAM role with OIDC (not SSO) — that setup is covered in the CI hardening ticket.
