@@ -1,0 +1,8 @@
+config:
+  aws:region: us-east-1
+  aws:profile: sable-dev
+
+  sable:rootDomain: sable.example
+  sable:dbInstanceClass: db.t3.micro
+  sable:appRunnerCpu: 0.5 vCPU
+  sable:appRunnerMemory: 1 GB

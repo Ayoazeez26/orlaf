@@ -1,0 +1,24 @@
+{
+  "name": "@sable/infra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Sable platform AWS infrastructure (Pulumi)",
+  "main": "index.ts",
+  "scripts": {
+    "preview:dev": "pulumi preview --stack dev",
+    "preview:prod": "pulumi preview --stack prod",
+    "up:dev": "pulumi up --stack dev",
+    "up:prod": "pulumi up --stack prod",
+    "destroy:dev": "pulumi destroy --stack dev",
+    "refresh:dev": "pulumi refresh --stack dev",
+    "refresh:prod": "pulumi refresh --stack prod"
+  },
+  "dependencies": {
+    "@pulumi/aws": "^6.0.0",
+    "@pulumi/pulumi": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
