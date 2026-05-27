@@ -80,7 +80,11 @@ export function UploadEpisodesStep({
                 </>
               )}
             </Button>
-            <Button variant="outline" className={toolbarButtonClassName} size="lg">
+            <Button
+              variant="outline"
+              className={toolbarButtonClassName}
+              size="lg"
+            >
               <FileText className="size-4" aria-hidden />
               Save Draft
             </Button>
@@ -98,13 +102,13 @@ export function UploadEpisodesStep({
 
         {state.guideVisible && <UploadGuideCard />}
 
-        <Card className="py-4 shadow-none border-dashed">
+        <Card className="border-dashed py-4 shadow-none">
           <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="font-semibold text-foreground text-sm">
                 Add Bulk Episodes
               </p>
-              <p className="text-muted-foreground text-xs mt-1">
+              <p className="mt-1 text-muted-foreground text-xs">
                 Quickly add multiple episode slots
               </p>
             </div>
@@ -162,11 +166,14 @@ export function UploadEpisodesStep({
                 <div className="space-y-5">
                   <div className="grid gap-5 lg:grid-cols-2">
                     <div className="space-y-3">
-                      <Label className="text-sm font-medium text-text-strong">
+                      <Label className="font-medium text-sm text-text-strong">
                         Upload Episode
                       </Label>
-                      <div className="flex min-h-[210px] flex-col items-center justify-center gap-2 rounded-[24px] border-3 border-dashed border-border bg-background px-6 py-10 text-center mt-2">
-                        <Upload className="size-10 text-text-subtle" aria-hidden />
+                      <div className="mt-2 flex min-h-[210px] flex-col items-center justify-center gap-2 rounded-[24px] border-3 border-border border-dashed bg-background px-6 py-10 text-center">
+                        <Upload
+                          className="size-10 text-text-subtle"
+                          aria-hidden
+                        />
                         <p className="font-medium text-[15px] text-text-strong">
                           Upload this episode
                         </p>
@@ -178,11 +185,11 @@ export function UploadEpisodesStep({
 
                     <div className="space-y-5">
                       <div className="space-y-3">
-                        <Label className="text-sm font-medium text-text-strong">
+                        <Label className="font-medium text-sm text-text-strong">
                           Episode Title
                         </Label>
                         <Input
-                          className="h-[52px] rounded-2xl bg-input-bg text-base text-text-strong dark:bg-input-bg mt-2"
+                          className="mt-2 h-[52px] rounded-2xl bg-input-bg text-base text-text-strong dark:bg-input-bg"
                           value={episode.title}
                           onChange={(e) =>
                             dispatch({
@@ -197,12 +204,12 @@ export function UploadEpisodesStep({
                       </div>
 
                       <div className="space-y-3">
-                        <Label className="text-sm font-medium text-text-strong">
+                        <Label className="font-medium text-sm text-text-strong">
                           Synopsis
                         </Label>
                         <Textarea
                           rows={4}
-                          className="min-h-[104px] rounded-2xl bg-input-bg px-4 py-3 text-base text-text-strong dark:bg-input-bg mt-2"
+                          className="mt-2 min-h-[104px] rounded-2xl bg-input-bg px-4 py-3 text-base text-text-strong dark:bg-input-bg"
                           value={episode.synopsis}
                           onChange={(e) =>
                             dispatch({
@@ -220,7 +227,7 @@ export function UploadEpisodesStep({
 
                   <div className="rounded-[24px] border bg-background p-5">
                     <div className="flex items-center justify-between gap-4">
-                      <p className="font-bold text-xs text-text-subtle uppercase tracking-[0.16em]">
+                      <p className="font-bold text-text-subtle text-xs uppercase tracking-[0.16em]">
                         Advanced Settings
                       </p>
                       <Switch defaultChecked />
@@ -229,8 +236,10 @@ export function UploadEpisodesStep({
                     <div className="mt-6 space-y-5">
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-start">
                         <div className="flex items-center gap-3">
-                          
-                            <Sparkles className="size-4 text-primary" aria-hidden />
+                          <Sparkles
+                            className="size-4 text-primary"
+                            aria-hidden
+                          />
                           <p className="font-medium text-sm text-text-strong">
                             Access
                           </p>
@@ -252,7 +261,7 @@ export function UploadEpisodesStep({
                                 })
                               }
                               className={cn(
-                                "h-8 rounded-full border px-4 pt-0.5 font-medium text-xs leading-none flex items-center justify-center transition-colors",
+                                "flex h-8 items-center justify-center rounded-full border px-4 pt-0.5 font-medium text-xs leading-none transition-colors",
                                 episode.access === opt.value
                                   ? "border-primary bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground dark:border-primary dark:bg-primary dark:hover:bg-primary dark:hover:text-primary-foreground"
                                   : "border-border bg-card text-text-subtle hover:bg-muted"
@@ -266,9 +275,12 @@ export function UploadEpisodesStep({
 
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div className="flex items-start gap-3">
-                          <Subtitles className="size-4 text-primary" aria-hidden />
+                          <Subtitles
+                            className="size-4 text-primary"
+                            aria-hidden
+                          />
                           <div>
-                            <p className="font-medium text-sm text-text-strong mb-1!">
+                            <p className="mb-1! font-medium text-sm text-text-strong">
                               Subtitles
                             </p>
                             <p className="text-sm text-text-subtle">
@@ -377,9 +389,11 @@ function UploadGuideCard() {
             >
               <div className="mb-3 flex items-center gap-2.5">
                 <Icon className="size-4 text-primary" aria-hidden />
-                <p className="font-semibold text-text-strong">{section.title}</p>
+                <p className="font-semibold text-text-strong">
+                  {section.title}
+                </p>
               </div>
-              <ul className="space-y-1 pl-4 text-xs text-text-subtle leading-7">
+              <ul className="space-y-1 pl-4 text-text-subtle text-xs leading-7">
                 {section.items.map((item) => (
                   <li key={item} className="list-disc">
                     {item}

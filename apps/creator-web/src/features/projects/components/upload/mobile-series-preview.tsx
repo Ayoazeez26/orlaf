@@ -59,7 +59,7 @@ export function MobileSeriesPreview({
                   {genre || "Drama"}
                 </span>
               </div>
-              <p className="line-clamp-2 max-w-[220px] text-white/70 text-sm leading-6">
+              <p className="line-clamp-2 max-w-[220px] text-sm text-white/70 leading-6">
                 {synopsis.trim() ||
                   "Your series synopsis will appear here as you fill in the details...."}
               </p>
@@ -84,7 +84,10 @@ export function MobileSeriesPreview({
 
             <div className="flex items-center justify-between pt-1">
               <span className="flex size-11 items-center justify-center rounded-full bg-primary shadow-[0_8px_20px_rgba(124,58,237,0.35)]">
-                <Play className="ml-0.5 size-5 fill-current text-white" aria-hidden />
+                <Play
+                  className="ml-0.5 size-5 fill-current text-white"
+                  aria-hidden
+                />
               </span>
 
               <div className="flex items-center gap-2 text-white/90">
@@ -112,7 +115,7 @@ export function MobileSeriesPreview({
         <div>
           <div className="mb-3 flex items-center justify-between">
             <p className="font-semibold text-sm text-text-strong">Episodes</p>
-            <p className="text-text-subtle text-sm">Season 1</p>
+            <p className="text-sm text-text-subtle">Season 1</p>
           </div>
           <ul className="space-y-3">
             {episodes.slice(0, 4).map((ep, index) => (
@@ -126,10 +129,7 @@ export function MobileSeriesPreview({
                 )}
               >
                 <span className="flex min-w-0 items-center gap-3">
-                  <Play
-                    className="size-3 text-text-subtle"
-                    aria-hidden
-                  />
+                  <Play className="size-3 text-text-subtle" aria-hidden />
                   <span className="min-w-0">
                     <span className="block truncate font-medium text-[15px] text-text-strong">
                       {ep.title}

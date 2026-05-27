@@ -75,15 +75,15 @@ export function ProjectSettingsTab() {
               }
             />
           </SettingRow>
-          <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "p-5 rounded-4xl")}>
+          <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "rounded-4xl p-5")}>
             <CardContent className="flex items-center justify-between">
               <div>
-              <p className="font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">
-                Series Revenue
-              </p>
-              <p className="mt-2 font-bold text-3xl text-foreground tracking-tight">
-                ${monetization.seriesRevenue}
-              </p>
+                <p className="font-semibold text-[10px] text-muted-foreground uppercase tracking-wider">
+                  Series Revenue
+                </p>
+                <p className="mt-2 font-bold text-3xl text-foreground tracking-tight">
+                  ${monetization.seriesRevenue}
+                </p>
               </div>
               <Button variant="outline" className="mt-4" size="sm">
                 <BarChart2 className="size-4" aria-hidden />

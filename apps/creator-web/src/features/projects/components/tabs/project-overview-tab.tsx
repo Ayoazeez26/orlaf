@@ -21,7 +21,9 @@ export function ProjectOverviewTab() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6 lg:col-span-2 gap-2")}>
+        <Card
+          className={cn(FROSTED_CARD_SURFACE_CLASS, "gap-2 py-6 lg:col-span-2")}
+        >
           <CardHeader className="">
             <p className="font-semibold text-foreground text-sm">About</p>
           </CardHeader>
@@ -73,7 +75,7 @@ export function ProjectOverviewTab() {
           <CardContent className="space-y-4">
             {project.recentEpisodes.map((episode) => (
               <div key={episode.id} className="flex gap-3">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-background font-medium text-muted-foreground text-[10px]">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-background font-medium text-[10px] text-muted-foreground">
                   {episode.number}
                 </span>
                 <div className="min-w-0">
@@ -108,7 +110,7 @@ function MetadataItem({
         <Icon className="size-5 text-muted-foreground" aria-hidden />
       </span>
       <div className="min-w-0">
-        <p className="text-muted-foreground text-[11px]">{label}</p>
+        <p className="text-[11px] text-muted-foreground">{label}</p>
         <p className="font-medium text-foreground text-sm">{value}</p>
       </div>
     </div>

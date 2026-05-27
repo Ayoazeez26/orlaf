@@ -5,7 +5,7 @@ import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import { Pencil, Sparkles } from "lucide-react"
 import { projectKeys } from "../../data/query-keys"
-import type { EpisodeAccess, UploadEpisodeDraft } from "../../types"
+import type { UploadEpisodeDraft } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
 import { MobileSeriesPreview } from "./mobile-series-preview"
 
@@ -132,7 +132,7 @@ function SummaryChip({
       )}
     >
       <p className="text-muted-foreground text-xs">{label}</p>
-      <p className="font-semibold text-foreground text-sm mt-1">{value}</p>
+      <p className="mt-1 font-semibold text-foreground text-sm">{value}</p>
     </div>
   )
 }

@@ -30,7 +30,7 @@ export function ProjectHeroCard({ project }: ProjectHeroCardProps) {
             {project.genre} • {project.episodeCount} episodes •{" "}
             {project.totalViews} views
           </p>
-          <p className="line-clamp-2 text-muted-foreground text-sm leading-relaxed mt-1 lg:w-3/4">
+          <p className="mt-1 line-clamp-2 text-muted-foreground text-sm leading-relaxed lg:w-3/4">
             {project.description}
           </p>
         </div>

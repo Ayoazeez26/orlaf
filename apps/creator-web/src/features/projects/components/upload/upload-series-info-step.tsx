@@ -23,7 +23,7 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
   const canContinue = state.title.trim().length > 0 && state.genre.length > 0
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="max-w-2xl space-y-6">
       <Card className="py-6 shadow-none">
         <CardContent className="space-y-5">
           <div className="flex flex-col gap-2">
@@ -87,7 +87,7 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
             <Label htmlFor="synopsis">Synopsis</Label>
             <Textarea
               id="synopsis"
-              className="bg-input-bg dark:bg-input-bg min-h-24"
+              className="min-h-24 bg-input-bg dark:bg-input-bg"
               placeholder="What's your series about?"
               rows={5}
               value={state.synopsis}

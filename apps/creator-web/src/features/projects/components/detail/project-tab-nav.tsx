@@ -18,10 +18,7 @@ export function ProjectTabNav({ projectId }: ProjectTabNavProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
 
   return (
-    <nav
-      className="flex flex-wrap gap-1"
-      aria-label="Project sections"
-    >
+    <nav className="flex flex-wrap gap-1" aria-label="Project sections">
       {TABS.map((tab) => {
         const link = projectDetailPath(
           projectId,

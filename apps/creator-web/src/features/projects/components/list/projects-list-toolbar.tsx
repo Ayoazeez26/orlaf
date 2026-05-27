@@ -1,7 +1,12 @@
 import { Link } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
-import { cn } from "@workspace/ui/lib/utils"
-import { LayoutGrid, LayoutList, Plus, Search, SlidersHorizontal } from "lucide-react"
+import {
+  LayoutGrid,
+  LayoutList,
+  Plus,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react"
 
 interface ProjectsListToolbarProps {
   layout: "grid" | "list"
@@ -33,7 +38,9 @@ export function ProjectsListToolbar({
       <Button
         variant="outline"
         size="icon"
-        aria-label={layout === "grid" ? "Switch to list view" : "Switch to grid view"}
+        aria-label={
+          layout === "grid" ? "Switch to list view" : "Switch to grid view"
+        }
         aria-pressed={layout === "grid"}
         onClick={() => onLayoutChange(layout === "grid" ? "list" : "grid")}
         className="bg-card text-muted-foreground"

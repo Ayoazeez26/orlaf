@@ -19,7 +19,10 @@ export function ProjectEpisodesTab() {
       </p>
       <div className="space-y-3">
         {project.episodes.map((episode) => (
-          <Card key={episode.id} className={cn(FROSTED_CARD_SURFACE_CLASS, "py-0")}>
+          <Card
+            key={episode.id}
+            className={cn(FROSTED_CARD_SURFACE_CLASS, "py-0")}
+          >
             <CardContent className="flex flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center">
               <div className="flex min-w-0 flex-1 items-center gap-4">
                 <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-background font-semibold text-muted-foreground">

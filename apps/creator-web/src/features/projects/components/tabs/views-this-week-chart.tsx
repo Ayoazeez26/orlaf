@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
-import { FROSTED_CARD_SURFACE_CLASS } from "../../constants/frosted-card"
 import {
   Area,
   AreaChart,
@@ -10,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import { FROSTED_CARD_SURFACE_CLASS } from "../../constants/frosted-card"
 import type { WeeklyViewPoint } from "../../types"
 
 interface ViewsThisWeekChartProps {
