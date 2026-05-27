@@ -6,5 +6,4 @@ export const Route = createFileRoute("/dashboard/projects")({
 
 function ProjectsLayout() {
   return <Outlet />
-
 }

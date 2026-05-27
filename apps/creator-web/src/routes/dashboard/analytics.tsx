@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { DashboardStubPage } from "@/features/dashboard/components/dashboard-stub-page"
+import { AnalyticsDashboardPage } from "@/features/analytics/pages/analytics-dashboard-page"
 
 export const Route = createFileRoute("/dashboard/analytics")({
   component: DashboardAnalytics,
 })
 
 function DashboardAnalytics() {
-  return <DashboardStubPage title="Analytics" />
+  return <AnalyticsDashboardPage />
 }

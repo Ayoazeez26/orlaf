@@ -1,7 +1,7 @@
 import { useParams } from "@tanstack/react-router"
+import { WeeklyViewsChart } from "@/features/analytics/components/charts/weekly-views-chart"
 import { useProject } from "../../hooks/use-project"
 import { MetricStatCard } from "../shared/metric-stat-card"
-import { ViewsThisWeekChart } from "./views-this-week-chart"
 
 export function ProjectAnalyticsTab() {
   const { projectId } = useParams({ strict: false })
@@ -16,7 +16,7 @@ export function ProjectAnalyticsTab() {
           <MetricStatCard key={metric.label} metric={metric} />
         ))}
       </div>
-      <ViewsThisWeekChart data={project.weeklyViews} />
+      <WeeklyViewsChart data={project.weeklyViews} />
     </div>
   )
 }

@@ -9,18 +9,24 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { FROSTED_CARD_SURFACE_CLASS } from "../../constants/frosted-card"
-import type { WeeklyViewPoint } from "../../types"
+import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
+import type { WeeklyViewPoint } from "@/features/projects/types"
 
-interface ViewsThisWeekChartProps {
+interface WeeklyViewsChartProps {
   data: WeeklyViewPoint[]
+  title?: string
+  className?: string
 }
 
-export function ViewsThisWeekChart({ data }: ViewsThisWeekChartProps) {
+export function WeeklyViewsChart({
+  data,
+  title = "Views This Week",
+  className,
+}: WeeklyViewsChartProps) {
   return (
-    <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6")}>
+    <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6", className)}>
       <CardHeader className="pb-4">
-        <p className="font-semibold text-foreground text-sm">Views This Week</p>
+        <p className="font-semibold text-foreground text-sm">{title}</p>
       </CardHeader>
       <CardContent className="h-[280px] px-2 sm:px-6">
         <ResponsiveContainer width="100%" height="100%">
@@ -29,7 +35,13 @@ export function ViewsThisWeekChart({ data }: ViewsThisWeekChartProps) {
             margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
           >
             <defs>
-              <linearGradient id="viewsGradient" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient
+                id="weeklyViewsGradient"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
                 <stop
                   offset="0%"
                   stopColor="var(--primary)"
@@ -73,7 +85,7 @@ export function ViewsThisWeekChart({ data }: ViewsThisWeekChartProps) {
               dataKey="views"
               stroke="var(--primary)"
               strokeWidth={2}
-              fill="url(#viewsGradient)"
+              fill="url(#weeklyViewsGradient)"
             />
           </AreaChart>
         </ResponsiveContainer>
