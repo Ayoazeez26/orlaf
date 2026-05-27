@@ -30,9 +30,7 @@ export function ViewershipTrendChart({
   return (
     <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6", className)}>
       <CardHeader className="pb-4">
-        <p className="font-semibold text-foreground">
-          Viewership Trend
-        </p>
+        <p className="font-semibold text-foreground">Viewership Trend</p>
       </CardHeader>
       <CardContent className="h-[300px] px-2 sm:px-6">
         <ResponsiveContainer width="100%" height="100%">

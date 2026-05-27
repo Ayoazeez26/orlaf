@@ -22,11 +22,11 @@ export function AnalyticsPageHeader() {
           Track performance across all your series
         </p>
       </div>
-      <Select value={period} onValueChange={setPeriod} className="">
+      <Select value={period} onValueChange={setPeriod}>
         <SelectTrigger
           size="sm"
           aria-label="Date range"
-          className="w-full rounded-[10px] border-border bg-transparent sm:w-[160px] dark:bg-transparent px-4 py-4"
+          className="w-full rounded-[10px] border-border bg-transparent px-4 py-4 sm:w-[160px] dark:bg-transparent"
         >
           <SelectValue />
         </SelectTrigger>
