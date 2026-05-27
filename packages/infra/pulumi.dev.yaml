@@ -1,0 +1,8 @@
+encryptionsalt: v1:gd4VNXXVr44=:v1:2E7saKWqLPGkxamS:yhGTE5gWGOslsW0Rqn8nI5p9NiOuYQ==
+config:
+  sable-infra:rootDomain: sable.example
+  sable-infra:dbInstanceClass: db.t3.micro
+  sable-infra:appRunnerCpu: 0.5 vCPU
+  sable-infra:appRunnerMemory: 1 GB
+  aws:region: us-east-1
+  aws:profile: sable-dev

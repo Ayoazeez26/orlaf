@@ -15,7 +15,11 @@
     "db:migrate": "pnpm --filter @orlaf/backend db:migrate",
     "db:generate": "pnpm --filter @orlaf/backend db:generate",
     "db:studio": "pnpm --filter @orlaf/backend db:studio",
-    "db:seed": "pnpm --filter @orlaf/backend db:seed"
+    "db:seed": "pnpm --filter @orlaf/backend db:seed",
+    "preview:dev": "pnpm --filter @sable/infra preview:dev",
+    "preview:prod": "pnpm --filter @sable/infra preview:prod",
+    "up:dev": "pnpm --filter @sable/infra up:dev",
+    "up:prod": "pnpm --filter @sable/infra up:prod"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
