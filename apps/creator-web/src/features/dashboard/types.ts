@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react"
 
-export type ProjectStatus = "ongoing" | "completed" | "draft"
+export type ProjectStatus = "published" | "draft" | "ongoing" | "completed"
 
 export interface DashboardWorkspace {
   id: string

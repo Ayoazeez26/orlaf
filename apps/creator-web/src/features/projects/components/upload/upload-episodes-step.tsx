@@ -1,0 +1,395 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@workspace/ui/components/accordion"
+import { Button } from "@workspace/ui/components/button"
+import { Card, CardContent } from "@workspace/ui/components/card"
+import { Input } from "@workspace/ui/components/input"
+import { Label } from "@workspace/ui/components/label"
+import { Switch } from "@workspace/ui/components/switch"
+import { Textarea } from "@workspace/ui/components/textarea"
+import { cn } from "@workspace/ui/lib/utils"
+import {
+  Check,
+  Clapperboard,
+  Eye,
+  EyeOff,
+  FileText,
+  Plus,
+  Sparkles,
+  Subtitles,
+  Upload,
+  Volume2,
+} from "lucide-react"
+import { useState } from "react"
+import type { EpisodeAccess } from "../../types"
+import { useUploadWizard } from "../../upload/upload-wizard-context"
+import { MobileSeriesPreview } from "./mobile-series-preview"
+
+const ACCESS_OPTIONS: { value: EpisodeAccess; label: string }[] = [
+  { value: "free", label: "Free" },
+  { value: "coins", label: "Coin-Gated" },
+  { value: "premium", label: "Premium" },
+]
+
+interface UploadEpisodesStepProps {
+  onBack: () => void
+  onNext: () => void
+}
+
+export function UploadEpisodesStep({
+  onBack,
+  onNext,
+}: UploadEpisodesStepProps) {
+  const { state, dispatch, previewImage } = useUploadWizard()
+  const [expandedEpisode, setExpandedEpisode] = useState(state.episodes[0]?.id)
+  const displayTitle = state.title.trim() || "The Returnees"
+  const toolbarButtonClassName =
+    "text-text-strong hover:text-text-strong aria-expanded:text-text-strong px-3 py-2"
+
+  return (
+    <div className="grid gap-8 xl:grid-cols-[1fr_320px]">
+      <div className="space-y-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-semibold text-foreground text-lg">
+              {displayTitle}
+            </h2>
+            <p className="text-sm text-text-subtle">
+              {state.episodes.length} episodes added
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="lg"
+              className={toolbarButtonClassName}
+              onClick={() => dispatch({ type: "TOGGLE_GUIDE" })}
+            >
+              {state.guideVisible ? (
+                <>
+                  <EyeOff className="size-4" aria-hidden />
+                  Hide Guide
+                </>
+              ) : (
+                <>
+                  <Eye className="size-4" aria-hidden />
+                  Show Guide
+                </>
+              )}
+            </Button>
+            <Button variant="outline" className={toolbarButtonClassName} size="lg">
+              <FileText className="size-4" aria-hidden />
+              Save Draft
+            </Button>
+            <Button
+              variant="outline"
+              className={toolbarButtonClassName}
+              onClick={() => dispatch({ type: "ADD_EPISODES", payload: 1 })}
+              size="lg"
+            >
+              <Plus className="size-4" aria-hidden />
+              Add New Episode
+            </Button>
+          </div>
+        </div>
+
+        {state.guideVisible && <UploadGuideCard />}
+
+        <Card className="py-4 shadow-none border-dashed">
+          <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-semibold text-foreground text-sm">
+                Add Bulk Episodes
+              </p>
+              <p className="text-muted-foreground text-xs mt-1">
+                Quickly add multiple episode slots
+              </p>
+            </div>
+            <div className="flex gap-2">
+              {[5, 10, 20].map((count) => (
+                <Button
+                  key={count}
+                  variant="outline"
+                  className="rounded-lg px-3 py-2"
+                  onClick={() =>
+                    dispatch({ type: "ADD_EPISODES", payload: count })
+                  }
+                >
+                  +{count}
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Accordion
+          type="single"
+          collapsible
+          value={expandedEpisode}
+          onValueChange={setExpandedEpisode}
+          className="space-y-3"
+        >
+          {state.episodes.map((episode, index) => (
+            <AccordionItem
+              key={episode.id}
+              value={episode.id}
+              className="overflow-hidden rounded-[24px] border bg-card"
+            >
+              <AccordionTrigger className="items-center px-6 py-5 hover:no-underline">
+                <div className="flex min-w-0 items-center gap-4">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted font-semibold text-sm text-text-strong">
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0 space-y-1 text-left">
+                    <p className="truncate font-semibold text-[15px] text-text-strong">
+                      {episode.title}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2 text-sm text-text-subtle">
+                      <span>
+                        Ep {index + 1} · {episode.duration}
+                      </span>
+                      <span className="rounded-full bg-primary/10 px-2.5 py-1 font-semibold text-primary text-xs">
+                        9:16 Vertical
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="border-t px-6 pt-6 pb-6">
+                <div className="space-y-5">
+                  <div className="grid gap-5 lg:grid-cols-2">
+                    <div className="space-y-3">
+                      <Label className="text-sm font-medium text-text-strong">
+                        Upload Episode
+                      </Label>
+                      <div className="flex min-h-[210px] flex-col items-center justify-center gap-2 rounded-[24px] border-3 border-dashed border-border bg-background px-6 py-10 text-center mt-2">
+                        <Upload className="size-10 text-text-subtle" aria-hidden />
+                        <p className="font-medium text-[15px] text-text-strong">
+                          Upload this episode
+                        </p>
+                        <p className="text-sm text-text-subtle">
+                          MP4, MOV • Max 500MB
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-5">
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium text-text-strong">
+                          Episode Title
+                        </Label>
+                        <Input
+                          className="h-[52px] rounded-2xl bg-input-bg text-base text-text-strong dark:bg-input-bg mt-2"
+                          value={episode.title}
+                          onChange={(e) =>
+                            dispatch({
+                              type: "UPDATE_EPISODE",
+                              payload: {
+                                id: episode.id,
+                                patch: { title: e.target.value },
+                              },
+                            })
+                          }
+                        />
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label className="text-sm font-medium text-text-strong">
+                          Synopsis
+                        </Label>
+                        <Textarea
+                          rows={4}
+                          className="min-h-[104px] rounded-2xl bg-input-bg px-4 py-3 text-base text-text-strong dark:bg-input-bg mt-2"
+                          value={episode.synopsis}
+                          onChange={(e) =>
+                            dispatch({
+                              type: "UPDATE_EPISODE",
+                              payload: {
+                                id: episode.id,
+                                patch: { synopsis: e.target.value },
+                              },
+                            })
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-[24px] border bg-background p-5">
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="font-bold text-xs text-text-subtle uppercase tracking-[0.16em]">
+                        Advanced Settings
+                      </p>
+                      <Switch defaultChecked />
+                    </div>
+
+                    <div className="mt-6 space-y-5">
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-start">
+                        <div className="flex items-center gap-3">
+                          
+                            <Sparkles className="size-4 text-primary" aria-hidden />
+                          <p className="font-medium text-sm text-text-strong">
+                            Access
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 lg:ml-9">
+                          {ACCESS_OPTIONS.map((opt) => (
+                            <Button
+                              key={opt.value}
+                              type="button"
+                              variant="outline"
+                              onClick={() =>
+                                dispatch({
+                                  type: "UPDATE_EPISODE",
+                                  payload: {
+                                    id: episode.id,
+                                    patch: { access: opt.value },
+                                  },
+                                })
+                              }
+                              className={cn(
+                                "h-8 rounded-full border px-4 pt-0.5 font-medium text-xs leading-none flex items-center justify-center transition-colors",
+                                episode.access === opt.value
+                                  ? "border-primary bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground dark:border-primary dark:bg-primary dark:hover:bg-primary dark:hover:text-primary-foreground"
+                                  : "border-border bg-card text-text-subtle hover:bg-muted"
+                              )}
+                            >
+                              {opt.label}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="flex items-start gap-3">
+                          <Subtitles className="size-4 text-primary" aria-hidden />
+                          <div>
+                            <p className="font-medium text-sm text-text-strong mb-1!">
+                              Subtitles
+                            </p>
+                            <p className="text-sm text-text-subtle">
+                              Auto-caption enabled · SRT / VTT
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            variant="outline"
+                            className="h-10 rounded-full border-transparent bg-upload-step-complete px-4 text-primary hover:bg-upload-step-complete/80 hover:text-primary"
+                          >
+                            <Check className="size-4" aria-hidden />
+                            Auto Caption
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="h-10 rounded-xl bg-transparent px-4 text-text-strong hover:text-text-strong"
+                          >
+                            Upload Subtitle
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+
+        <div className="flex justify-between">
+          <Button variant="outline" className="h-10 px-3" onClick={onBack}>
+            ← Back
+          </Button>
+          <Button onClick={onNext}>Next: Review →</Button>
+        </div>
+      </div>
+
+      <div className="hidden xl:block">
+        <div className="sticky top-8">
+          <MobileSeriesPreview
+            title={displayTitle}
+            genre={state.genre}
+            synopsis={state.synopsis}
+            posterUrl={previewImage}
+            episodes={state.episodes}
+            activeEpisodeId={expandedEpisode}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function UploadGuideCard() {
+  const sections = [
+    {
+      title: "Video",
+      icon: Clapperboard,
+      items: [
+        "Vertical 9:16 (1080×1920px)",
+        "MP4/MOV, H.264/H.265",
+        "Max 500MB per episode",
+        "1-10 min recommended",
+      ],
+    },
+    {
+      title: "Sound",
+      icon: Volume2,
+      items: [
+        "AAC stereo 128kbps+",
+        "Normalize to -14 LUFS",
+        "Clear dialogue separation",
+      ],
+    },
+    {
+      title: "Subtitles",
+      icon: Subtitles,
+      items: [
+        "SRT or VTT format",
+        "Auto-caption available",
+        "Multi-language supported",
+      ],
+    },
+  ] as const
+
+  return (
+    <div className="rounded-3xl border bg-background p-4 sm:p-5">
+      <div className="mb-4 flex items-center gap-2.5">
+        <Sparkles className="size-5 text-primary" aria-hidden />
+        <p className="font-semibold text-[15px] text-text-strong">
+          Upload Guide
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {sections.map((section) => {
+          const Icon = section.icon
+
+          return (
+            <div
+              key={section.title}
+              className="rounded-2xl border bg-card px-4 py-4 shadow-[0_1px_2px_rgba(23,23,28,0.04)]"
+            >
+              <div className="mb-3 flex items-center gap-2.5">
+                <Icon className="size-4 text-primary" aria-hidden />
+                <p className="font-semibold text-text-strong">{section.title}</p>
+              </div>
+              <ul className="space-y-1 pl-4 text-xs text-text-subtle leading-7">
+                {section.items.map((item) => (
+                  <li key={item} className="list-disc">
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}

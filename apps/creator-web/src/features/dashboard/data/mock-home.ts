@@ -1,5 +1,16 @@
 import { Crown, Gift, Lock } from "lucide-react"
-import type { DashboardHomeData } from "../types"
+import { MOCK_PROJECT_SUMMARIES } from "@/features/projects/data/mock-projects"
+import type { DashboardHomeData, DashboardProject } from "../types"
+
+const HOME_PROJECTS: DashboardProject[] = MOCK_PROJECT_SUMMARIES.map(
+  (project) => ({
+    id: project.id,
+    title: project.title,
+    episodeCount: project.episodeCount,
+    status: project.status,
+    thumbnailUrl: project.thumbnailUrl,
+  })
+)
 
 export const MOCK_DASHBOARD_HOME: DashboardHomeData = {
   user: {
@@ -23,44 +34,7 @@ export const MOCK_DASHBOARD_HOME: DashboardHomeData = {
       { label: "Avg. Watch Time", value: "25m", color: "bg-rose-300" },
     ],
   },
-  projects: [
-    {
-      id: "1",
-      title: "The Billionaire's Secret Wife",
-      episodeCount: 12,
-      status: "ongoing",
-    },
-    {
-      id: "2",
-      title: "Love in Lagos",
-      episodeCount: 8,
-      status: "completed",
-    },
-    {
-      id: "3",
-      title: "Campus Diaries",
-      episodeCount: 5,
-      status: "draft",
-    },
-    {
-      id: "4",
-      title: "Midnight Confessions",
-      episodeCount: 15,
-      status: "ongoing",
-    },
-    {
-      id: "5",
-      title: "Royal Bloodline",
-      episodeCount: 10,
-      status: "completed",
-    },
-    {
-      id: "6",
-      title: "Street Dreams",
-      episodeCount: 3,
-      status: "draft",
-    },
-  ],
+  projects: HOME_PROJECTS,
   onboardingProgress: {
     title: "Your first series",
     subtitle: "14% completed, let's go!",

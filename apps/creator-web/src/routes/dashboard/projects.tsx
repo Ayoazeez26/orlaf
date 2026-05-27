@@ -1,6 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { DashboardStubPage } from "@/features/dashboard/components/dashboard-stub-page"
+import { createFileRoute, Outlet } from "@tanstack/react-router"
 
 export const Route = createFileRoute("/dashboard/projects")({
-  component: () => <DashboardStubPage title="Projects" />,
+  component: ProjectsLayout,
 })
+
+function ProjectsLayout() {
+  return <Outlet />
+}
