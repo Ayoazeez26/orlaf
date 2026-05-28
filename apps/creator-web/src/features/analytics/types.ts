@@ -1,9 +1,18 @@
-export type AnalyticsKpiIcon = "views" | "viewers" | "watchTime" | "engagement"
+export type AnalyticsKpiIcon =
+  | "views"
+  | "viewers"
+  | "watchTime"
+  | "engagement"
+  | "dollar"
+  | "chart"
+  | "clock"
+  | "creditCard"
 
 export interface AnalyticsKpi {
   label: string
   value: string
-  changePercent: number
+  changePercent?: number
+  footnote?: string
   icon: AnalyticsKpiIcon
 }
 

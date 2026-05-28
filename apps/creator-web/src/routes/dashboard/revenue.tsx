@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { DashboardStubPage } from "@/features/dashboard/components/dashboard-stub-page"
+import { RevenueLayout } from "@/features/revenue/layouts/revenue-layout"
 
 export const Route = createFileRoute("/dashboard/revenue")({
-  component: DashboardRevenue,
+  component: RevenueLayoutRoute,
 })
 
-function DashboardRevenue() {
-  return <DashboardStubPage title="Revenue" />
+function RevenueLayoutRoute() {
+  return <RevenueLayout />
 }

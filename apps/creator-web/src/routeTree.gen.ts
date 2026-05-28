@@ -17,7 +17,11 @@ import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settin
 import { Route as DashboardRevenueRouteImport } from './routes/dashboard/revenue'
 import { Route as DashboardProjectsRouteImport } from './routes/dashboard/projects'
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard/analytics'
+import { Route as DashboardRevenueIndexRouteImport } from './routes/dashboard/revenue/index'
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard/projects/index'
+import { Route as DashboardRevenueSettingsRouteImport } from './routes/dashboard/revenue/settings'
+import { Route as DashboardRevenuePayoutsRouteImport } from './routes/dashboard/revenue/payouts'
+import { Route as DashboardRevenueAnalyticsRouteImport } from './routes/dashboard/revenue/analytics'
 import { Route as DashboardProjectsNewRouteImport } from './routes/dashboard/projects.new'
 import { Route as DashboardProjectsProjectIdRouteImport } from './routes/dashboard/projects.$projectId'
 import { Route as DashboardProjectsProjectIdIndexRouteImport } from './routes/dashboard/projects.$projectId/index'
@@ -65,11 +69,33 @@ const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
   path: '/analytics',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardRevenueIndexRoute = DashboardRevenueIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRevenueRoute,
+} as any)
 const DashboardProjectsIndexRoute = DashboardProjectsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardProjectsRoute,
 } as any)
+const DashboardRevenueSettingsRoute =
+  DashboardRevenueSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => DashboardRevenueRoute,
+  } as any)
+const DashboardRevenuePayoutsRoute = DashboardRevenuePayoutsRouteImport.update({
+  id: '/payouts',
+  path: '/payouts',
+  getParentRoute: () => DashboardRevenueRoute,
+} as any)
+const DashboardRevenueAnalyticsRoute =
+  DashboardRevenueAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => DashboardRevenueRoute,
+  } as any)
 const DashboardProjectsNewRoute = DashboardProjectsNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -112,12 +138,16 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/projects': typeof DashboardProjectsRouteWithChildren
-  '/dashboard/revenue': typeof DashboardRevenueRoute
+  '/dashboard/revenue': typeof DashboardRevenueRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRouteWithChildren
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/dashboard/revenue/analytics': typeof DashboardRevenueAnalyticsRoute
+  '/dashboard/revenue/payouts': typeof DashboardRevenuePayoutsRoute
+  '/dashboard/revenue/settings': typeof DashboardRevenueSettingsRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
+  '/dashboard/revenue/': typeof DashboardRevenueIndexRoute
   '/dashboard/projects/$projectId/analytics': typeof DashboardProjectsProjectIdAnalyticsRoute
   '/dashboard/projects/$projectId/episodes': typeof DashboardProjectsProjectIdEpisodesRoute
   '/dashboard/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
@@ -127,11 +157,14 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
-  '/dashboard/revenue': typeof DashboardRevenueRoute
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/dashboard/revenue/analytics': typeof DashboardRevenueAnalyticsRoute
+  '/dashboard/revenue/payouts': typeof DashboardRevenuePayoutsRoute
+  '/dashboard/revenue/settings': typeof DashboardRevenueSettingsRoute
   '/dashboard/projects': typeof DashboardProjectsIndexRoute
+  '/dashboard/revenue': typeof DashboardRevenueIndexRoute
   '/dashboard/projects/$projectId/analytics': typeof DashboardProjectsProjectIdAnalyticsRoute
   '/dashboard/projects/$projectId/episodes': typeof DashboardProjectsProjectIdEpisodesRoute
   '/dashboard/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
@@ -144,12 +177,16 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/projects': typeof DashboardProjectsRouteWithChildren
-  '/dashboard/revenue': typeof DashboardRevenueRoute
+  '/dashboard/revenue': typeof DashboardRevenueRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRouteWithChildren
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/dashboard/revenue/analytics': typeof DashboardRevenueAnalyticsRoute
+  '/dashboard/revenue/payouts': typeof DashboardRevenuePayoutsRoute
+  '/dashboard/revenue/settings': typeof DashboardRevenueSettingsRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
+  '/dashboard/revenue/': typeof DashboardRevenueIndexRoute
   '/dashboard/projects/$projectId/analytics': typeof DashboardProjectsProjectIdAnalyticsRoute
   '/dashboard/projects/$projectId/episodes': typeof DashboardProjectsProjectIdEpisodesRoute
   '/dashboard/projects/$projectId/settings': typeof DashboardProjectsProjectIdSettingsRoute
@@ -168,7 +205,11 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
+    | '/dashboard/revenue/analytics'
+    | '/dashboard/revenue/payouts'
+    | '/dashboard/revenue/settings'
     | '/dashboard/projects/'
+    | '/dashboard/revenue/'
     | '/dashboard/projects/$projectId/analytics'
     | '/dashboard/projects/$projectId/episodes'
     | '/dashboard/projects/$projectId/settings'
@@ -178,11 +219,14 @@ export interface FileRouteTypes {
     | '/'
     | '/onboarding'
     | '/dashboard/analytics'
-    | '/dashboard/revenue'
     | '/dashboard/settings'
     | '/dashboard'
     | '/dashboard/projects/new'
+    | '/dashboard/revenue/analytics'
+    | '/dashboard/revenue/payouts'
+    | '/dashboard/revenue/settings'
     | '/dashboard/projects'
+    | '/dashboard/revenue'
     | '/dashboard/projects/$projectId/analytics'
     | '/dashboard/projects/$projectId/episodes'
     | '/dashboard/projects/$projectId/settings'
@@ -199,7 +243,11 @@ export interface FileRouteTypes {
     | '/dashboard/'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
+    | '/dashboard/revenue/analytics'
+    | '/dashboard/revenue/payouts'
+    | '/dashboard/revenue/settings'
     | '/dashboard/projects/'
+    | '/dashboard/revenue/'
     | '/dashboard/projects/$projectId/analytics'
     | '/dashboard/projects/$projectId/episodes'
     | '/dashboard/projects/$projectId/settings'
@@ -270,12 +318,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardAnalyticsRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/revenue/': {
+      id: '/dashboard/revenue/'
+      path: '/'
+      fullPath: '/dashboard/revenue/'
+      preLoaderRoute: typeof DashboardRevenueIndexRouteImport
+      parentRoute: typeof DashboardRevenueRoute
+    }
     '/dashboard/projects/': {
       id: '/dashboard/projects/'
       path: '/'
       fullPath: '/dashboard/projects/'
       preLoaderRoute: typeof DashboardProjectsIndexRouteImport
       parentRoute: typeof DashboardProjectsRoute
+    }
+    '/dashboard/revenue/settings': {
+      id: '/dashboard/revenue/settings'
+      path: '/settings'
+      fullPath: '/dashboard/revenue/settings'
+      preLoaderRoute: typeof DashboardRevenueSettingsRouteImport
+      parentRoute: typeof DashboardRevenueRoute
+    }
+    '/dashboard/revenue/payouts': {
+      id: '/dashboard/revenue/payouts'
+      path: '/payouts'
+      fullPath: '/dashboard/revenue/payouts'
+      preLoaderRoute: typeof DashboardRevenuePayoutsRouteImport
+      parentRoute: typeof DashboardRevenueRoute
+    }
+    '/dashboard/revenue/analytics': {
+      id: '/dashboard/revenue/analytics'
+      path: '/analytics'
+      fullPath: '/dashboard/revenue/analytics'
+      preLoaderRoute: typeof DashboardRevenueAnalyticsRouteImport
+      parentRoute: typeof DashboardRevenueRoute
     }
     '/dashboard/projects/new': {
       id: '/dashboard/projects/new'
@@ -360,10 +436,27 @@ const DashboardProjectsRouteChildren: DashboardProjectsRouteChildren = {
 const DashboardProjectsRouteWithChildren =
   DashboardProjectsRoute._addFileChildren(DashboardProjectsRouteChildren)
 
+interface DashboardRevenueRouteChildren {
+  DashboardRevenueAnalyticsRoute: typeof DashboardRevenueAnalyticsRoute
+  DashboardRevenuePayoutsRoute: typeof DashboardRevenuePayoutsRoute
+  DashboardRevenueSettingsRoute: typeof DashboardRevenueSettingsRoute
+  DashboardRevenueIndexRoute: typeof DashboardRevenueIndexRoute
+}
+
+const DashboardRevenueRouteChildren: DashboardRevenueRouteChildren = {
+  DashboardRevenueAnalyticsRoute: DashboardRevenueAnalyticsRoute,
+  DashboardRevenuePayoutsRoute: DashboardRevenuePayoutsRoute,
+  DashboardRevenueSettingsRoute: DashboardRevenueSettingsRoute,
+  DashboardRevenueIndexRoute: DashboardRevenueIndexRoute,
+}
+
+const DashboardRevenueRouteWithChildren =
+  DashboardRevenueRoute._addFileChildren(DashboardRevenueRouteChildren)
+
 interface DashboardRouteRouteChildren {
   DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
   DashboardProjectsRoute: typeof DashboardProjectsRouteWithChildren
-  DashboardRevenueRoute: typeof DashboardRevenueRoute
+  DashboardRevenueRoute: typeof DashboardRevenueRouteWithChildren
   DashboardSettingsRoute: typeof DashboardSettingsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
@@ -371,7 +464,7 @@ interface DashboardRouteRouteChildren {
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardAnalyticsRoute: DashboardAnalyticsRoute,
   DashboardProjectsRoute: DashboardProjectsRouteWithChildren,
-  DashboardRevenueRoute: DashboardRevenueRoute,
+  DashboardRevenueRoute: DashboardRevenueRouteWithChildren,
   DashboardSettingsRoute: DashboardSettingsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }

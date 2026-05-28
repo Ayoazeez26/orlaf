@@ -1,6 +1,14 @@
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
-import { Clock, Eye, TrendingUp, Users } from "lucide-react"
+import {
+  Banknote,
+  Clock,
+  DollarSign,
+  Eye,
+  LineChart,
+  TrendingUp,
+  Users,
+} from "lucide-react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
 import type { AnalyticsKpi, AnalyticsKpiIcon } from "../../types"
 import { TrendBadge } from "./trend-badge"
@@ -10,6 +18,10 @@ const ICON_MAP: Record<AnalyticsKpiIcon, typeof Eye> = {
   viewers: Users,
   watchTime: Clock,
   engagement: TrendingUp,
+  dollar: DollarSign,
+  chart: LineChart,
+  clock: Clock,
+  creditCard: Banknote,
 }
 
 interface AnalyticsMetricCardProps {
@@ -30,18 +42,22 @@ export function AnalyticsMetricCard({
           <span className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
             {kpi.label}
           </span>
-          <Icon
-            className="size-5 shrink-0 text-muted-foreground"
-            strokeWidth={1.75}
-            aria-hidden
-          />
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+            <Icon className="size-5 text-primary" strokeWidth={2} aria-hidden />
+          </span>
         </div>
 
         <p className="font-bold text-2xl text-foreground tracking-tight">
           {kpi.value}
         </p>
 
-        <TrendBadge changePercent={kpi.changePercent} variant="inline" />
+        {kpi.footnote ? (
+          <p className="font-medium text-sm text-trend-positive">
+            {kpi.footnote}
+          </p>
+        ) : kpi.changePercent !== undefined ? (
+          <TrendBadge changePercent={kpi.changePercent} variant="inline" />
+        ) : null}
       </CardContent>
     </Card>
   )
