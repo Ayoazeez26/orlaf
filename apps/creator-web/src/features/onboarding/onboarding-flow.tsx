@@ -1,3 +1,4 @@
+import { ThemeSwitcher } from "@/components/theme-switcher"
 import { useNavigate } from "@tanstack/react-router"
 import { ContentFormatStep } from "./components/steps/content-format-step"
 import { CreatorTypeStep } from "./components/steps/creator-type-step"
@@ -31,7 +32,8 @@ export function OnboardingFlow() {
   const navigation = useOnboardingNavigation("welcome", handleComplete)
   const { currentStep, progress, goNext, goBack, goTo } = navigation
 
-  switch (currentStep) {
+  const stepContent = (() => {
+    switch (currentStep) {
     case "welcome":
       return <WelcomeStep progress={progress} onAuthSelect={handleAuthSelect} />
     case "signup":
@@ -78,5 +80,15 @@ export function OnboardingFlow() {
       )
     default:
       return <WelcomeStep progress={progress} onAuthSelect={handleAuthSelect} />
-  }
+    }
+  })()
+
+  return (
+    <div className="relative">
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeSwitcher />
+      </div>
+      {stepContent}
+    </div>
+  )
 }

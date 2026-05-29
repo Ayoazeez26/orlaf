@@ -1,4 +1,5 @@
 import { ClientOnly, createFileRoute } from "@tanstack/react-router"
+import { ThemeSwitcher } from "@/components/theme-switcher"
 import { OnboardingProvider } from "@/features/onboarding/onboarding-context"
 import { OnboardingFlow } from "@/features/onboarding/onboarding-flow"
 
@@ -19,7 +20,10 @@ function OnboardingPage() {
 
 function OnboardingFallback() {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center bg-background px-4 py-10">
+    <div className="relative flex min-h-svh flex-col items-center justify-center bg-background px-4 py-10">
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeSwitcher />
+      </div>
       <p className="mb-6 font-semibold text-foreground text-lg">
         <span className="font-bold">OrlAf</span>{" "}
         <span className="text-muted-foreground">Creators</span>
