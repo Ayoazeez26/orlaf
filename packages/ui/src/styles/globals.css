@@ -27,6 +27,7 @@
   --color-input: var(--input);
   --color-input-bg: var(--input-bg);
   --color-border: var(--border);
+  --color-border-zinc-200: var(--border-zinc-200);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
@@ -45,11 +46,13 @@
   --color-text-strong: var(--text-strong);
   --color-text-subtle: var(--text-subtle);
   --color-surface-frosted: var(--surface-frosted);
+  --color-surface-subtle: var(--surface-subtle);
   --color-upload-step-complete: var(--upload-step-complete);
   --color-trend-positive: var(--trend-positive);
   --color-trend-positive-muted: var(--trend-positive-muted);
   --color-trend-negative: var(--trend-negative);
   --color-trend-negative-muted: var(--trend-negative-muted);
+  --color-danger-zone-border: var(--danger-zone-border);
   --color-chart-device-mobile: var(--chart-device-mobile);
   --color-chart-device-desktop: var(--chart-device-desktop);
   --color-chart-device-tablet: var(--chart-device-tablet);
@@ -111,7 +114,11 @@
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.884 0.01 286.4);
+  /* #E4E4E7 */
+  --border-zinc-200: oklch(0.92 0.004 286.3);
   --surface-frosted: oklch(1 0 0 / 0.8);
+  /* #F4F4F580 */
+  --surface-subtle: oklch(0.967 0.001 286.4 / 0.502);
   /* #F4F4F5 */
   --upload-step-complete: #f4f4f5;
   /* #21C45D / #DC2828 */
@@ -119,6 +126,8 @@
   --trend-positive-muted: oklch(0.72 0.192 149.5 / 0.15);
   --trend-negative: oklch(0.579 0.214 27.2);
   --trend-negative-muted: oklch(0.579 0.214 27.2 / 0.15);
+  /* #DC28284D */
+  --danger-zone-border: oklch(0.579 0.214 27.2 / 0.302);
   /* #7C51C8 / #C285E0 / #E0B8E0 */
   --chart-device-mobile: oklch(0.542 0.178 296.7);
   --chart-device-desktop: oklch(0.711 0.143 314);
@@ -178,12 +187,15 @@
   --accent-foreground: oklch(0.961 0 89.9);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(0.38 0.012 286);
+  --border-zinc-200: oklch(0.42 0.01 286);
   --surface-frosted: oklch(0.198 0.008 285.6 / 0.8);
+  --surface-subtle: oklch(0.252 0.012 286.4 / 0.502);
   --upload-step-complete: oklch(0.252 0.012 286.4);
   --trend-positive: oklch(0.72 0.192 149.5);
   --trend-positive-muted: oklch(0.72 0.192 149.5 / 0.2);
   --trend-negative: oklch(0.579 0.214 27.2);
   --trend-negative-muted: oklch(0.579 0.214 27.2 / 0.2);
+  --danger-zone-border: oklch(0.579 0.214 27.2 / 0.302);
   --chart-device-mobile: oklch(0.542 0.178 296.7);
   --chart-device-desktop: oklch(0.711 0.143 314);
   --chart-device-tablet: oklch(0.83 0.07 326.2);

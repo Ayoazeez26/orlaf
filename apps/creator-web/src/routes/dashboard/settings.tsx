@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { DashboardStubPage } from "@/features/dashboard/components/dashboard-stub-page"
+import { SettingsLayout } from "@/features/settings/layouts/settings-layout"
 
 export const Route = createFileRoute("/dashboard/settings")({
-  component: DashboardSettings,
+  component: SettingsLayoutRoute,
 })
 
-function DashboardSettings() {
-  return <DashboardStubPage title="Settings" />
+function SettingsLayoutRoute() {
+  return <SettingsLayout />
 }
