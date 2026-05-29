@@ -13,7 +13,9 @@ import {
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
 import {
   ANALYTICS_CHART_AXIS_LINE,
+  ANALYTICS_CHART_MARGIN,
   ANALYTICS_CHART_TICK,
+  ANALYTICS_CHART_Y_AXIS_WIDTH,
   DEVICE_CHART_COLORS,
 } from "../../constants"
 import type { EngagementByDevicePoint } from "../../types"
@@ -32,13 +34,9 @@ export function EngagementByDeviceChart({
       <CardHeader className="pb-4">
         <p className="font-semibold text-foreground">Engagement</p>
       </CardHeader>
-      <CardContent className="h-[300px] px-2 sm:px-6">
+      <CardContent className="h-[300px] pl-0 pr-1 sm:px-6">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{ top: 8, right: 8, left: 4, bottom: 4 }}
-            barGap={4}
-          >
+          <BarChart data={data} margin={ANALYTICS_CHART_MARGIN} barGap={4}>
             <CartesianGrid
               strokeDasharray="3 3"
               vertical={false}
@@ -51,9 +49,10 @@ export function EngagementByDeviceChart({
               tick={ANALYTICS_CHART_TICK}
             />
             <YAxis
+              width={ANALYTICS_CHART_Y_AXIS_WIDTH}
               axisLine={ANALYTICS_CHART_AXIS_LINE}
               tickLine={ANALYTICS_CHART_AXIS_LINE}
-              tick={ANALYTICS_CHART_TICK}
+              tick={{ ...ANALYTICS_CHART_TICK, fontSize: 11 }}
             />
             <Tooltip
               contentStyle={{

@@ -21,8 +21,8 @@ function OnboardingPage() {
 function OnboardingFallback() {
   return (
     <div className="relative flex min-h-svh flex-col items-center justify-center bg-background px-4 py-10">
-      <div className="absolute top-4 right-4 z-10">
-        <ThemeSwitcher />
+      <div className="absolute top-4 right-4 left-4 z-10 flex justify-end sm:left-auto">
+        <ThemeSwitcher compact />
       </div>
       <p className="mb-6 font-semibold text-foreground text-lg">
         <span className="font-bold">OrlAf</span>{" "}

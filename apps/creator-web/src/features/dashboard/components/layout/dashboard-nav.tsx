@@ -2,7 +2,11 @@ import { Link, useRouterState } from "@tanstack/react-router"
 import { cn } from "@workspace/ui/lib/utils"
 import { DASHBOARD_NAV_ITEMS } from "../../constants"
 
-export function DashboardNav() {
+interface DashboardNavProps {
+  onNavigate?: () => void
+}
+
+export function DashboardNav({ onNavigate }: DashboardNavProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
 
   return (
@@ -18,6 +22,7 @@ export function DashboardNav() {
           <Link
             key={item.to}
             to={item.to}
+            onClick={onNavigate}
             className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium text-sm transition-colors",
               isActive

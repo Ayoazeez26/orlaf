@@ -8,6 +8,7 @@ import {
 } from "@workspace/ui/components/select"
 import { cn } from "@workspace/ui/lib/utils"
 import { useState } from "react"
+import { DATE_RANGE_SELECT_TRIGGER_CLASS } from "@/features/analytics/constants"
 import type { DashboardMetrics } from "../../types"
 
 const PERIOD_OPTIONS = ["Last 7 days", "Last 30 days", "Last 90 days"]
@@ -21,7 +22,7 @@ export function ViewsEngagementCard({ metrics }: ViewsEngagementCardProps) {
 
   return (
     <Card className="rounded-3xl">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-2">
         <p className="font-semibold text-foreground text-sm">
           Views &amp; Engagement
         </p>
@@ -29,7 +30,10 @@ export function ViewsEngagementCard({ metrics }: ViewsEngagementCardProps) {
           <SelectTrigger
             size="sm"
             aria-label="Time period"
-            className="rounded-full! border-border bg-transparent px-3 py-1.5 dark:bg-transparent"
+            className={cn(
+              DATE_RANGE_SELECT_TRIGGER_CLASS,
+              "rounded-full! py-1.5"
+            )}
           >
             <SelectValue />
           </SelectTrigger>
@@ -51,7 +55,7 @@ export function ViewsEngagementCard({ metrics }: ViewsEngagementCardProps) {
             {metrics.totalViewsLabel}
           </p>
         </div>
-        <div className="flex gap-5">
+        <div className="flex flex-wrap gap-x-5 gap-y-2">
           {metrics.breakdown.map((item) => (
             <div key={item.label} className="flex items-end gap-2">
               <span

@@ -9,6 +9,10 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import {
+  ANALYTICS_CHART_MARGIN,
+  ANALYTICS_CHART_Y_AXIS_WIDTH,
+} from "@/features/analytics/constants"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
 import type { WeeklyViewPoint } from "@/features/projects/types"
 
@@ -28,12 +32,9 @@ export function WeeklyViewsChart({
       <CardHeader className="pb-4">
         <p className="font-semibold text-foreground text-sm">{title}</p>
       </CardHeader>
-      <CardContent className="h-[280px] px-2 sm:px-6">
+      <CardContent className="h-[280px] pl-0 pr-1 sm:px-6">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={data}
-            margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
-          >
+          <AreaChart data={data} margin={ANALYTICS_CHART_MARGIN}>
             <defs>
               <linearGradient
                 id="weeklyViewsGradient"
@@ -66,9 +67,10 @@ export function WeeklyViewsChart({
               tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
             />
             <YAxis
+              width={ANALYTICS_CHART_Y_AXIS_WIDTH}
               axisLine={false}
               tickLine={false}
-              tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
               tickFormatter={(v) =>
                 v >= 1000 ? `${Math.round(v / 1000)}k` : String(v)
               }

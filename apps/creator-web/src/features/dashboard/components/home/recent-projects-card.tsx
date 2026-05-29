@@ -11,7 +11,7 @@ interface RecentProjectsCardProps {
 export function RecentProjectsCard({ projects }: RecentProjectsCardProps) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-4">
         <div className="flex items-center gap-2">
           <FolderKanban className="size-5 text-muted-foreground" aria-hidden />
           <p className="font-semibold text-foreground text-sm">

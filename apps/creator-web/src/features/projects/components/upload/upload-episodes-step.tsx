@@ -24,9 +24,11 @@ import {
   Volume2,
 } from "lucide-react"
 import { useState } from "react"
+import { useSaveUploadDraft } from "../../hooks/use-save-upload-draft"
 import type { EpisodeAccess } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
-import { MobileSeriesPreview } from "./mobile-series-preview"
+import { UploadEpisodesStepNav } from "./upload-step-nav"
+import { UploadSeriesPreviewAside } from "./upload-series-preview-aside"
 
 const ACCESS_OPTIONS: { value: EpisodeAccess; label: string }[] = [
   { value: "free", label: "Free" },
@@ -44,14 +46,15 @@ export function UploadEpisodesStep({
   onNext,
 }: UploadEpisodesStepProps) {
   const { state, dispatch, previewImage } = useUploadWizard()
+  const saveDraft = useSaveUploadDraft()
   const [expandedEpisode, setExpandedEpisode] = useState(state.episodes[0]?.id)
   const displayTitle = state.title.trim() || "The Returnees"
   const toolbarButtonClassName =
     "text-text-strong hover:text-text-strong aria-expanded:text-text-strong px-3 py-2"
 
   return (
-    <div className="grid gap-8 xl:grid-cols-[1fr_320px]">
-      <div className="space-y-6">
+    <div className="flex flex-col gap-8 xl:grid xl:grid-cols-[1fr_320px]">
+      <div className="min-w-0 space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-semibold text-foreground text-lg">
@@ -61,7 +64,7 @@ export function UploadEpisodesStep({
               {state.episodes.length} episodes added
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 sm:justify-end">
             <Button
               variant="outline"
               size="lg"
@@ -84,6 +87,7 @@ export function UploadEpisodesStep({
               variant="outline"
               className={toolbarButtonClassName}
               size="lg"
+              onClick={saveDraft}
             >
               <FileText className="size-4" aria-hidden />
               Save Draft
@@ -313,25 +317,27 @@ export function UploadEpisodesStep({
           ))}
         </Accordion>
 
-        <div className="flex justify-between">
-          <Button variant="outline" className="h-10 px-3" onClick={onBack}>
-            ← Back
-          </Button>
-          <Button onClick={onNext}>Next: Review →</Button>
-        </div>
+        <UploadEpisodesStepNav
+          onBack={onBack}
+          onNext={onNext}
+          className="hidden xl:flex"
+        />
       </div>
 
-      <div className="hidden xl:block">
-        <div className="sticky top-8">
-          <MobileSeriesPreview
-            title={displayTitle}
-            genre={state.genre}
-            synopsis={state.synopsis}
-            posterUrl={previewImage}
-            episodes={state.episodes}
-            activeEpisodeId={expandedEpisode}
-          />
-        </div>
+      <div className="flex flex-col gap-6">
+        <UploadSeriesPreviewAside
+          title={displayTitle}
+          genre={state.genre}
+          synopsis={state.synopsis}
+          posterUrl={previewImage}
+          episodes={state.episodes}
+          activeEpisodeId={expandedEpisode}
+        />
+        <UploadEpisodesStepNav
+          onBack={onBack}
+          onNext={onNext}
+          className="xl:hidden"
+        />
       </div>
     </div>
   )

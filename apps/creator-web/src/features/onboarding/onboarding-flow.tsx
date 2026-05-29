@@ -85,8 +85,8 @@ export function OnboardingFlow() {
 
   return (
     <div className="relative">
-      <div className="absolute top-4 right-4 z-10">
-        <ThemeSwitcher />
+      <div className="absolute top-4 right-4 left-4 z-10 flex justify-end sm:left-auto">
+        <ThemeSwitcher compact />
       </div>
       {stepContent}
     </div>

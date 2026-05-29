@@ -6,6 +6,7 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select"
 import { useState } from "react"
+import { DATE_RANGE_SELECT_TRIGGER_HEADER_CLASS } from "@/features/analytics/constants"
 import {
   DEFAULT_REVENUE_DATE_RANGE,
   REVENUE_DATE_RANGE_OPTIONS,
@@ -15,7 +16,7 @@ export function RevenuePageHeader() {
   const [period, setPeriod] = useState(DEFAULT_REVENUE_DATE_RANGE)
 
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div>
         <h1 className="font-bold text-2xl text-foreground">Revenue</h1>
         <p className="mt-1 text-muted-foreground text-sm">
@@ -26,7 +27,7 @@ export function RevenuePageHeader() {
         <SelectTrigger
           size="sm"
           aria-label="Date range"
-          className="w-full rounded-[10px] border-border bg-transparent px-4 py-4 sm:w-[160px] dark:bg-transparent"
+          className={DATE_RANGE_SELECT_TRIGGER_HEADER_CLASS}
         >
           <SelectValue />
         </SelectTrigger>

@@ -55,14 +55,16 @@ export function WelcomeStep({ progress, onAuthSelect }: WelcomeStepProps) {
   }
 
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center bg-background px-4 py-10">
+    <div className="flex min-h-svh flex-col items-center justify-center bg-background px-4 py-8 sm:py-10">
       <p className="mb-6 font-semibold text-foreground text-lg">
         <span className="font-bold">OrlAf</span>{" "}
         <span className="text-muted-foreground">Creators</span>
       </p>
-      <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-8 shadow-sm">
+      <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
         <div className="text-center">
-          <h1 className="font-semibold text-2xl">Let&apos;s get you started</h1>
+          <h1 className="font-semibold text-xl sm:text-2xl">
+            Let&apos;s get you started
+          </h1>
           <p className="mt-2 text-muted-foreground text-sm">
             Your Creator Studio for short dramas &amp; series
           </p>

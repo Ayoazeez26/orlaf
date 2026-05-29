@@ -5,9 +5,11 @@ import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import { Pencil, Sparkles } from "lucide-react"
 import { projectKeys } from "../../data/query-keys"
+import { useSaveUploadDraft } from "../../hooks/use-save-upload-draft"
 import type { UploadEpisodeDraft } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
-import { MobileSeriesPreview } from "./mobile-series-preview"
+import { UploadReviewStepNav } from "./upload-step-nav"
+import { UploadSeriesPreviewAside } from "./upload-series-preview-aside"
 
 interface UploadReviewStepProps {
   onBack: () => void
@@ -17,6 +19,7 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { state, dispatch, previewImage } = useUploadWizard()
+  const saveDraft = useSaveUploadDraft()
 
   const displayTitle = state.title.trim() || "The Returnees"
   const freeCount = state.episodes.filter((e) => e.access === "free").length
@@ -30,8 +33,8 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
   }
 
   return (
-    <div className="grid gap-8 xl:grid-cols-[1fr_300px]">
-      <div className="space-y-6">
+    <div className="flex flex-col gap-8 xl:grid xl:grid-cols-[1fr_300px]">
+      <div className="min-w-0 space-y-6">
         <Card className="py-6 shadow-none">
           <CardContent className="space-y-5">
             <div className="flex gap-3">
@@ -57,7 +60,9 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
               <SummaryChip label="Premium" value={String(premiumCount)} />
             </div>
             <div className="flex flex-wrap justify-end gap-2">
-              <Button variant="outline">Save as Draft</Button>
+              <Button variant="outline" onClick={saveDraft}>
+                Save as Draft
+              </Button>
               <Button onClick={handlePublish}>
                 <Sparkles className="size-4" aria-hidden />
                 Publish Series
@@ -93,23 +98,18 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
           </CardContent>
         </Card>
 
-        <div className="flex justify-between">
-          <Button variant="outline" onClick={onBack}>
-            ← Back to Episodes
-          </Button>
-        </div>
+        <UploadReviewStepNav onBack={onBack} className="hidden xl:flex" />
       </div>
 
-      <div className="hidden xl:block">
-        <div className="sticky top-8">
-          <MobileSeriesPreview
-            title={displayTitle}
-            genre={state.genre}
-            synopsis={state.synopsis}
-            posterUrl={previewImage}
-            episodes={state.episodes}
-          />
-        </div>
+      <div className="flex flex-col gap-6">
+        <UploadSeriesPreviewAside
+          title={displayTitle}
+          genre={state.genre}
+          synopsis={state.synopsis}
+          posterUrl={previewImage}
+          episodes={state.episodes}
+        />
+        <UploadReviewStepNav onBack={onBack} className="xl:hidden" />
       </div>
     </div>
   )
@@ -127,7 +127,7 @@ function SummaryChip({
   return (
     <div
       className={cn(
-        "w-[172px] max-w-[172px] rounded-lg border bg-muted/30 px-3 py-3 text-center",
+        "min-w-[7.5rem] flex-1 rounded-lg border bg-muted/30 px-3 py-3 text-center sm:w-[172px] sm:max-w-[172px] sm:flex-none",
         className
       )}
     >
@@ -145,23 +145,29 @@ function EpisodeReviewRow({
   index: number
 }) {
   return (
-    <li className="flex flex-wrap items-center gap-2 rounded-lg bg-muted/40 px-4 py-3">
-      <span className="flex size-7 items-center justify-center rounded-full bg-muted font-medium text-muted-foreground text-xs">
-        {index + 1}
-      </span>
-      <span className="min-w-0 flex-1 font-medium text-foreground text-sm">
-        {episode.title}
-      </span>
-      <span className="text-muted-foreground text-xs">{episode.duration}</span>
-      <BadgePill>9:16 Vertical</BadgePill>
-      <BadgePill variant={episode.access === "free" ? "solid" : "outline"}>
-        {episode.access === "free"
-          ? "Free"
-          : episode.access === "premium"
-            ? "Premium"
-            : "Coins"}
-      </BadgePill>
-      <BadgePill>CC</BadgePill>
+    <li className="rounded-lg bg-muted/40 px-4 py-3">
+      <div className="flex min-w-0 items-center gap-2">
+        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted font-medium text-muted-foreground text-xs">
+          {index + 1}
+        </span>
+        <span className="min-w-0 flex-1 truncate font-medium text-foreground text-sm">
+          {episode.title}
+        </span>
+        <span className="shrink-0 text-muted-foreground text-xs">
+          {episode.duration}
+        </span>
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-2 pl-9">
+        <BadgePill>9:16 Vertical</BadgePill>
+        <BadgePill variant={episode.access === "free" ? "solid" : "outline"}>
+          {episode.access === "free"
+            ? "Free"
+            : episode.access === "premium"
+              ? "Premium"
+              : "Coins"}
+        </BadgePill>
+        <BadgePill>CC</BadgePill>
+      </div>
     </li>
   )
 }

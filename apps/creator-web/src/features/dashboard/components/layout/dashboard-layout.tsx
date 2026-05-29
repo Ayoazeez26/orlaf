@@ -1,13 +1,17 @@
 import { Outlet } from "@tanstack/react-router"
+import { DashboardMobileHeader } from "./dashboard-mobile-header"
 import { DashboardSidebar } from "./dashboard-sidebar"
 
 export function DashboardLayout() {
   return (
-    <div className="flex h-svh overflow-hidden bg-background">
+    <div className="flex h-svh flex-col overflow-hidden bg-background lg:flex-row">
       <DashboardSidebar />
-      <main className="min-h-0 flex-1 overflow-y-auto">
-        <Outlet />
-      </main>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <DashboardMobileHeader />
+        <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+          <Outlet />
+        </main>
+      </div>
     </div>
   )
 }

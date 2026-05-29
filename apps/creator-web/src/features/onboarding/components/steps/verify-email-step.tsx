@@ -47,8 +47,13 @@ export function VerifyEmailStep({
         </p>
       </div>
 
-      <div className="mt-8 flex justify-center">
-        <InputOTP maxLength={6} value={code} onChange={setCode}>
+      <div className="mt-8 flex justify-center overflow-x-auto px-1">
+        <InputOTP
+          maxLength={6}
+          value={code}
+          onChange={setCode}
+          containerClassName="gap-1 sm:gap-2"
+        >
           <InputOTPGroup>
             {([0, 1, 2, 3, 4, 5] as const).map((index) => (
               <InputOTPSlot key={`otp-slot-${index}`} index={index} />

@@ -16,7 +16,7 @@ export function RecentPayoutsCard({
 }: RecentPayoutsCardProps) {
   return (
     <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "gap-0 py-0", className)}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 border-border border-b p-5 pb-5!">
+      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0 border-border border-b p-5 pb-5!">
         <p className="font-semibold text-foreground text-sm">Recent Payouts</p>
         <Badge className="border-0 bg-payout-accent-muted font-normal text-primary hover:bg-payout-accent-muted">
           {payouts.length} transactions

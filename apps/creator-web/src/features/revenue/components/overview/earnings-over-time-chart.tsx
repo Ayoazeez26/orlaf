@@ -11,7 +11,9 @@ import {
 } from "recharts"
 import {
   ANALYTICS_CHART_AXIS_LINE,
+  ANALYTICS_CHART_MARGIN,
   ANALYTICS_CHART_TICK,
+  ANALYTICS_CHART_Y_AXIS_WIDTH,
 } from "@/features/analytics/constants"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
 import type { EarningsOverTimePoint } from "../../types"
@@ -30,12 +32,9 @@ export function EarningsOverTimeChart({
       <CardHeader className="pb-4">
         <p className="font-semibold text-foreground">Earnings Over Time</p>
       </CardHeader>
-      <CardContent className="h-[300px] px-2 sm:px-6">
+      <CardContent className="h-[300px] pl-0 pr-1 sm:px-6">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={data}
-            margin={{ top: 8, right: 8, left: 4, bottom: 4 }}
-          >
+          <AreaChart data={data} margin={ANALYTICS_CHART_MARGIN}>
             <defs>
               <linearGradient id="earningsGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop
@@ -62,9 +61,10 @@ export function EarningsOverTimeChart({
               tick={ANALYTICS_CHART_TICK}
             />
             <YAxis
+              width={ANALYTICS_CHART_Y_AXIS_WIDTH}
               axisLine={ANALYTICS_CHART_AXIS_LINE}
               tickLine={ANALYTICS_CHART_AXIS_LINE}
-              tick={ANALYTICS_CHART_TICK}
+              tick={{ ...ANALYTICS_CHART_TICK, fontSize: 11 }}
               tickFormatter={(v) =>
                 v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${v}`
               }

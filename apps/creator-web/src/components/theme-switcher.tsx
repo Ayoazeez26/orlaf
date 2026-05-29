@@ -9,7 +9,12 @@ const themes = [
   { value: "system", label: "System", icon: Monitor },
 ] as const
 
-export function ThemeSwitcher() {
+interface ThemeSwitcherProps {
+  /** Hides text labels below `sm` — for sidebars and narrow headers */
+  compact?: boolean
+}
+
+export function ThemeSwitcher({ compact = false }: ThemeSwitcherProps) {
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
@@ -20,14 +25,22 @@ export function ThemeSwitcher() {
   if (!mounted) {
     return (
       <div
-        className="h-9 w-[220px] rounded-full border border-border bg-card"
+        className={cn(
+          "h-9 rounded-full border border-border bg-card",
+          compact ? "w-30 sm:w-[220px]" : "w-[220px]"
+        )}
         aria-hidden
       />
     )
   }
 
   return (
-    <fieldset className="flex items-center gap-0.5 rounded-full border border-border bg-card p-1">
+    <fieldset
+      className={cn(
+        "flex max-w-full items-center gap-0.5 rounded-full border border-border bg-card p-1",
+        compact && "w-full sm:w-auto"
+      )}
+    >
       <legend className="sr-only">Theme</legend>
       {themes.map(({ value, label, icon: Icon }) => {
         const active = theme === value
@@ -37,14 +50,16 @@ export function ThemeSwitcher() {
             type="button"
             onClick={() => setTheme(value)}
             className={cn(
-              "flex items-center gap-1.5 rounded-full px-2.5 py-1.5 font-medium text-xs transition-colors",
+              "flex flex-1 items-center justify-center gap-1.5 rounded-full px-2 py-1.5 font-medium text-xs transition-colors sm:flex-none sm:px-2.5",
               active
                 ? "border border-border bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             )}
           >
             <Icon className="size-3.5 shrink-0" aria-hidden />
-            {label}
+            <span className={cn(compact && "sr-only sm:not-sr-only")}>
+              {label}
+            </span>
           </button>
         )
       })}

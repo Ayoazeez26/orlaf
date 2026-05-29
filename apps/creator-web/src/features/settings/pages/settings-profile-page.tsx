@@ -70,9 +70,12 @@ export function SettingsProfilePage() {
             Connect your social presence
           </p>
         </CardHeader>
-        <CardContent className="grid grid-cols-[8.5rem_1fr] items-center gap-x-3 gap-y-3">
+        <CardContent className="space-y-4">
           {social.map((link, index) => (
-            <div key={link.platform} className="contents">
+            <div
+              key={link.platform}
+              className="grid grid-cols-1 items-center gap-2 sm:grid-cols-[8.5rem_1fr] sm:gap-x-3"
+            >
               <p className="inline-flex items-center gap-2 text-foreground text-sm">
                 <ExternalLink
                   className="size-3.5 shrink-0 text-muted-foreground"
@@ -92,7 +95,7 @@ export function SettingsProfilePage() {
               />
             </div>
           ))}
-          <div className="col-span-2 flex justify-end pt-1">
+          <div className="flex justify-end pt-1">
             <Button type="button" variant="outline">
               Update Links
             </Button>

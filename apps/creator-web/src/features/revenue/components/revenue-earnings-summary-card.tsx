@@ -9,6 +9,7 @@ import {
 import { cn } from "@workspace/ui/lib/utils"
 import { useState } from "react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
+import { DATE_RANGE_SELECT_TRIGGER_CLASS } from "@/features/analytics/constants"
 import {
   DEFAULT_REVENUE_DATE_RANGE,
   REVENUE_DATE_RANGE_OPTIONS,
@@ -31,13 +32,13 @@ export function RevenueEarningsSummaryCard({
 
   return (
     <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6", className)}>
-      <CardHeader className="flex flex-row items-center justify-start gap-4 space-y-0 pb-4">
+      <CardHeader className="flex flex-row flex-wrap items-center justify-start gap-3 space-y-0 pb-4 sm:gap-4">
         <p className="font-semibold text-foreground text-lg">Earnings</p>
         <Select value={period} onValueChange={setPeriod}>
           <SelectTrigger
             size="sm"
             aria-label="Earnings date range"
-            className="w-[132px] rounded-[10px] border-border bg-transparent py-4 dark:bg-transparent"
+            className={cn(DATE_RANGE_SELECT_TRIGGER_CLASS, "py-4")}
           >
             <SelectValue />
           </SelectTrigger>

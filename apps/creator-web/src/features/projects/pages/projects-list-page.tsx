@@ -43,8 +43,8 @@ export function ProjectsListPage() {
   }
 
   return (
-    <div className="space-y-8 p-6 lg:p-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h1 className="font-bold text-2xl text-foreground">Projects</h1>
           <p className="mt-1 text-muted-foreground text-sm">

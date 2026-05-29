@@ -9,7 +9,7 @@ export function RevenueLayout() {
   const { data, isLoading, isError } = useRevenueDashboard()
 
   return (
-    <div className="space-y-8 p-6 lg:p-8">
+    <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
       <RevenuePageHeader />
 
       {isLoading && <RevenuePageSkeleton />}

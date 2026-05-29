@@ -25,7 +25,7 @@ export function ProjectsListToolbar({
   onClearFilters,
 }: ProjectsListToolbarProps) {
   return (
-    <div className="flex flex-wrap items-center justify-end gap-2">
+    <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:justify-end lg:w-auto">
       <ProjectsListSearch value={searchQuery} onChange={onSearchChange} />
       <ProjectsListFilterMenu
         filters={filters}
@@ -49,10 +49,11 @@ export function ProjectsListToolbar({
           <LayoutGrid className="size-4" aria-hidden />
         )}
       </Button>
-      <Button asChild>
+      <Button asChild className="gap-1.5">
         <Link to="/dashboard/projects/new" search={{ step: "info" }}>
-          <Plus className="size-4" aria-hidden />
-          New Series
+          <Plus className="size-4 shrink-0" aria-hidden />
+          <span className="hidden sm:inline">New Series</span>
+          <span className="sm:hidden">New</span>
         </Link>
       </Button>
     </div>

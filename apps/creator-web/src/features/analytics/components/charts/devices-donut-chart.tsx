@@ -106,7 +106,7 @@ export function DevicesDonutChart({ data, className }: DevicesDonutChartProps) {
         </div>
 
         <div className="flex flex-col gap-4 px-2">
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
             {mobile && (
               <DeviceLegendItem
                 segment={mobile.segment}

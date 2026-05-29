@@ -12,7 +12,7 @@ export function ProjectListRow({ project }: ProjectListRowProps) {
   return (
     <Link
       {...projectDetailPath(project.id)}
-      className="flex items-center gap-4 px-5 py-4 transition-colors hover:bg-muted/30"
+      className="flex flex-wrap items-center gap-3 px-4 py-4 transition-colors hover:bg-muted/30 sm:flex-nowrap sm:gap-4 sm:px-5"
     >
       <ProjectThumbnail
         src={project.thumbnailUrl}

@@ -70,7 +70,7 @@ export function SettingsStudioPage() {
       </Card>
 
       <Card className={FROSTED_CARD_SURFACE_CLASS}>
-        <CardHeader className="flex flex-row items-start justify-between space-y-0">
+        <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3 space-y-0">
           <div>
             <p className="font-semibold text-foreground">Team Members</p>
             <p className="text-muted-foreground text-sm">
@@ -170,7 +170,7 @@ function DangerRow({
   action: ReactNode
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b pb-4 last:border-b-0 last:pb-0">
+    <div className="flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 last:border-b-0 last:pb-0">
       <div>
         <p className="text-foreground text-sm">{title}</p>
         <p className="text-muted-foreground text-xs">{description}</p>
