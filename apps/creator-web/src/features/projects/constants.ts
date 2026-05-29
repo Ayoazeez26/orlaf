@@ -15,6 +15,20 @@ export const GENRE_OPTIONS = [
   "Documentary",
 ] as const
 
+export const PROJECT_STATUS_FILTER_OPTIONS = [
+  { value: "published" as const, label: "Published" },
+  { value: "draft" as const, label: "Draft" },
+  { value: "ongoing" as const, label: "Ongoing" },
+  { value: "completed" as const, label: "Completed" },
+]
+
+export const PROJECT_SORT_OPTIONS = [
+  { value: "newest" as const, label: "Newest first" },
+  { value: "title-asc" as const, label: "Title (A–Z)" },
+] as const
+
+export const ALL_GENRES_LABEL = "All genres"
+
 export const LANGUAGE_OPTIONS = [
   "English",
   "Yoruba",

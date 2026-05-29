@@ -1,41 +1,39 @@
 import { Link } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
-import {
-  LayoutGrid,
-  LayoutList,
-  Plus,
-  Search,
-  SlidersHorizontal,
-} from "lucide-react"
+import { LayoutGrid, LayoutList, Plus } from "lucide-react"
+import type { ProjectsListFilters } from "../../types"
+import { ProjectsListFilterMenu } from "./projects-list-filter-menu"
+import { ProjectsListSearch } from "./projects-list-search"
 
 interface ProjectsListToolbarProps {
   layout: "grid" | "list"
   onLayoutChange: (layout: "grid" | "list") => void
+  searchQuery: string
+  onSearchChange: (value: string) => void
+  filters: ProjectsListFilters
+  onFiltersChange: (patch: Partial<ProjectsListFilters>) => void
+  onClearFilters: () => void
 }
 
 export function ProjectsListToolbar({
   layout,
   onLayoutChange,
+  searchQuery,
+  onSearchChange,
+  filters,
+  onFiltersChange,
+  onClearFilters,
 }: ProjectsListToolbarProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      <ProjectsListSearch value={searchQuery} onChange={onSearchChange} />
+      <ProjectsListFilterMenu
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+        onClearFilters={onClearFilters}
+      />
       <Button
-        variant="outline"
-        size="icon"
-        aria-label="Search projects"
-        className="bg-card text-muted-foreground"
-      >
-        <Search className="size-4" aria-hidden />
-      </Button>
-      <Button
-        variant="outline"
-        size="icon"
-        aria-label="Filter projects"
-        className="bg-card text-muted-foreground"
-      >
-        <SlidersHorizontal className="size-4" aria-hidden />
-      </Button>
-      <Button
+        type="button"
         variant="outline"
         size="icon"
         aria-label={

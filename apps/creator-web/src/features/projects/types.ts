@@ -10,8 +10,19 @@ export interface ProjectSummary {
   status: ProjectStatus
   episodeCount: number
   updatedAt: string
+  /** Sortable timestamp for list ordering (mock / API) */
+  updatedAtMs: number
   genre?: string
   language?: string
+}
+
+export type ProjectSortOption = "newest" | "title-asc"
+
+export interface ProjectsListFilters {
+  searchQuery: string
+  statuses: ProjectStatus[]
+  genre: string | null
+  sort: ProjectSortOption
 }
 
 export interface ProjectMetric {
