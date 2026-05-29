@@ -24,7 +24,7 @@
     "db:reset": "prisma migrate reset",
     "db:seed": "ts-node prisma/seed.ts",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate"
+    "postinstall": "node ./scripts/postinstall.mjs"
   },
   "engines": {
     "npm": ">=10.0.0",
