@@ -26,7 +26,7 @@ export function RecentProjectsCard({ projects }: RecentProjectsCardProps) {
         </Link>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="max-h-[320px] overflow-y-auto pr-1">
+        <div className="max-h-[320px] overflow-y-auto pr-1 pb-3">
           {projects.map((project) => (
             <ProjectRow key={project.id} project={project} />
           ))}
