@@ -79,6 +79,11 @@
     var(--revenue-breakdown-gradient-from),
     var(--revenue-breakdown-gradient-to)
   );
+  --background-image-wallet-balance-gradient: linear-gradient(
+    to bottom right,
+    var(--wallet-balance-gradient-from),
+    var(--wallet-balance-gradient-to)
+  );
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -106,6 +111,8 @@
   /* #7C51C8 → #C285E0 */
   --revenue-breakdown-gradient-from: oklch(0.542 0.178 296.7);
   --revenue-breakdown-gradient-to: oklch(0.711 0.143 314);
+  --wallet-balance-gradient-from: oklch(0.44 0.22 296.7);
+  --wallet-balance-gradient-to: oklch(0.56 0.21 308);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -180,6 +187,8 @@
   --primary-gradient-to: oklch(0.626 0.162 313.4);
   --revenue-breakdown-gradient-from: oklch(0.542 0.178 296.7);
   --revenue-breakdown-gradient-to: oklch(0.711 0.143 314);
+  --wallet-balance-gradient-from: oklch(0.44 0.22 296.7);
+  --wallet-balance-gradient-to: oklch(0.56 0.21 308);
   --secondary: oklch(0.198 0.008 285.6);
   --secondary-foreground: oklch(0.961 0 89.9);
   --muted: oklch(0.198 0.008 285.6);
