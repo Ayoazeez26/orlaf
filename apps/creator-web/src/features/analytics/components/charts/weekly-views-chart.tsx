@@ -32,7 +32,7 @@ export function WeeklyViewsChart({
       <CardHeader className="pb-4">
         <p className="font-semibold text-foreground text-sm">{title}</p>
       </CardHeader>
-      <CardContent className="h-[280px] pl-0 pr-1 sm:px-6">
+      <CardContent className="h-[280px] pr-1 pl-0 sm:px-6">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={ANALYTICS_CHART_MARGIN}>
             <defs>

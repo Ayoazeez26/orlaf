@@ -2,6 +2,7 @@ import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 import { Menu, X } from "lucide-react"
 import { useEffect, useState } from "react"
+import { DashboardLogo } from "./dashboard-logo"
 import { DashboardSidebarContent } from "./dashboard-sidebar-content"
 
 export function DashboardMobileHeader() {
@@ -38,10 +39,7 @@ export function DashboardMobileHeader() {
             <Menu className="size-5" aria-hidden />
           )}
         </Button>
-        <p className="min-w-0 truncate font-semibold text-foreground text-base">
-          <span className="font-bold">OrlAf</span>{" "}
-          <span className="text-muted-foreground">Creators</span>
-        </p>
+        <DashboardLogo className="min-w-0 px-0" />
         <div className="size-9 shrink-0" aria-hidden />
       </header>
 

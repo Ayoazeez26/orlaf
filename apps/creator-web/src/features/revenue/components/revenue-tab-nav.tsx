@@ -7,10 +7,7 @@ export function RevenueTabNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
 
   return (
-    <nav
-      className={SCROLLABLE_TAB_NAV_CLASS}
-      aria-label="Revenue sections"
-    >
+    <nav className={SCROLLABLE_TAB_NAV_CLASS} aria-label="Revenue sections">
       {REVENUE_TABS.map((tab) => {
         const link = revenueTabPath(tab.path)
         const isActive =

@@ -1,21 +1,43 @@
 import {
   BarChart3,
-  Crown,
+  Bell,
   DollarSign,
   FolderKanban,
-  Gift,
   Home,
-  Lock,
+  LifeBuoy,
+  Megaphone,
   Settings,
 } from "lucide-react"
-import type { DashboardNavItem } from "./types"
+import type { DashboardNavGroup } from "./types"
 
-export const DASHBOARD_NAV_ITEMS: DashboardNavItem[] = [
-  { label: "Home", to: "/dashboard", icon: Home },
-  { label: "Projects", to: "/dashboard/projects", icon: FolderKanban },
-  { label: "Analytics", to: "/dashboard/analytics", icon: BarChart3 },
-  { label: "Revenue", to: "/dashboard/revenue", icon: DollarSign },
-  { label: "Settings", to: "/dashboard/settings", icon: Settings },
+export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
+  {
+    label: "Studio",
+    items: [
+      { label: "Home", to: "/dashboard", icon: Home },
+      { label: "Projects", to: "/dashboard/projects", icon: FolderKanban },
+      { label: "Analytics", to: "/dashboard/analytics", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "Monetization",
+    items: [
+      { label: "Revenue", to: "/dashboard/revenue", icon: DollarSign },
+      { label: "Promotions", to: "/dashboard/promotions", icon: Megaphone },
+    ],
+  },
+  {
+    label: "Operations",
+    items: [
+      {
+        label: "Notifications",
+        to: "/dashboard/notifications",
+        icon: Bell,
+      },
+      { label: "Support", to: "/dashboard/support", icon: LifeBuoy },
+      { label: "Settings", to: "/dashboard/settings", icon: Settings },
+    ],
+  },
 ]
 
 export const MOCK_WORKSPACES = [
@@ -32,9 +54,3 @@ export const MOCK_WORKSPACES = [
     role: "Member" as const,
   },
 ]
-
-export const EARN_MORE_ICON_MAP = {
-  memberships: { icon: Crown, className: "text-primary" },
-  extras: { icon: Gift, className: "text-pink-500" },
-  locked: { icon: Lock, className: "text-primary" },
-} as const

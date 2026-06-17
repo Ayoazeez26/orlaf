@@ -13,7 +13,7 @@ export function UploadStepper({ currentStep }: UploadStepperProps) {
   const currentIndex = stepOrder.indexOf(currentStep)
 
   return (
-    <div
+    <nav
       className={cn(
         SCROLLABLE_HORIZONTAL_CLASS,
         "flex flex-nowrap items-center gap-2"
@@ -54,6 +54,6 @@ export function UploadStepper({ currentStep }: UploadStepperProps) {
           </div>
         )
       })}
-    </div>
+    </nav>
   )
 }

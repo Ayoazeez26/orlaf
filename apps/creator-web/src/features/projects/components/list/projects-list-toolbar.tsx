@@ -1,101 +1,56 @@
-import { Link } from "@tanstack/react-router"
-import { Button } from "@workspace/ui/components/button"
-import { LayoutGrid, LayoutList, Plus } from "lucide-react"
 import type { ProjectsListFilters } from "../../types"
-import { ProjectsListFilterMenu } from "./projects-list-filter-menu"
 import { ProjectsListSearch } from "./projects-list-search"
+import { ProjectsStatusFilterPills } from "./projects-status-filter-pills"
+import { ProjectsViewToggle } from "./projects-view-toggle"
 
-interface ProjectsListToolbarProps {
+interface ProjectsListCardToolbarProps {
   layout: "grid" | "list"
   onLayoutChange: (layout: "grid" | "list") => void
-  searchQuery: string
-  onSearchChange: (value: string) => void
   filters: ProjectsListFilters
   onFiltersChange: (patch: Partial<ProjectsListFilters>) => void
-  onClearFilters: () => void
 }
 
-export function ProjectsListToolbar({
+export function ProjectsListCardToolbar({
   layout,
   onLayoutChange,
-  searchQuery,
-  onSearchChange,
   filters,
   onFiltersChange,
-  onClearFilters,
-}: ProjectsListToolbarProps) {
+}: ProjectsListCardToolbarProps) {
   return (
-    <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:justify-end lg:w-auto">
-      <ProjectsListSearch value={searchQuery} onChange={onSearchChange} />
-      <ProjectsListFilterMenu
-        filters={filters}
-        onFiltersChange={onFiltersChange}
-        onClearFilters={onClearFilters}
+    <div className="flex flex-col gap-4 border-border border-b px-5 py-4 sm:px-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <ProjectsListSearch
+          value={filters.searchQuery}
+          onChange={(searchQuery) => onFiltersChange({ searchQuery })}
+        />
+        <ProjectsViewToggle layout={layout} onLayoutChange={onLayoutChange} />
+      </div>
+      <ProjectsStatusFilterPills
+        value={filters.statusFilter}
+        onChange={(statusFilter) => onFiltersChange({ statusFilter })}
       />
-      <Button
-        type="button"
-        variant="outline"
-        size="icon"
-        aria-label={
-          layout === "grid" ? "Switch to list view" : "Switch to grid view"
-        }
-        aria-pressed={layout === "grid"}
-        onClick={() => onLayoutChange(layout === "grid" ? "list" : "grid")}
-        className="bg-card text-muted-foreground"
-      >
-        {layout === "grid" ? (
-          <LayoutList className="size-4" aria-hidden />
-        ) : (
-          <LayoutGrid className="size-4" aria-hidden />
-        )}
-      </Button>
-      <Button asChild className="gap-1.5">
-        <Link to="/dashboard/projects/new" search={{ step: "info" }}>
-          <Plus className="size-4 shrink-0" aria-hidden />
-          <span className="hidden sm:inline">New Series</span>
-          <span className="sm:hidden">New</span>
-        </Link>
-      </Button>
     </div>
   )
 }
 
 export function ProjectsListSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {(["a", "b", "c", "d"] as const).map((id) => (
-        <div key={id} className="animate-pulse space-y-3">
-          <div className="aspect-[4/2] rounded-xl bg-muted" />
-          <div className="h-4 w-2/3 rounded bg-muted" />
-          <div className="h-3 w-1/2 rounded bg-muted" />
+    <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="border-border border-b px-6 py-4">
+        <div className="h-10 w-full max-w-xs animate-pulse rounded-xl bg-muted" />
+      </div>
+      {(["a", "b", "c"] as const).map((id) => (
+        <div
+          key={id}
+          className="flex items-center gap-4 border-border border-b px-6 py-4 last:border-b-0"
+        >
+          <div className="h-[70px] w-12 animate-pulse rounded-xl bg-muted" />
+          <div className="flex-1 space-y-2">
+            <div className="h-4 w-1/3 animate-pulse rounded bg-muted" />
+            <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
+          </div>
         </div>
       ))}
-    </div>
-  )
-}
-
-interface ProjectsGridProps {
-  children: React.ReactNode
-  layout: "grid" | "list"
-  listContent?: React.ReactNode
-}
-
-export function ProjectsGrid({
-  children,
-  layout,
-  listContent,
-}: ProjectsGridProps) {
-  if (layout === "list" && listContent) {
-    return (
-      <div className="overflow-hidden rounded-2xl border border-border bg-card">
-        {listContent}
-      </div>
-    )
-  }
-
-  return (
-    <div className="grid grid-cols-1 gap-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {children}
     </div>
   )
 }

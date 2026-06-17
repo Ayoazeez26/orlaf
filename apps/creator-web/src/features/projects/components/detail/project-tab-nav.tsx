@@ -19,10 +19,7 @@ export function ProjectTabNav({ projectId }: ProjectTabNavProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
 
   return (
-    <nav
-      className={SCROLLABLE_TAB_NAV_CLASS}
-      aria-label="Project sections"
-    >
+    <nav className={SCROLLABLE_TAB_NAV_CLASS} aria-label="Project sections">
       {TABS.map((tab) => {
         const link = projectDetailPath(
           projectId,

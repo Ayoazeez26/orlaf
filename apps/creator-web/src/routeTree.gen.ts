@@ -13,12 +13,16 @@ import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardSupportRouteImport } from './routes/dashboard/support'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
 import { Route as DashboardRevenueRouteImport } from './routes/dashboard/revenue'
+import { Route as DashboardPromotionsRouteImport } from './routes/dashboard/promotions'
 import { Route as DashboardProjectsRouteImport } from './routes/dashboard/projects'
+import { Route as DashboardNotificationsRouteImport } from './routes/dashboard/notifications'
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard/analytics'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
 import { Route as DashboardRevenueIndexRouteImport } from './routes/dashboard/revenue/index'
+import { Route as DashboardPromotionsIndexRouteImport } from './routes/dashboard/promotions/index'
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard/projects/index'
 import { Route as DashboardSettingsStudioRouteImport } from './routes/dashboard/settings/studio'
 import { Route as DashboardSettingsSecurityRouteImport } from './routes/dashboard/settings/security'
@@ -27,6 +31,7 @@ import { Route as DashboardSettingsNotificationsRouteImport } from './routes/das
 import { Route as DashboardRevenueSettingsRouteImport } from './routes/dashboard/revenue/settings'
 import { Route as DashboardRevenuePayoutsRouteImport } from './routes/dashboard/revenue/payouts'
 import { Route as DashboardRevenueAnalyticsRouteImport } from './routes/dashboard/revenue/analytics'
+import { Route as DashboardPromotionsPromotionIdRouteImport } from './routes/dashboard/promotions.$promotionId'
 import { Route as DashboardProjectsNewRouteImport } from './routes/dashboard/projects.new'
 import { Route as DashboardProjectsProjectIdRouteImport } from './routes/dashboard/projects.$projectId'
 import { Route as DashboardProjectsProjectIdIndexRouteImport } from './routes/dashboard/projects.$projectId/index'
@@ -54,6 +59,11 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardSupportRoute = DashboardSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -64,9 +74,19 @@ const DashboardRevenueRoute = DashboardRevenueRouteImport.update({
   path: '/revenue',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
+const DashboardPromotionsRoute = DashboardPromotionsRouteImport.update({
+  id: '/promotions',
+  path: '/promotions',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardProjectsRoute = DashboardProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardNotificationsRoute = DashboardNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
@@ -84,6 +104,12 @@ const DashboardRevenueIndexRoute = DashboardRevenueIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRevenueRoute,
 } as any)
+const DashboardPromotionsIndexRoute =
+  DashboardPromotionsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => DashboardPromotionsRoute,
+  } as any)
 const DashboardProjectsIndexRoute = DashboardProjectsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -129,6 +155,12 @@ const DashboardRevenueAnalyticsRoute =
     path: '/analytics',
     getParentRoute: () => DashboardRevenueRoute,
   } as any)
+const DashboardPromotionsPromotionIdRoute =
+  DashboardPromotionsPromotionIdRouteImport.update({
+    id: '/$promotionId',
+    path: '/$promotionId',
+    getParentRoute: () => DashboardPromotionsRoute,
+  } as any)
 const DashboardProjectsNewRoute = DashboardProjectsNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -170,12 +202,16 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/projects': typeof DashboardProjectsRouteWithChildren
+  '/dashboard/promotions': typeof DashboardPromotionsRouteWithChildren
   '/dashboard/revenue': typeof DashboardRevenueRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
+  '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRouteWithChildren
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/dashboard/promotions/$promotionId': typeof DashboardPromotionsPromotionIdRoute
   '/dashboard/revenue/analytics': typeof DashboardRevenueAnalyticsRoute
   '/dashboard/revenue/payouts': typeof DashboardRevenuePayoutsRoute
   '/dashboard/revenue/settings': typeof DashboardRevenueSettingsRoute
@@ -184,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/security': typeof DashboardSettingsSecurityRoute
   '/dashboard/settings/studio': typeof DashboardSettingsStudioRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
+  '/dashboard/promotions/': typeof DashboardPromotionsIndexRoute
   '/dashboard/revenue/': typeof DashboardRevenueIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/dashboard/projects/$projectId/analytics': typeof DashboardProjectsProjectIdAnalyticsRoute
@@ -195,8 +232,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/onboarding': typeof OnboardingRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/notifications': typeof DashboardNotificationsRoute
+  '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/dashboard/promotions/$promotionId': typeof DashboardPromotionsPromotionIdRoute
   '/dashboard/revenue/analytics': typeof DashboardRevenueAnalyticsRoute
   '/dashboard/revenue/payouts': typeof DashboardRevenuePayoutsRoute
   '/dashboard/revenue/settings': typeof DashboardRevenueSettingsRoute
@@ -205,6 +245,7 @@ export interface FileRoutesByTo {
   '/dashboard/settings/security': typeof DashboardSettingsSecurityRoute
   '/dashboard/settings/studio': typeof DashboardSettingsStudioRoute
   '/dashboard/projects': typeof DashboardProjectsIndexRoute
+  '/dashboard/promotions': typeof DashboardPromotionsIndexRoute
   '/dashboard/revenue': typeof DashboardRevenueIndexRoute
   '/dashboard/settings': typeof DashboardSettingsIndexRoute
   '/dashboard/projects/$projectId/analytics': typeof DashboardProjectsProjectIdAnalyticsRoute
@@ -218,12 +259,16 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/onboarding': typeof OnboardingRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
+  '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/projects': typeof DashboardProjectsRouteWithChildren
+  '/dashboard/promotions': typeof DashboardPromotionsRouteWithChildren
   '/dashboard/revenue': typeof DashboardRevenueRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
+  '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRouteWithChildren
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
+  '/dashboard/promotions/$promotionId': typeof DashboardPromotionsPromotionIdRoute
   '/dashboard/revenue/analytics': typeof DashboardRevenueAnalyticsRoute
   '/dashboard/revenue/payouts': typeof DashboardRevenuePayoutsRoute
   '/dashboard/revenue/settings': typeof DashboardRevenueSettingsRoute
@@ -232,6 +277,7 @@ export interface FileRoutesById {
   '/dashboard/settings/security': typeof DashboardSettingsSecurityRoute
   '/dashboard/settings/studio': typeof DashboardSettingsStudioRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
+  '/dashboard/promotions/': typeof DashboardPromotionsIndexRoute
   '/dashboard/revenue/': typeof DashboardRevenueIndexRoute
   '/dashboard/settings/': typeof DashboardSettingsIndexRoute
   '/dashboard/projects/$projectId/analytics': typeof DashboardProjectsProjectIdAnalyticsRoute
@@ -246,12 +292,16 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/dashboard/analytics'
+    | '/dashboard/notifications'
     | '/dashboard/projects'
+    | '/dashboard/promotions'
     | '/dashboard/revenue'
     | '/dashboard/settings'
+    | '/dashboard/support'
     | '/dashboard/'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
+    | '/dashboard/promotions/$promotionId'
     | '/dashboard/revenue/analytics'
     | '/dashboard/revenue/payouts'
     | '/dashboard/revenue/settings'
@@ -260,6 +310,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/security'
     | '/dashboard/settings/studio'
     | '/dashboard/projects/'
+    | '/dashboard/promotions/'
     | '/dashboard/revenue/'
     | '/dashboard/settings/'
     | '/dashboard/projects/$projectId/analytics'
@@ -271,8 +322,11 @@ export interface FileRouteTypes {
     | '/'
     | '/onboarding'
     | '/dashboard/analytics'
+    | '/dashboard/notifications'
+    | '/dashboard/support'
     | '/dashboard'
     | '/dashboard/projects/new'
+    | '/dashboard/promotions/$promotionId'
     | '/dashboard/revenue/analytics'
     | '/dashboard/revenue/payouts'
     | '/dashboard/revenue/settings'
@@ -281,6 +335,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/security'
     | '/dashboard/settings/studio'
     | '/dashboard/projects'
+    | '/dashboard/promotions'
     | '/dashboard/revenue'
     | '/dashboard/settings'
     | '/dashboard/projects/$projectId/analytics'
@@ -293,12 +348,16 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/onboarding'
     | '/dashboard/analytics'
+    | '/dashboard/notifications'
     | '/dashboard/projects'
+    | '/dashboard/promotions'
     | '/dashboard/revenue'
     | '/dashboard/settings'
+    | '/dashboard/support'
     | '/dashboard/'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
+    | '/dashboard/promotions/$promotionId'
     | '/dashboard/revenue/analytics'
     | '/dashboard/revenue/payouts'
     | '/dashboard/revenue/settings'
@@ -307,6 +366,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/security'
     | '/dashboard/settings/studio'
     | '/dashboard/projects/'
+    | '/dashboard/promotions/'
     | '/dashboard/revenue/'
     | '/dashboard/settings/'
     | '/dashboard/projects/$projectId/analytics'
@@ -351,6 +411,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/support': {
+      id: '/dashboard/support'
+      path: '/support'
+      fullPath: '/dashboard/support'
+      preLoaderRoute: typeof DashboardSupportRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/settings': {
       id: '/dashboard/settings'
       path: '/settings'
@@ -365,11 +432,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRevenueRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/promotions': {
+      id: '/dashboard/promotions'
+      path: '/promotions'
+      fullPath: '/dashboard/promotions'
+      preLoaderRoute: typeof DashboardPromotionsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/projects': {
       id: '/dashboard/projects'
       path: '/projects'
       fullPath: '/dashboard/projects'
       preLoaderRoute: typeof DashboardProjectsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/notifications': {
+      id: '/dashboard/notifications'
+      path: '/notifications'
+      fullPath: '/dashboard/notifications'
+      preLoaderRoute: typeof DashboardNotificationsRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/analytics': {
@@ -392,6 +473,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/revenue/'
       preLoaderRoute: typeof DashboardRevenueIndexRouteImport
       parentRoute: typeof DashboardRevenueRoute
+    }
+    '/dashboard/promotions/': {
+      id: '/dashboard/promotions/'
+      path: '/'
+      fullPath: '/dashboard/promotions/'
+      preLoaderRoute: typeof DashboardPromotionsIndexRouteImport
+      parentRoute: typeof DashboardPromotionsRoute
     }
     '/dashboard/projects/': {
       id: '/dashboard/projects/'
@@ -448,6 +536,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/revenue/analytics'
       preLoaderRoute: typeof DashboardRevenueAnalyticsRouteImport
       parentRoute: typeof DashboardRevenueRoute
+    }
+    '/dashboard/promotions/$promotionId': {
+      id: '/dashboard/promotions/$promotionId'
+      path: '/$promotionId'
+      fullPath: '/dashboard/promotions/$promotionId'
+      preLoaderRoute: typeof DashboardPromotionsPromotionIdRouteImport
+      parentRoute: typeof DashboardPromotionsRoute
     }
     '/dashboard/projects/new': {
       id: '/dashboard/projects/new'
@@ -532,6 +627,19 @@ const DashboardProjectsRouteChildren: DashboardProjectsRouteChildren = {
 const DashboardProjectsRouteWithChildren =
   DashboardProjectsRoute._addFileChildren(DashboardProjectsRouteChildren)
 
+interface DashboardPromotionsRouteChildren {
+  DashboardPromotionsPromotionIdRoute: typeof DashboardPromotionsPromotionIdRoute
+  DashboardPromotionsIndexRoute: typeof DashboardPromotionsIndexRoute
+}
+
+const DashboardPromotionsRouteChildren: DashboardPromotionsRouteChildren = {
+  DashboardPromotionsPromotionIdRoute: DashboardPromotionsPromotionIdRoute,
+  DashboardPromotionsIndexRoute: DashboardPromotionsIndexRoute,
+}
+
+const DashboardPromotionsRouteWithChildren =
+  DashboardPromotionsRoute._addFileChildren(DashboardPromotionsRouteChildren)
+
 interface DashboardRevenueRouteChildren {
   DashboardRevenueAnalyticsRoute: typeof DashboardRevenueAnalyticsRoute
   DashboardRevenuePayoutsRoute: typeof DashboardRevenuePayoutsRoute
@@ -570,17 +678,23 @@ const DashboardSettingsRouteWithChildren =
 
 interface DashboardRouteRouteChildren {
   DashboardAnalyticsRoute: typeof DashboardAnalyticsRoute
+  DashboardNotificationsRoute: typeof DashboardNotificationsRoute
   DashboardProjectsRoute: typeof DashboardProjectsRouteWithChildren
+  DashboardPromotionsRoute: typeof DashboardPromotionsRouteWithChildren
   DashboardRevenueRoute: typeof DashboardRevenueRouteWithChildren
   DashboardSettingsRoute: typeof DashboardSettingsRouteWithChildren
+  DashboardSupportRoute: typeof DashboardSupportRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardAnalyticsRoute: DashboardAnalyticsRoute,
+  DashboardNotificationsRoute: DashboardNotificationsRoute,
   DashboardProjectsRoute: DashboardProjectsRouteWithChildren,
+  DashboardPromotionsRoute: DashboardPromotionsRouteWithChildren,
   DashboardRevenueRoute: DashboardRevenueRouteWithChildren,
   DashboardSettingsRoute: DashboardSettingsRouteWithChildren,
+  DashboardSupportRoute: DashboardSupportRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 

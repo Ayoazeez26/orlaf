@@ -1,17 +1,50 @@
 import { Coins, CreditCard, Gift, Tv } from "lucide-react"
-import { MOCK_DASHBOARD_HOME } from "@/features/dashboard/data/mock-home"
 import type { RevenueDashboardData } from "../types"
 
 export const MOCK_REVENUE_DASHBOARD: RevenueDashboardData = {
-  earningsSummary: {
-    total: "$18,420",
-    breakdown: [
-      { label: "Coin Unlocks", amount: "$12,480", colorKey: "coinUnlocks" },
-      { label: "Memberships", amount: "$3,200", colorKey: "memberships" },
-      { label: "Pending Payout", amount: "$1,840", colorKey: "pending" },
-      { label: "Extras", amount: "$640", colorKey: "extras" },
-    ],
+  wallet: {
+    balance: "$3,800.00",
+    statusText: "Available now",
+    nextAutoPayout: "Apr 1",
+    autoPayoutEnabled: false,
   },
+  walletActivity: [
+    {
+      id: "activity-1",
+      type: "credit",
+      label: "Ad revenue — Week 11",
+      date: "Mar 28",
+      amount: "+$340.00",
+    },
+    {
+      id: "activity-2",
+      type: "credit",
+      label: "Tip from @nollywood_fan",
+      date: "Mar 24",
+      amount: "+$12.00",
+    },
+    {
+      id: "activity-3",
+      type: "debit",
+      label: "Payout to GTBank ••4521",
+      date: "Mar 20",
+      amount: "-$2500.00",
+    },
+    {
+      id: "activity-4",
+      type: "credit",
+      label: "Coin unlocks — Lagos After Dark",
+      date: "Mar 18",
+      amount: "+$880.00",
+    },
+    {
+      id: "activity-5",
+      type: "credit",
+      label: "Promotion spend refund",
+      date: "Mar 12",
+      amount: "+$62.00",
+    },
+  ],
   earningsOverTime: [
     { month: "Jul", amount: 2800 },
     { month: "Aug", amount: 3200 },
@@ -53,19 +86,38 @@ export const MOCK_REVENUE_DASHBOARD: RevenueDashboardData = {
       icon: Tv,
     },
   ],
-  earnMoreCards: MOCK_DASHBOARD_HOME.earnMoreCards,
   recentPayouts: [
     {
       id: "payout-1",
-      bankLabel: "Payout to GTBank ••4521",
-      date: "Jan 01",
+      bankName: "GTBank",
+      last4: "4521",
+      date: "Mar 20, 2026",
       amount: "$2500.00",
+      status: "completed",
     },
     {
       id: "payout-2",
-      bankLabel: "Payout to Access Bank ••8903",
-      date: "Feb 02",
+      bankName: "GTBank",
+      last4: "4521",
+      date: "Feb 28, 2026",
       amount: "$1800.00",
+      status: "completed",
+    },
+    {
+      id: "payout-3",
+      bankName: "GTBank",
+      last4: "4521",
+      date: "Jan 31, 2026",
+      amount: "$3200.00",
+      status: "completed",
+    },
+    {
+      id: "payout-4",
+      bankName: "Access Bank",
+      last4: "8903",
+      date: "Dec 31, 2025",
+      amount: "$2100.00",
+      status: "completed",
     },
   ],
   bankAccounts: [
@@ -94,7 +146,7 @@ export const MOCK_REVENUE_DASHBOARD: RevenueDashboardData = {
     {
       label: "This Month",
       value: "$3,800",
-      changePercent: -1.2,
+      changePercent: 12.5,
       icon: "chart",
     },
     {
@@ -104,9 +156,9 @@ export const MOCK_REVENUE_DASHBOARD: RevenueDashboardData = {
       icon: "clock",
     },
     {
-      label: "Top Source",
-      value: "Coin Unlocks",
-      changePercent: 44.7,
+      label: "Total Payouts",
+      value: "$24,600",
+      changePercent: -1.2,
       icon: "creditCard",
     },
   ],

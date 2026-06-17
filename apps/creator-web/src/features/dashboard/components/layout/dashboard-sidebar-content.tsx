@@ -1,8 +1,8 @@
-import { ThemeSwitcher } from "@/components/theme-switcher"
+import { Separator } from "@workspace/ui/components/separator"
 import { useDashboardHome } from "../../hooks/use-dashboard-home"
+import { DashboardLogo } from "./dashboard-logo"
 import { DashboardNav } from "./dashboard-nav"
-import { OnboardingProgressCard } from "./onboarding-progress-card"
-import { WorkspaceSwitcher } from "./workspace-switcher"
+import { SidebarUserProfile } from "./sidebar-user-profile"
 
 interface DashboardSidebarContentProps {
   onNavigate?: () => void
@@ -11,24 +11,21 @@ interface DashboardSidebarContentProps {
 export function DashboardSidebarContent({
   onNavigate,
 }: DashboardSidebarContentProps) {
-  const { user, onboardingProgress } = useDashboardHome()
+  const { user } = useDashboardHome()
 
   return (
     <>
-      <p className="mb-6 shrink-0 px-2 font-semibold text-foreground text-lg">
-        <span className="font-bold">OrlAf</span>{" "}
-        <span className="text-muted-foreground">Creators</span>
-      </p>
-
-      <WorkspaceSwitcher user={user} className="mb-6 shrink-0" />
+      <div className="mb-8 shrink-0">
+        <DashboardLogo />
+      </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
         <DashboardNav onNavigate={onNavigate} />
       </div>
 
-      <div className="flex shrink-0 flex-col gap-4 pt-6">
-        <OnboardingProgressCard progress={onboardingProgress} />
-        <ThemeSwitcher compact />
+      <div className="shrink-0 pt-4">
+        <Separator className="mb-4" />
+        <SidebarUserProfile user={user} />
       </div>
     </>
   )

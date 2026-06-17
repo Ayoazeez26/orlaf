@@ -34,7 +34,7 @@ export function ViewershipTrendChart({
       <CardHeader className="pb-4">
         <p className="font-semibold text-foreground">Viewership Trend</p>
       </CardHeader>
-      <CardContent className="h-[300px] pl-0 pr-1 sm:px-6">
+      <CardContent className="h-[300px] pr-1 pl-0 sm:px-6">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={ANALYTICS_CHART_MARGIN}>
             <defs>

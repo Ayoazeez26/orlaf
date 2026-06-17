@@ -1,6 +1,16 @@
 import type { LucideIcon } from "lucide-react"
+import type { AnalyticsKpi, TopEpisodeRow } from "@/features/analytics/types"
 
-export type ProjectStatus = "published" | "draft" | "ongoing" | "completed"
+export type DashboardProjectStatus = "published" | "draft" | "in_review"
+
+export type DashboardProjectIconVariant = "purple" | "pink" | "blue"
+
+export interface DashboardUser {
+  displayName: string
+  fullName: string
+  role: string
+  initials: string
+}
 
 export interface DashboardWorkspace {
   id: string
@@ -9,37 +19,35 @@ export interface DashboardWorkspace {
   role: "Owner" | "Member"
 }
 
-export interface DashboardUser {
-  displayName: string
-  role: string
-  workspace: DashboardWorkspace
-}
-
 export interface DashboardProject {
   id: string
   title: string
-  episodeCount: number
-  status: ProjectStatus
-  thumbnailUrl?: string
+  type: string
+  genre: string
+  episodeCount?: number
+  duration?: string
+  updatedAt: string
+  views?: string
+  status: DashboardProjectStatus
+  iconVariant: DashboardProjectIconVariant
 }
 
-export interface DashboardMetricBreakdown {
+export interface DashboardEngagementPoint {
+  day: string
+  primary: number
+  secondary: number
+  tertiary: number
+}
+
+export interface DashboardNavItem {
   label: string
-  value: string
-  color: string
+  to: string
+  icon: LucideIcon
 }
 
-export interface DashboardMetrics {
-  period: string
-  totalViews: string
-  totalViewsLabel: string
-  breakdown: DashboardMetricBreakdown[]
-}
-
-export interface DashboardOnboardingProgress {
-  title: string
-  subtitle: string
-  percent: number
+export interface DashboardNavGroup {
+  label: string
+  items: DashboardNavItem[]
 }
 
 export interface DashboardEarnMoreCard {
@@ -53,14 +61,8 @@ export interface DashboardEarnMoreCard {
 
 export interface DashboardHomeData {
   user: DashboardUser
-  metrics: DashboardMetrics
+  kpis: AnalyticsKpi[]
   projects: DashboardProject[]
-  onboardingProgress: DashboardOnboardingProgress
-  earnMoreCards: DashboardEarnMoreCard[]
-}
-
-export interface DashboardNavItem {
-  label: string
-  to: string
-  icon: LucideIcon
+  engagementChart: DashboardEngagementPoint[]
+  topEpisodes: TopEpisodeRow[]
 }

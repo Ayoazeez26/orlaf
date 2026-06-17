@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
-import { FolderKanban } from "lucide-react"
+import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
 import type { DashboardProject } from "../../types"
 import { ProjectRow } from "./project-row"
 
@@ -10,27 +10,20 @@ interface RecentProjectsCardProps {
 
 export function RecentProjectsCard({ projects }: RecentProjectsCardProps) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-2 space-y-0 pb-4">
-        <div className="flex items-center gap-2">
-          <FolderKanban className="size-5 text-muted-foreground" aria-hidden />
-          <p className="font-semibold text-foreground text-sm">
-            Recent Projects
-          </p>
-        </div>
+    <Card className={FROSTED_CARD_SURFACE_CLASS}>
+      <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+        <p className="font-semibold text-foreground">Recent Projects</p>
         <Link
           to="/dashboard/projects"
           className="font-medium text-primary text-sm hover:underline"
         >
-          View all
+          View All
         </Link>
       </CardHeader>
       <CardContent className="pt-0">
-        <div className="max-h-[320px] overflow-y-auto pr-1 pb-3">
-          {projects.map((project) => (
-            <ProjectRow key={project.id} project={project} />
-          ))}
-        </div>
+        {projects.map((project) => (
+          <ProjectRow key={project.id} project={project} />
+        ))}
       </CardContent>
     </Card>
   )

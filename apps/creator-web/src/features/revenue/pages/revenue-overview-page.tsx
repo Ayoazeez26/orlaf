@@ -1,6 +1,6 @@
-import { EarnMoreSection } from "@/features/dashboard/components/home/earn-more-section"
-import { EarningsOverTimeChart } from "../components/overview/earnings-over-time-chart"
-import { RevenueBreakdownCard } from "../components/overview/revenue-breakdown-card"
+import { PayoutProcessSteps } from "../components/wallet/payout-process-steps"
+import { RecentActivityCard } from "../components/wallet/recent-activity-card"
+import { WalletBalanceCard } from "../components/wallet/wallet-balance-card"
 import { useRevenueDashboard } from "../hooks/use-revenue-dashboard"
 
 export function RevenueOverviewPage() {
@@ -9,15 +9,10 @@ export function RevenueOverviewPage() {
   if (!data) return null
 
   return (
-    <div className="space-y-8">
-      <div className="grid gap-4 lg:grid-cols-3">
-        <EarningsOverTimeChart
-          data={data.earningsOverTime}
-          className="lg:col-span-2"
-        />
-        <RevenueBreakdownCard items={data.revenueBreakdown} />
-      </div>
-      <EarnMoreSection cards={data.earnMoreCards} />
+    <div className="space-y-6">
+      <WalletBalanceCard wallet={data.wallet} />
+      <PayoutProcessSteps />
+      <RecentActivityCard activities={data.walletActivity} />
     </div>
   )
 }

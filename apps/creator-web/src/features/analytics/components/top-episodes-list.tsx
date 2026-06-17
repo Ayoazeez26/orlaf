@@ -15,7 +15,7 @@ export function TopEpisodesList({ episodes, className }: TopEpisodesListProps) {
   return (
     <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6", className)}>
       <CardHeader className="pb-4">
-        <p className="font-semibold text-foreground text-sm">Top Episodes</p>
+        <p className="font-semibold text-foreground">Top Episodes</p>
       </CardHeader>
       <CardContent className="space-y-1 px-6">
         {episodes.map((episode) => (
@@ -36,7 +36,7 @@ export function TopEpisodesList({ episodes, className }: TopEpisodesListProps) {
               </p>
             </div>
             <div className="flex shrink-0 flex-col items-end gap-1">
-              <span className="font-medium text-foreground text-sm">
+              <span className="font-semibold text-foreground text-sm">
                 {episode.views}
               </span>
               <TrendBadge

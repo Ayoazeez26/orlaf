@@ -1,5 +1,4 @@
 import { Outlet } from "@tanstack/react-router"
-import { RevenueEarningsSummaryCard } from "../components/revenue-earnings-summary-card"
 import { RevenuePageHeader } from "../components/revenue-page-header"
 import { RevenuePageSkeleton } from "../components/revenue-page-skeleton"
 import { RevenueTabNav } from "../components/revenue-tab-nav"
@@ -22,10 +21,6 @@ export function RevenueLayout() {
 
       {data && (
         <>
-          <RevenueEarningsSummaryCard
-            total={data.earningsSummary.total}
-            breakdown={data.earningsSummary.breakdown}
-          />
           <RevenueTabNav />
           <Outlet />
         </>

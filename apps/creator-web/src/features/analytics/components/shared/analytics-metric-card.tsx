@@ -47,7 +47,7 @@ export function AnalyticsMetricCard({
           </span>
         </div>
 
-        <p className="font-bold text-2xl text-foreground tracking-tight">
+        <p className="font-bold font-space-grotesk text-2xl text-foreground tracking-tight">
           {kpi.value}
         </p>
 

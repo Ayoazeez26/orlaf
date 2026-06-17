@@ -170,7 +170,7 @@ function DangerRow({
   action: ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 last:border-b-0 last:pb-0">
+    <div className="flex flex-col gap-3 border-b pb-4 last:border-b-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <div>
         <p className="text-foreground text-sm">{title}</p>
         <p className="text-muted-foreground text-xs">{description}</p>

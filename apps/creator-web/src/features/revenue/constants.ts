@@ -1,4 +1,4 @@
-import { BarChart3, Info, Settings, Wallet } from "lucide-react"
+import { BarChart3, CreditCard, Settings, Wallet } from "lucide-react"
 import type { RevenueSourceColorKey } from "./types"
 
 export const REVENUE_DATE_RANGE_OPTIONS = [
@@ -10,8 +10,8 @@ export const REVENUE_DATE_RANGE_OPTIONS = [
 export const DEFAULT_REVENUE_DATE_RANGE = "Last 30 days"
 
 export const REVENUE_TABS = [
-  { id: "overview", label: "Overview", icon: Info, path: "" },
-  { id: "payouts", label: "Payouts", icon: Wallet, path: "payouts" },
+  { id: "wallet", label: "Wallet", icon: Wallet, path: "" },
+  { id: "payouts", label: "Payouts", icon: CreditCard, path: "payouts" },
   { id: "analytics", label: "Analytics", icon: BarChart3, path: "analytics" },
   { id: "settings", label: "Settings", icon: Settings, path: "settings" },
 ] as const

@@ -1,4 +1,14 @@
-export type ProjectStatus = "published" | "draft" | "ongoing" | "completed"
+export type ProjectStatus =
+  | "published"
+  | "draft"
+  | "in_review"
+  | "scheduled"
+  | "ongoing"
+  | "completed"
+
+export type ProjectIconVariant = "purple" | "pink" | "blue"
+
+export type ProjectsStatusFilter = "all" | ProjectStatus
 
 export type EpisodeAccess = "free" | "coins" | "premium"
 
@@ -6,22 +16,25 @@ export interface ProjectSummary {
   id: string
   slug: string
   title: string
-  thumbnailUrl: string
+  thumbnailUrl?: string
+  type: string
   status: ProjectStatus
-  episodeCount: number
+  episodeCount?: number
+  duration?: string
   updatedAt: string
   /** Sortable timestamp for list ordering (mock / API) */
   updatedAtMs: number
   genre?: string
   language?: string
+  views?: string
+  iconVariant: ProjectIconVariant
 }
 
 export type ProjectSortOption = "newest" | "title-asc"
 
 export interface ProjectsListFilters {
   searchQuery: string
-  statuses: ProjectStatus[]
-  genre: string | null
+  statusFilter: ProjectsStatusFilter
   sort: ProjectSortOption
 }
 

@@ -8,25 +8,29 @@ import type { BankAccount } from "../../types"
 
 interface BankAccountsCardProps {
   accounts: BankAccount[]
+  title?: string
+  description?: string
+  addButtonLabel?: string
   className?: string
 }
 
 export function BankAccountsCard({
   accounts,
+  title = "Bank Accounts",
+  description = "Add and manage your bank accounts for payouts",
+  addButtonLabel = "Add New Account",
   className,
 }: BankAccountsCardProps) {
   return (
     <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6", className)}>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:space-y-0">
         <div>
-          <p className="font-semibold text-foreground">Bank Accounts</p>
-          <p className="mt-1 text-muted-foreground text-sm">
-            Add and manage your bank accounts for payouts
-          </p>
+          <p className="font-semibold text-foreground">{title}</p>
+          <p className="mt-1 text-muted-foreground text-sm">{description}</p>
         </div>
         <Button type="button" className="w-full shrink-0 gap-1.5 sm:w-auto">
           <Plus className="size-4" aria-hidden />
-          Add New Account
+          {addButtonLabel}
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">

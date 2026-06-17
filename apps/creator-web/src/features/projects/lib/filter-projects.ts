@@ -6,17 +6,12 @@ import type {
 
 export const DEFAULT_PROJECTS_LIST_FILTERS: ProjectsListFilters = {
   searchQuery: "",
-  statuses: [],
-  genre: null,
+  statusFilter: "all",
   sort: "newest",
 }
 
 export function hasActiveProjectFilters(filters: ProjectsListFilters): boolean {
-  return (
-    filters.statuses.length > 0 ||
-    filters.genre !== null ||
-    filters.sort !== "newest"
-  )
+  return filters.statusFilter !== "all" || filters.sort !== "newest"
 }
 
 function matchesSearch(project: ProjectSummary, query: string): boolean {
@@ -25,24 +20,21 @@ function matchesSearch(project: ProjectSummary, query: string): boolean {
 
   const title = project.title.toLowerCase()
   const genre = (project.genre ?? "").toLowerCase()
+  const type = project.type.toLowerCase()
 
-  return title.includes(normalized) || genre.includes(normalized)
+  return (
+    title.includes(normalized) ||
+    genre.includes(normalized) ||
+    type.includes(normalized)
+  )
 }
 
 function matchesStatus(
   project: ProjectSummary,
-  statuses: ProjectsListFilters["statuses"]
+  statusFilter: ProjectsListFilters["statusFilter"]
 ): boolean {
-  if (statuses.length === 0) return true
-  return statuses.includes(project.status)
-}
-
-function matchesGenre(
-  project: ProjectSummary,
-  genre: ProjectsListFilters["genre"]
-): boolean {
-  if (genre === null) return true
-  return project.genre === genre
+  if (statusFilter === "all") return true
+  return project.status === statusFilter
 }
 
 function compareProjects(
@@ -64,8 +56,7 @@ export function filterProjects(
     .filter(
       (project) =>
         matchesSearch(project, filters.searchQuery) &&
-        matchesStatus(project, filters.statuses) &&
-        matchesGenre(project, filters.genre)
+        matchesStatus(project, filters.statusFilter)
     )
     .sort((a, b) => compareProjects(a, b, filters.sort))
 }

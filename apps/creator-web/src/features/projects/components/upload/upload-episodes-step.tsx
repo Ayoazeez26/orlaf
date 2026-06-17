@@ -27,8 +27,8 @@ import { useState } from "react"
 import { useSaveUploadDraft } from "../../hooks/use-save-upload-draft"
 import type { EpisodeAccess } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
-import { UploadEpisodesStepNav } from "./upload-step-nav"
 import { UploadSeriesPreviewAside } from "./upload-series-preview-aside"
+import { UploadEpisodesStepNav } from "./upload-step-nav"
 
 const ACCESS_OPTIONS: { value: EpisodeAccess; label: string }[] = [
   { value: "free", label: "Free" },

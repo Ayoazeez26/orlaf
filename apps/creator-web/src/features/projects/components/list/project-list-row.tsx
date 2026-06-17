@@ -1,8 +1,11 @@
 import { Link } from "@tanstack/react-router"
+import { Button } from "@workspace/ui/components/button"
+import { MoreHorizontal } from "lucide-react"
 import { projectDetailPath } from "../../constants"
+import { formatProjectMeta } from "../../lib/format-project-meta"
 import type { ProjectSummary } from "../../types"
+import { ProjectListThumbnail } from "../shared/project-list-thumbnail"
 import { ProjectStatusBadge } from "../shared/project-status-badge"
-import { ProjectThumbnail } from "../shared/project-thumbnail"
 
 interface ProjectListRowProps {
   project: ProjectSummary
@@ -10,24 +13,37 @@ interface ProjectListRowProps {
 
 export function ProjectListRow({ project }: ProjectListRowProps) {
   return (
-    <Link
-      {...projectDetailPath(project.id)}
-      className="flex flex-wrap items-center gap-3 px-4 py-4 transition-colors hover:bg-muted/30 sm:flex-nowrap sm:gap-4 sm:px-5"
-    >
-      <ProjectThumbnail
-        src={project.thumbnailUrl}
-        alt={project.title}
-        variant="row"
-      />
-      <div className="min-w-0 flex-1">
-        <p className="truncate font-semibold text-[15px] text-text-strong">
-          {project.title}
-        </p>
-        <p className="text-sm text-text-subtle">
-          {project.episodeCount} episodes
-        </p>
+    <div className="flex items-center gap-4 px-5 py-4 sm:px-6">
+      <Link
+        {...projectDetailPath(project.id)}
+        className="flex min-w-0 flex-1 items-center gap-4 transition-opacity hover:opacity-80"
+      >
+        <ProjectListThumbnail variant={project.iconVariant} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold text-foreground text-sm">
+            {project.title}
+          </p>
+          <p className="truncate text-muted-foreground text-xs">
+            {formatProjectMeta(project)}
+          </p>
+        </div>
+      </Link>
+
+      <div className="flex shrink-0 items-center gap-3">
+        <span className="hidden min-w-[88px] text-right font-medium text-foreground text-sm sm:inline">
+          {project.views ?? "—"}
+        </span>
+        <ProjectStatusBadge status={project.status} variant="table" />
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          className="text-muted-foreground"
+          aria-label={`Actions for ${project.title}`}
+        >
+          <MoreHorizontal className="size-4" aria-hidden />
+        </Button>
       </div>
-      <ProjectStatusBadge status={project.status} variant="list" />
-    </Link>
+    </div>
   )
 }

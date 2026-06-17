@@ -8,8 +8,8 @@ import { projectKeys } from "../../data/query-keys"
 import { useSaveUploadDraft } from "../../hooks/use-save-upload-draft"
 import type { UploadEpisodeDraft } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
-import { UploadReviewStepNav } from "./upload-step-nav"
 import { UploadSeriesPreviewAside } from "./upload-series-preview-aside"
+import { UploadReviewStepNav } from "./upload-step-nav"
 
 interface UploadReviewStepProps {
   onBack: () => void

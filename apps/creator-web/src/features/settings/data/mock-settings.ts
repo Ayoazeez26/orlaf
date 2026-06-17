@@ -1,4 +1,4 @@
-import { MOCK_DASHBOARD_HOME } from "@/features/dashboard/data/mock-home"
+import { MOCK_EARN_MORE_CARDS } from "@/features/dashboard/data/mock-earn-more"
 import type { SettingsDashboardData } from "../types"
 
 export const MOCK_SETTINGS_DASHBOARD: SettingsDashboardData = {
@@ -226,5 +226,5 @@ export const MOCK_SETTINGS_DASHBOARD: SettingsDashboardData = {
     timezone: "West Africa Time (WAT)",
     reducedMotion: false,
   },
-  earnMoreCards: MOCK_DASHBOARD_HOME.earnMoreCards,
+  earnMoreCards: MOCK_EARN_MORE_CARDS,
 }

@@ -17,9 +17,19 @@ export const GENRE_OPTIONS = [
 
 export const PROJECT_STATUS_FILTER_OPTIONS = [
   { value: "published" as const, label: "Published" },
+  { value: "in_review" as const, label: "In review" },
   { value: "draft" as const, label: "Draft" },
+  { value: "scheduled" as const, label: "Scheduled" },
   { value: "ongoing" as const, label: "Ongoing" },
   { value: "completed" as const, label: "Completed" },
+]
+
+export const PROJECT_STATUS_FILTER_PILLS = [
+  { value: "all" as const, label: "All" },
+  { value: "published" as const, label: "Published" },
+  { value: "in_review" as const, label: "In review" },
+  { value: "draft" as const, label: "Draft" },
+  { value: "scheduled" as const, label: "Scheduled" },
 ]
 
 export const PROJECT_SORT_OPTIONS = [

@@ -9,8 +9,8 @@ import {
 import { MoreVertical } from "lucide-react"
 import { projectDetailPath } from "../../constants"
 import type { ProjectSummary } from "../../types"
+import { ProjectListThumbnail } from "../shared/project-list-thumbnail"
 import { ProjectStatusBadge } from "../shared/project-status-badge"
-import { ProjectThumbnail } from "../shared/project-thumbnail"
 
 interface ProjectCardProps {
   project: ProjectSummary
@@ -21,12 +21,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
     <article className="group flex w-full flex-col">
       <Link
         {...projectDetailPath(project.id)}
-        className="block w-full overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="block w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <ProjectThumbnail
-          src={project.thumbnailUrl}
-          alt={project.title}
-          variant="card"
+        <ProjectListThumbnail
+          variant={project.iconVariant}
+          className="h-40 w-full rounded-xl"
         />
       </Link>
       <div className="mt-4 flex items-start justify-between gap-2">
@@ -41,7 +40,12 @@ export function ProjectCard({ project }: ProjectCardProps) {
             <ProjectStatusBadge status={project.status} />
           </div>
           <p className="mt-1 text-muted-foreground text-xs">
-            {project.updatedAt} • {project.episodeCount} Episodes
+            {project.updatedAt}
+            {project.episodeCount !== undefined
+              ? ` • ${project.episodeCount} Episodes`
+              : project.duration
+                ? ` • ${project.duration}`
+                : null}
           </p>
         </div>
         <DropdownMenu>

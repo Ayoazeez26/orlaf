@@ -1,6 +1,5 @@
 import type { LucideIcon } from "lucide-react"
 import type { AnalyticsKpi } from "@/features/analytics/types"
-import type { DashboardEarnMoreCard } from "@/features/dashboard/types"
 
 export type RevenueSourceColorKey =
   | "coinUnlocks"
@@ -8,12 +7,6 @@ export type RevenueSourceColorKey =
   | "pending"
   | "extras"
   | "commission"
-
-export interface RevenueEarningsBreakdownItem {
-  label: string
-  amount: string
-  colorKey: RevenueSourceColorKey
-}
 
 export interface EarningsOverTimePoint {
   month: string
@@ -35,11 +28,32 @@ export interface RevenueBySourceItem {
   colorKey: RevenueSourceColorKey
 }
 
+export type PayoutStatus = "completed" | "pending" | "failed"
+
 export interface RecentPayout {
   id: string
-  bankLabel: string
+  bankName: string
+  last4: string
   date: string
   amount: string
+  status: PayoutStatus
+}
+
+export type WalletActivityType = "credit" | "debit"
+
+export interface WalletActivity {
+  id: string
+  type: WalletActivityType
+  label: string
+  date: string
+  amount: string
+}
+
+export interface WalletSummary {
+  balance: string
+  statusText: string
+  nextAutoPayout: string
+  autoPayoutEnabled: boolean
 }
 
 export interface BankAccount {
@@ -67,13 +81,10 @@ export interface RevenueNotificationSetting {
 }
 
 export interface RevenueDashboardData {
-  earningsSummary: {
-    total: string
-    breakdown: RevenueEarningsBreakdownItem[]
-  }
+  wallet: WalletSummary
+  walletActivity: WalletActivity[]
   earningsOverTime: EarningsOverTimePoint[]
   revenueBreakdown: RevenueBreakdownItem[]
-  earnMoreCards: DashboardEarnMoreCard[]
   recentPayouts: RecentPayout[]
   bankAccounts: BankAccount[]
   analyticsKpis: AnalyticsKpi[]

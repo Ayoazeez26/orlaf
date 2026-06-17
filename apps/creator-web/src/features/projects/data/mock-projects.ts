@@ -59,52 +59,73 @@ const JOLLOF_EPISODES = [
 
 export const MOCK_PROJECT_SUMMARIES: ProjectSummary[] = [
   {
-    id: "zulu-dawn",
-    slug: "zulu-dawn",
-    title: "Zulu Dawn",
-    thumbnailUrl: PROJECT_THUMBNAILS.zuluDawn,
+    id: "lagos-after-dark",
+    slug: "lagos-after-dark",
+    title: "Lagos After Dark",
+    type: "Short series",
     status: "published",
-    episodeCount: 8,
-    updatedAt: "1 day ago",
-    updatedAtMs: Date.now() - 86_400_000,
-    genre: "Action / Adventure",
-    language: "English",
-  },
-  {
-    id: "the-returnees",
-    slug: "the-returnees",
-    title: "The Returnees",
-    thumbnailUrl: PROJECT_THUMBNAILS.theReturnees,
-    status: "draft",
-    episodeCount: 12,
-    updatedAt: "3 days ago",
-    updatedAtMs: Date.now() - 259_200_000,
+    episodeCount: 4,
+    updatedAt: "2d ago",
+    updatedAtMs: Date.now() - 172_800_000,
     genre: "Drama",
     language: "English",
+    views: "24.3k views",
+    iconVariant: "purple",
+  },
+  {
+    id: "studio-sessions-tems",
+    slug: "studio-sessions-tems",
+    title: "Studio Sessions: Tems",
+    type: "Short movie",
+    status: "in_review",
+    duration: "18:34",
+    updatedAt: "5h ago",
+    updatedAtMs: Date.now() - 18_000_000,
+    genre: "Documentary",
+    language: "English",
+    iconVariant: "pink",
+  },
+  {
+    id: "sable-shorts-vol-2",
+    slug: "sable-shorts-vol-2",
+    title: "Sable Shorts — Vol. 2",
+    type: "Short series",
+    status: "draft",
+    episodeCount: 0,
+    updatedAt: "1d ago",
+    updatedAtMs: Date.now() - 86_400_000,
+    genre: "Anthology",
+    language: "English",
+    iconVariant: "blue",
   },
   {
     id: "jollof-wars",
     slug: "jollof-wars",
     title: "Jollof Wars",
     thumbnailUrl: PROJECT_THUMBNAILS.jollofWars,
+    type: "Short series",
     status: "published",
     episodeCount: 4,
     updatedAt: "2 hours ago",
     updatedAtMs: Date.now() - 7_200_000,
     genre: "Romance / Drama",
     language: "English",
+    views: "1.2M views",
+    iconVariant: "purple",
   },
   {
-    id: "palmwine-days",
-    slug: "palmwine-days",
-    title: "Palmwine Days",
-    thumbnailUrl: PROJECT_THUMBNAILS.palmwineDays,
+    id: "the-returnees",
+    slug: "the-returnees",
+    title: "The Returnees",
+    thumbnailUrl: PROJECT_THUMBNAILS.theReturnees,
+    type: "Short series",
     status: "draft",
     episodeCount: 12,
     updatedAt: "3 days ago",
-    updatedAtMs: Date.now() - 250_000_000,
-    genre: "Romance / Drama",
+    updatedAtMs: Date.now() - 259_200_000,
+    genre: "Drama",
     language: "English",
+    iconVariant: "blue",
   },
 ]
 
@@ -173,8 +194,12 @@ const JOLLOF_DETAIL: ProjectDetail = {
 }
 
 function buildGenericDetail(summary: ProjectSummary): ProjectDetail {
+  const episodeCount = summary.episodeCount ?? 0
+
   return {
     ...summary,
+    thumbnailUrl: summary.thumbnailUrl ?? PROJECT_THUMBNAILS.jollofWars,
+    episodeCount,
     description: JOLLOF_DESCRIPTION,
     totalViews: "420K",
     revenue: "2,100",
@@ -194,19 +219,19 @@ function buildGenericDetail(summary: ProjectSummary): ProjectDetail {
     overviewMetrics: JOLLOF_DETAIL.overviewMetrics,
     analyticsMetrics: JOLLOF_DETAIL.analyticsMetrics,
     recentEpisodes: JOLLOF_EPISODES.slice(0, 3),
-    episodes: JOLLOF_EPISODES.slice(
-      0,
-      summary.episodeCount > 4 ? 4 : summary.episodeCount
-    ),
+    episodes: JOLLOF_EPISODES.slice(0, episodeCount > 4 ? 4 : episodeCount),
     weeklyViews: JOLLOF_DETAIL.weeklyViews,
   }
 }
 
 export const MOCK_PROJECT_DETAILS: Record<string, ProjectDetail> = {
   "jollof-wars": JOLLOF_DETAIL,
-  "zulu-dawn": buildGenericDetail(summaryById("zulu-dawn")),
+  "lagos-after-dark": buildGenericDetail(summaryById("lagos-after-dark")),
+  "studio-sessions-tems": buildGenericDetail(
+    summaryById("studio-sessions-tems")
+  ),
+  "sable-shorts-vol-2": buildGenericDetail(summaryById("sable-shorts-vol-2")),
   "the-returnees": buildGenericDetail(summaryById("the-returnees")),
-  "palmwine-days": buildGenericDetail(summaryById("palmwine-days")),
 }
 
 export const DEFAULT_UPLOAD_EPISODES = [
