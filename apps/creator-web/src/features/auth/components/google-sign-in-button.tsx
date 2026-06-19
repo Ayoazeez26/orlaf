@@ -136,10 +136,7 @@ export function GoogleSignInButton({
         {label}
       </Button>
       {buttonWidth > 0 && (
-        <div
-          className="absolute inset-0 z-10 flex cursor-pointer items-stretch opacity-[0.01] [&>div]:flex [&>div]:h-full [&>div]:w-full [&_iframe]:!h-12 [&_iframe]:!w-full"
-          aria-label={label}
-        >
+        <div className="absolute inset-0 z-10 flex cursor-pointer items-stretch opacity-[0.01] [&>div]:flex [&>div]:h-full [&>div]:w-full [&_iframe]:h-12! [&_iframe]:w-full!">
           <GoogleLogin
             onSuccess={handleSuccess}
             onError={() => onError?.("Google sign-in was cancelled or failed.")}

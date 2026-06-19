@@ -17,13 +17,13 @@ import {
 import { Account } from "src/generated/prisma/client"
 import { PrismaService } from "../prisma/prisma.service"
 import { AuthService } from "./auth.service"
-import { DeletionService } from "./deletion.service"
-import { ProviderTokenService } from "./provider-token.service"
 import {
   buildRefreshCookieOptions as getRefreshCookieOptions,
   REFRESH_COOKIE_MAX_AGE_MS,
   REFRESH_COOKIE_NAME,
 } from "./auth-cookie.constants"
+import { DeletionService } from "./deletion.service"
+import { ProviderTokenService } from "./provider-token.service"
 import { RefreshTokenService } from "./refresh-token.service"
 
 // TODO(KAN-53): import Sentry once OTEL is wired

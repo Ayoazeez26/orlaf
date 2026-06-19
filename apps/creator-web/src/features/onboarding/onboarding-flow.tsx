@@ -2,7 +2,10 @@ import { useNavigate, useSearch } from "@tanstack/react-router"
 import { useEffect } from "react"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { useAuth } from "@/features/auth/auth-context"
-import { markOnboardingComplete, hasCompletedOnboarding } from "@/features/auth/lib/onboarding-complete"
+import {
+  hasCompletedOnboarding,
+  markOnboardingComplete,
+} from "@/features/auth/lib/onboarding-complete"
 import { ConsentStep } from "./components/steps/consent-step"
 import { ContentFormatStep } from "./components/steps/content-format-step"
 import { CreatorTypeStep } from "./components/steps/creator-type-step"

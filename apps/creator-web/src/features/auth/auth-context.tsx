@@ -19,7 +19,7 @@ import {
   signInWithGoogle as signInWithGoogleApi,
 } from "./api/auth-api"
 import { AUTH_SESSION_STORAGE_KEY } from "./constants"
-import { getAuthSnapshot, setAuthSnapshot } from "./lib/auth-snapshot"
+import { setAuthSnapshot } from "./lib/auth-snapshot"
 import { clearOnboardingComplete } from "./lib/onboarding-complete"
 import { resolvePostSignInRoute } from "./lib/post-sign-in-route"
 

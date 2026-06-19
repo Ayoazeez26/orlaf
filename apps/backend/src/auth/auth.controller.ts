@@ -22,6 +22,11 @@ import { type AccessTokenClaims } from "@sable/contracts"
 import type { Request, Response } from "express"
 
 import { AuthService } from "./auth.service"
+import {
+  buildRefreshCookieOptions,
+  REFRESH_COOKIE_NAME,
+  REFRESH_COOKIE_PATH,
+} from "./auth-cookie.constants"
 import { SkipConsent } from "./consent.guard"
 import { ConsentService } from "./consent.service"
 import { DeletionService } from "./deletion.service"
@@ -35,11 +40,6 @@ import {
 import { GoogleSignInDto } from "./dto/sign-in.dto"
 import { JwtAuthGuard } from "./jwt-auth.guard"
 import { RefreshTokenService } from "./refresh-token.service"
-import {
-  buildRefreshCookieOptions,
-  REFRESH_COOKIE_NAME,
-  REFRESH_COOKIE_PATH,
-} from "./auth-cookie.constants"
 import { SignInService } from "./sign-in.service"
 
 @ApiTags("Auth")
