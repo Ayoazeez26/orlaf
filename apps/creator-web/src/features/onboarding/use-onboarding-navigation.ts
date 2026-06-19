@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useOnboarding } from "./onboarding-context"
 import { getNextStep, getPrevStep, getProgress } from "./steps"
 import type { OnboardingStep } from "./types"
@@ -9,6 +9,10 @@ export function useOnboardingNavigation(
 ) {
   const { data } = useOnboarding()
   const [currentStep, setCurrentStep] = useState<OnboardingStep>(initialStep)
+
+  useEffect(() => {
+    setCurrentStep(initialStep)
+  }, [initialStep])
 
   const progress = getProgress(currentStep, data)
 

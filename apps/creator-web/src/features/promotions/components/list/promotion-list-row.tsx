@@ -40,33 +40,35 @@ export function PromotionListRow({ promotion }: PromotionListRowProps) {
         </div>
       </Link>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2 sm:hidden">
-        <div className="flex items-center justify-between text-sm">
-          <span className="font-semibold text-foreground">
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:hidden">
+        <div className="flex w-full items-center justify-between">
+          <span className="text-foreground text-sm">
             {formatCurrency(promotion.spent)}
           </span>
-          <span className="text-muted-foreground text-xs">
-            {promotion.impressions} impressions
+          <span className="text-muted-foreground text-sm">
+            {promotion.progressPercent}%
           </span>
         </div>
         <Progress
           value={promotion.progressPercent}
-          className="h-1.5 bg-muted"
+          className="h-2 bg-muted [&_[data-slot=progress-indicator]]:bg-primary"
         />
       </div>
 
       <div className="hidden min-w-[220px] items-center gap-4 sm:flex">
-        <span className="w-12 shrink-0 text-right font-semibold text-foreground text-sm">
-          {formatCurrency(promotion.spent)}
-        </span>
-        <div className="min-w-[100px] flex-1 space-y-1">
+        <div className="min-w-[160px] flex-1 space-y-1.5">
+          <div className="flex w-full items-center justify-between">
+            <span className="text-[#5F636F] text-sm">
+              {formatCurrency(promotion.spent)}
+            </span>
+            <span className="text-[#5F636F] text-sm">
+              {promotion.progressPercent}%
+            </span>
+          </div>
           <Progress
             value={promotion.progressPercent}
-            className="h-1.5 bg-muted"
+            className="h-2 bg-muted [&_[data-slot=progress-indicator]]:bg-primary"
           />
-          <p className="text-muted-foreground text-xs">
-            {promotion.progressPercent}%
-          </p>
         </div>
         <span className="w-24 shrink-0 text-right text-muted-foreground text-xs">
           {promotion.impressions} impressions

@@ -8,6 +8,7 @@ export type GetStartedMode = "upload" | "create-series"
 
 export type OnboardingStep =
   | "welcome"
+  | "consent"
   | "signup"
   | "verify"
   | "creator-type"

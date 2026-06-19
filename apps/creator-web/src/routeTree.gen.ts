@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
@@ -20,6 +21,9 @@ import { Route as DashboardPromotionsRouteImport } from './routes/dashboard/prom
 import { Route as DashboardProjectsRouteImport } from './routes/dashboard/projects'
 import { Route as DashboardNotificationsRouteImport } from './routes/dashboard/notifications'
 import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard/analytics'
+import { Route as AuthSuspendedRouteImport } from './routes/auth/suspended'
+import { Route as AuthRejectedRouteImport } from './routes/auth/rejected'
+import { Route as AuthPendingApprovalRouteImport } from './routes/auth/pending-approval'
 import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
 import { Route as DashboardRevenueIndexRouteImport } from './routes/dashboard/revenue/index'
 import { Route as DashboardPromotionsIndexRouteImport } from './routes/dashboard/promotions/index'
@@ -42,6 +46,11 @@ import { Route as DashboardProjectsProjectIdAnalyticsRouteImport } from './route
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
@@ -93,6 +102,21 @@ const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
   getParentRoute: () => DashboardRouteRoute,
+} as any)
+const AuthSuspendedRoute = AuthSuspendedRouteImport.update({
+  id: '/auth/suspended',
+  path: '/auth/suspended',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRejectedRoute = AuthRejectedRouteImport.update({
+  id: '/auth/rejected',
+  path: '/auth/rejected',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthPendingApprovalRoute = AuthPendingApprovalRouteImport.update({
+  id: '/auth/pending-approval',
+  path: '/auth/pending-approval',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
   id: '/',
@@ -200,7 +224,11 @@ const DashboardProjectsProjectIdAnalyticsRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/auth/pending-approval': typeof AuthPendingApprovalRoute
+  '/auth/rejected': typeof AuthRejectedRoute
+  '/auth/suspended': typeof AuthSuspendedRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/projects': typeof DashboardProjectsRouteWithChildren
@@ -230,7 +258,11 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/auth/pending-approval': typeof AuthPendingApprovalRoute
+  '/auth/rejected': typeof AuthRejectedRoute
+  '/auth/suspended': typeof AuthSuspendedRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/support': typeof DashboardSupportRoute
@@ -257,7 +289,11 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/auth/pending-approval': typeof AuthPendingApprovalRoute
+  '/auth/rejected': typeof AuthRejectedRoute
+  '/auth/suspended': typeof AuthSuspendedRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/projects': typeof DashboardProjectsRouteWithChildren
@@ -290,7 +326,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/login'
     | '/onboarding'
+    | '/auth/pending-approval'
+    | '/auth/rejected'
+    | '/auth/suspended'
     | '/dashboard/analytics'
     | '/dashboard/notifications'
     | '/dashboard/projects'
@@ -320,7 +360,11 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/login'
     | '/onboarding'
+    | '/auth/pending-approval'
+    | '/auth/rejected'
+    | '/auth/suspended'
     | '/dashboard/analytics'
     | '/dashboard/notifications'
     | '/dashboard/support'
@@ -346,7 +390,11 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/login'
     | '/onboarding'
+    | '/auth/pending-approval'
+    | '/auth/rejected'
+    | '/auth/suspended'
     | '/dashboard/analytics'
     | '/dashboard/notifications'
     | '/dashboard/projects'
@@ -378,7 +426,11 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  AuthPendingApprovalRoute: typeof AuthPendingApprovalRoute
+  AuthRejectedRoute: typeof AuthRejectedRoute
+  AuthSuspendedRoute: typeof AuthSuspendedRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -388,6 +440,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -459,6 +518,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/analytics'
       preLoaderRoute: typeof DashboardAnalyticsRouteImport
       parentRoute: typeof DashboardRouteRoute
+    }
+    '/auth/suspended': {
+      id: '/auth/suspended'
+      path: '/auth/suspended'
+      fullPath: '/auth/suspended'
+      preLoaderRoute: typeof AuthSuspendedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/rejected': {
+      id: '/auth/rejected'
+      path: '/auth/rejected'
+      fullPath: '/auth/rejected'
+      preLoaderRoute: typeof AuthRejectedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/pending-approval': {
+      id: '/auth/pending-approval'
+      path: '/auth/pending-approval'
+      fullPath: '/auth/pending-approval'
+      preLoaderRoute: typeof AuthPendingApprovalRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/dashboard/settings/': {
       id: '/dashboard/settings/'
@@ -705,7 +785,11 @@ const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  AuthPendingApprovalRoute: AuthPendingApprovalRoute,
+  AuthRejectedRoute: AuthRejectedRoute,
+  AuthSuspendedRoute: AuthSuspendedRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

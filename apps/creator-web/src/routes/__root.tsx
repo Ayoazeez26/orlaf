@@ -1,8 +1,12 @@
+import { GoogleOAuthProvider } from "@react-oauth/google"
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
 
 import appCss from "@workspace/ui/globals.css?url"
 import { QueryProvider } from "@/components/query-provider"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AuthProvider } from "@/features/auth/auth-context"
+
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ""
 
 export const Route = createRootRoute({
   head: () => ({
@@ -51,7 +55,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body suppressHydrationWarning>
         <QueryProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <AuthProvider>
+            <GoogleOAuthProvider clientId={googleClientId}>
+              <ThemeProvider>{children}</ThemeProvider>
+            </GoogleOAuthProvider>
+          </AuthProvider>
         </QueryProvider>
         <Scripts />
       </body>

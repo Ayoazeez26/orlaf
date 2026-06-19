@@ -19,6 +19,10 @@ export function getStepSequence(data: OnboardingData): OnboardingStep[] {
     steps.push("signup", "verify")
   }
 
+  if (data.authMethod === "google" || data.authMethod === "apple") {
+    steps.push("consent")
+  }
+
   steps.push("creator-type")
 
   if (data.creatorType === "studio") {

@@ -87,7 +87,6 @@ export function PromotionDetailPage() {
         <PromotionPerformanceCard
           data={promotion.performanceData}
           spent={promotion.spent}
-          budget={promotion.budget}
           progressPercent={promotion.progressPercent}
           projectName={promotion.projectName}
           placement={promotion.placement}

@@ -46,7 +46,6 @@ const AUDIENCE_LABELS = Object.fromEntries(
 interface PromotionPerformanceCardProps {
   data: PromotionPerformancePoint[]
   spent: number
-  budget: number
   progressPercent: number
   projectName: string
   placement: string
@@ -84,7 +83,6 @@ function DetailField({ icon: Icon, label, value }: DetailFieldProps) {
 export function PromotionPerformanceCard({
   data,
   spent,
-  budget,
   progressPercent,
   projectName,
   placement,
@@ -164,18 +162,19 @@ export function PromotionPerformanceCard({
           </ResponsiveContainer>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Budget utilization</span>
-            <span className="text-muted-foreground">{progressPercent}%</span>
+        <div className="space-y-1.5">
+          <div className="flex w-full items-center justify-between">
+            <span className="font-semibold font-space-grotesk text-foreground text-sm">
+              ${spent}
+            </span>
+            <span className="text-muted-foreground text-sm">
+              {progressPercent}%
+            </span>
           </div>
           <Progress
             value={progressPercent}
             className="h-2.5 bg-primary/10 [&_[data-slot=progress-indicator]]:bg-primary"
           />
-          <p className="text-muted-foreground text-sm">
-            ${spent} spent of ${budget}
-          </p>
         </div>
 
         <div className="grid gap-6 border-border border-t pt-6 sm:grid-cols-2">

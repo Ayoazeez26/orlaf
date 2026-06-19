@@ -1,10 +1,29 @@
-import { ClientOnly, createFileRoute } from "@tanstack/react-router"
+import { ClientOnly, createFileRoute, redirect } from "@tanstack/react-router"
+import { z } from "zod"
 import { ThemeSwitcher } from "@/components/theme-switcher"
+import { getAuthSnapshot } from "@/features/auth/lib/auth-snapshot"
+import { hasCompletedOnboarding } from "@/features/auth/lib/onboarding-complete"
 import { OnboardingProvider } from "@/features/onboarding/onboarding-context"
 import { OnboardingFlow } from "@/features/onboarding/onboarding-flow"
 
+const onboardingSearchSchema = z.object({
+  step: z.string().optional(),
+})
+
 export const Route = createFileRoute("/onboarding")({
   ssr: false,
+  validateSearch: onboardingSearchSchema,
+  beforeLoad: () => {
+    const { status, session } = getAuthSnapshot()
+    if (
+      status === "authenticated" &&
+      session &&
+      !session.needs_consent &&
+      hasCompletedOnboarding()
+    ) {
+      throw redirect({ to: "/dashboard" })
+    }
+  },
   component: OnboardingPage,
 })
 
