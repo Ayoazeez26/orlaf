@@ -49,8 +49,11 @@ export function SettingsProfilePage() {
     tiktokUrl: "",
   })
 
+  const hasInitialized = useRef(false)
+
   useEffect(() => {
-    if (!data) return
+    if (!data || hasInitialized.current) return
+    hasInitialized.current = true
     setForm({
       firstName: data.firstName ?? "",
       lastName: data.lastName ?? "",

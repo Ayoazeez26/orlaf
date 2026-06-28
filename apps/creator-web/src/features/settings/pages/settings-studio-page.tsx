@@ -26,8 +26,11 @@ export function SettingsStudioPage() {
     logoUrl: "",
   })
 
+  const hasInitialized = useRef(false)
+
   useEffect(() => {
-    if (!data) return
+    if (!data || hasInitialized.current) return
+    hasInitialized.current = true
     setForm({
       studioName: data.creatorProfile?.studioName ?? "",
       handle: data.creatorProfile?.handle ?? "",

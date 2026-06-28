@@ -102,6 +102,15 @@ export function UploadEpisodesStep({
   const toolbarButtonClassName =
     "text-text-strong hover:text-text-strong aria-expanded:text-text-strong px-3 py-2"
 
+  const allEpisodesReady =
+    state.episodes.length > 0 &&
+    state.episodes.every((episode) => episode.media?.status === "ready")
+
+  function handleNext() {
+    if (!allEpisodesReady) return
+    onNext()
+  }
+
   return (
     <div className="flex flex-col gap-8 xl:grid xl:grid-cols-[1fr_320px]">
       <div className="min-w-0 space-y-6">
@@ -382,7 +391,8 @@ export function UploadEpisodesStep({
 
         <UploadEpisodesStepNav
           onBack={onBack}
-          onNext={onNext}
+          onNext={handleNext}
+          nextDisabled={!allEpisodesReady}
           className="hidden xl:flex"
         />
       </div>
@@ -399,7 +409,8 @@ export function UploadEpisodesStep({
         />
         <UploadEpisodesStepNav
           onBack={onBack}
-          onNext={onNext}
+          onNext={handleNext}
+          nextDisabled={!allEpisodesReady}
           className="xl:hidden"
         />
       </div>

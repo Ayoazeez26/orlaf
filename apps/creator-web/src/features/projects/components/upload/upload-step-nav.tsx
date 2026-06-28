@@ -4,12 +4,14 @@ import { cn } from "@workspace/ui/lib/utils"
 interface UploadEpisodesStepNavProps {
   onBack: () => void
   onNext: () => void
+  nextDisabled?: boolean
   className?: string
 }
 
 export function UploadEpisodesStepNav({
   onBack,
   onNext,
+  nextDisabled,
   className,
 }: UploadEpisodesStepNavProps) {
   return (
@@ -17,7 +19,9 @@ export function UploadEpisodesStepNav({
       <Button variant="outline" className="h-10 px-3" onClick={onBack}>
         ← Back
       </Button>
-      <Button onClick={onNext}>Next: Review →</Button>
+      <Button onClick={onNext} disabled={nextDisabled}>
+        Next: Review →
+      </Button>
     </div>
   )
 }
