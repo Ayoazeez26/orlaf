@@ -40,11 +40,22 @@ function isTokenExpiringSoon(token: string): boolean {
   return Date.now() / 1000 > exp - REFRESH_EXPIRY_BUFFER_SECONDS
 }
 
+/** Low-level fetch wrapper — always sends cookies (sable_rt). */
+export function apiFetch(
+  path: string,
+  options: RequestInit = {}
+): Promise<Response> {
+  const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`
+  return fetch(url, {
+    ...options,
+    credentials: "include",
+  })
+}
+
 async function doRefresh(): Promise<string | null> {
-  const response = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
+  const response = await apiFetch("/api/v1/auth/refresh", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include",
     body: JSON.stringify({}),
   })
 
@@ -89,11 +100,9 @@ export async function apiRequest<T = unknown>(
     headers.Authorization = `Bearer ${inMemoryAccessToken}`
   }
 
-  const url = path.startsWith("http") ? path : `${API_BASE_URL}${path}`
-  let response = await fetch(url, {
+  let response = await apiFetch(path, {
     ...options,
     headers,
-    credentials: "include",
   })
 
   if (response.status === 401 && !path.includes("/auth/refresh")) {
@@ -104,10 +113,9 @@ export async function apiRequest<T = unknown>(
     }
 
     headers.Authorization = `Bearer ${newToken}`
-    response = await fetch(url, {
+    response = await apiFetch(path, {
       ...options,
       headers,
-      credentials: "include",
     })
   }
 

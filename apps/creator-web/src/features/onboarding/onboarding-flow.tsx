@@ -1,11 +1,9 @@
 import { useNavigate, useSearch } from "@tanstack/react-router"
-import { useEffect } from "react"
+import { useCallback, useEffect, useRef } from "react"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { useAuth } from "@/features/auth/auth-context"
-import {
-  hasCompletedOnboarding,
-  markOnboardingComplete,
-} from "@/features/auth/lib/onboarding-complete"
+import { onboardingStepFromApi } from "@/features/auth/lib/post-sign-in-route"
+import { getOnboardingStatus } from "./api/onboarding-api"
 import { ConsentStep } from "./components/steps/consent-step"
 import { ContentFormatStep } from "./components/steps/content-format-step"
 import { CreatorTypeStep } from "./components/steps/creator-type-step"
@@ -14,7 +12,7 @@ import { SignupStep } from "./components/steps/signup-step"
 import { StudioStep } from "./components/steps/studio-step"
 import { VerifyEmailStep } from "./components/steps/verify-email-step"
 import { WelcomeStep } from "./components/steps/welcome-step"
-import { ONBOARDING_STORAGE_KEY } from "./constants"
+import { useOnboardingPersist } from "./hooks/use-onboarding-persist"
 import { useOnboarding } from "./onboarding-context"
 import type { OnboardingStep } from "./types"
 import { useOnboardingNavigation } from "./use-onboarding-navigation"
@@ -38,45 +36,90 @@ function parseInitialStep(step?: string): OnboardingStep {
 
 export function OnboardingFlow() {
   const navigate = useNavigate()
-  const { isAuthenticated, session } = useAuth()
+  const { isAuthenticated, session, updateSession } = useAuth()
   const { data, dispatch } = useOnboarding()
+  const { finishOnboarding } = useOnboardingPersist()
   const search = useSearch({ from: "/onboarding" })
+  const hasHydratedRef = useRef(false)
+
+  const navigateToStep = useCallback(
+    (step: OnboardingStep) => {
+      navigate({ to: "/onboarding", search: { step }, replace: true })
+    },
+    [navigate]
+  )
 
   useEffect(() => {
-    const step = parseInitialStep(search.step)
-    if ((step === "consent" || step === "creator-type") && session) {
-      dispatch({ type: "SET_AUTH_METHOD", payload: "google" })
-    }
-  }, [search.step, session, dispatch])
+    if (!isAuthenticated || !session) return
+    if (session.account_state !== "onboarding") return
+    if (hasHydratedRef.current) return
 
-  useEffect(() => {
-    if (isAuthenticated && !search.step && !hasCompletedOnboarding()) {
-      navigate({
-        to: "/onboarding",
-        search: { step: "creator-type" },
-        replace: true,
+    hasHydratedRef.current = true
+
+    getOnboardingStatus()
+      .then((status) => {
+        dispatch({ type: "HYDRATE_FROM_API", payload: status })
+        const apiStep = onboardingStepFromApi(status)
+        if (!search.step && apiStep) {
+          navigateToStep(apiStep)
+        }
       })
-    }
-  }, [isAuthenticated, search.step, navigate])
+      .catch(() => {
+        hasHydratedRef.current = false
+      })
+  }, [isAuthenticated, session, dispatch, search.step, navigateToStep])
 
-  const handleComplete = () => {
+  useEffect(() => {
+    if (search.step === "studio" && data.creatorType !== "studio") {
+      dispatch({ type: "SET_CREATOR_TYPE", payload: "studio" })
+    }
+  }, [search.step, data.creatorType, dispatch])
+
+  useEffect(() => {
+    if (!isAuthenticated || !session || search.step) return
+
+    if (session.needs_consent) {
+      navigateToStep("consent")
+      return
+    }
+
+    if (session.account_state === "onboarding") {
+      navigateToStep("creator-type")
+    }
+  }, [isAuthenticated, session, search.step, navigateToStep])
+
+  const handleComplete = useCallback(async () => {
     if (!isAuthenticated) {
       navigate({ to: "/onboarding", replace: true })
       return
     }
-    sessionStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify(data))
-    markOnboardingComplete()
-    navigate({ to: "/dashboard", replace: true })
-  }
+
+    try {
+      const result = await finishOnboarding()
+      updateSession({ account_state: result.account_state })
+      navigate({ to: result.redirect, replace: true })
+    } catch {
+      // error surfaced by useOnboardingPersist in step components
+    }
+  }, [isAuthenticated, finishOnboarding, updateSession, navigate])
 
   const initialStep = parseInitialStep(search.step)
-  const navigation = useOnboardingNavigation(initialStep, handleComplete)
+  const navigation = useOnboardingNavigation(
+    initialStep,
+    handleComplete,
+    navigateToStep
+  )
   const { currentStep, progress, goNext, goBack, goTo } = navigation
 
   const stepContent = (() => {
     switch (currentStep) {
       case "welcome":
-        return <WelcomeStep progress={progress} />
+        return (
+          <WelcomeStep
+            progress={progress}
+            onContinueEmail={() => goTo("signup")}
+          />
+        )
       case "consent":
         return (
           <ConsentStep
@@ -90,27 +133,23 @@ export function OnboardingFlow() {
           <SignupStep progress={progress} onBack={goBack} onNext={goNext} />
         )
       case "verify":
-        return (
-          <VerifyEmailStep
-            progress={progress}
-            onBack={goBack}
-            onNext={goNext}
-          />
-        )
+        return <VerifyEmailStep progress={progress} onBack={goBack} />
       case "creator-type":
         return (
           <CreatorTypeStep
             progress={progress}
             onBack={goBack}
-            onNext={goNext}
-            onSkip={goNext}
+            onNext={(creatorType) =>
+              goTo(creatorType === "studio" ? "studio" : "content")
+            }
+            onSkip={() => goTo("content")}
           />
         )
       case "studio":
         return (
           <StudioStep
             progress={progress}
-            onBack={goBack}
+            onBack={() => goTo("creator-type")}
             onNext={goNext}
             onSkip={goNext}
           />
@@ -119,7 +158,9 @@ export function OnboardingFlow() {
         return (
           <ContentFormatStep
             progress={progress}
-            onBack={goBack}
+            onBack={() =>
+              goTo(data.creatorType === "studio" ? "studio" : "creator-type")
+            }
             onNext={goNext}
             onSkip={goNext}
           />
@@ -129,12 +170,16 @@ export function OnboardingFlow() {
           <GetStartedStep
             progress={progress}
             onBack={goBack}
-            onNext={goNext}
-            onSkip={handleComplete}
+            onComplete={handleComplete}
           />
         )
       default:
-        return <WelcomeStep progress={progress} />
+        return (
+          <WelcomeStep
+            progress={progress}
+            onContinueEmail={() => goTo("signup")}
+          />
+        )
     }
   })()
 

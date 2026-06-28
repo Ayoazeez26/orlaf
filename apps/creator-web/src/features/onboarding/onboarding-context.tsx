@@ -1,3 +1,4 @@
+import type { OnboardingStatusResponse } from "@sable/contracts"
 import {
   createContext,
   type Dispatch,
@@ -6,6 +7,7 @@ import {
   useMemo,
   useReducer,
 } from "react"
+import { fromApiProfile } from "./lib/onboarding-mappers"
 import {
   type AuthMethod,
   type CreatorType,
@@ -20,12 +22,17 @@ import {
 type OnboardingAction =
   | { type: "SET_AUTH_METHOD"; payload: AuthMethod }
   | { type: "SET_PROFILE"; payload: Partial<OnboardingProfile> }
+  | {
+      type: "SET_VERIFICATION_META"
+      payload: { verificationId: string; maskedEmail: string }
+    }
   | { type: "SET_VERIFICATION_CODE"; payload: string }
   | { type: "SET_CREATOR_TYPE"; payload: CreatorType }
   | { type: "SET_STUDIO"; payload: Partial<OnboardingStudio> }
   | { type: "SET_TEAM_SIZE"; payload: TeamSize }
   | { type: "TOGGLE_CONTENT_FORMAT"; payload: string }
   | { type: "SET_GET_STARTED_MODE"; payload: GetStartedMode }
+  | { type: "HYDRATE_FROM_API"; payload: OnboardingStatusResponse }
   | { type: "RESET" }
 
 function onboardingReducer(
@@ -37,6 +44,12 @@ function onboardingReducer(
       return { ...state, authMethod: action.payload }
     case "SET_PROFILE":
       return { ...state, profile: { ...state.profile, ...action.payload } }
+    case "SET_VERIFICATION_META":
+      return {
+        ...state,
+        verificationId: action.payload.verificationId,
+        maskedEmail: action.payload.maskedEmail,
+      }
     case "SET_VERIFICATION_CODE":
       return { ...state, verificationCode: action.payload }
     case "SET_CREATOR_TYPE":
@@ -60,6 +73,8 @@ function onboardingReducer(
     }
     case "SET_GET_STARTED_MODE":
       return { ...state, getStartedMode: action.payload }
+    case "HYDRATE_FROM_API":
+      return { ...state, ...fromApiProfile(action.payload.profile) }
     case "RESET":
       return initialOnboardingData
     default:

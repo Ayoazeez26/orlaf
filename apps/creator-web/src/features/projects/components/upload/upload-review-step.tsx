@@ -2,10 +2,13 @@ import { useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent } from "@workspace/ui/components/card"
+import { Progress } from "@workspace/ui/components/progress"
 import { cn } from "@workspace/ui/lib/utils"
 import { Pencil, Sparkles } from "lucide-react"
 import { projectKeys } from "../../data/query-keys"
+import { useMediaUploadPipeline } from "../../hooks/use-media-upload-pipeline"
 import { useSaveUploadDraft } from "../../hooks/use-save-upload-draft"
+import { formatUploadGenres } from "../../lib/format-upload-genres"
 import type { UploadEpisodeDraft } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
 import { UploadSeriesPreviewAside } from "./upload-series-preview-aside"
@@ -20,16 +23,31 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
   const queryClient = useQueryClient()
   const { state, dispatch, previewImage } = useUploadWizard()
   const saveDraft = useSaveUploadDraft()
+  const { publish, isPublishing, publishError, progress } =
+    useMediaUploadPipeline()
 
   const displayTitle = state.title.trim() || "The Returnees"
   const freeCount = state.episodes.filter((e) => e.access === "free").length
   const premiumCount = state.episodes.filter(
     (e) => e.access === "premium"
   ).length
-  function handlePublish() {
-    queryClient.invalidateQueries({ queryKey: projectKeys.list() })
-    dispatch({ type: "RESET" })
-    navigate({ to: "/dashboard/projects" })
+  const episodesWithMedia = state.episodes.filter(
+    (e) => e.media?.status === "ready"
+  ).length
+  const canPublish =
+    state.seriesId != null &&
+    (state.episodes.length === 0 ||
+      state.episodes.every((e) => e.media?.status === "ready"))
+
+  async function handlePublish() {
+    try {
+      await publish(state)
+      queryClient.invalidateQueries({ queryKey: projectKeys.list() })
+      dispatch({ type: "RESET" })
+      navigate({ to: "/dashboard/projects" })
+    } catch {
+      // publishError is set in the hook
+    }
   }
 
   return (
@@ -56,16 +74,46 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
                 label="Episodes"
                 value={String(state.episodes.length)}
               />
+              <SummaryChip
+                label="With video"
+                value={String(episodesWithMedia)}
+              />
               <SummaryChip label="Free" value={String(freeCount)} />
               <SummaryChip label="Premium" value={String(premiumCount)} />
+              {state.trailer?.file && (
+                <SummaryChip label="Trailer" value="Added" />
+              )}
             </div>
+            {isPublishing && progress && (
+              <div className="space-y-2">
+                <p className="text-muted-foreground text-sm">
+                  {progress.label}
+                </p>
+                <Progress value={progress.value * 100} />
+              </div>
+            )}
+            {publishError && (
+              <p className="text-destructive text-sm">{publishError}</p>
+            )}
+            {!canPublish && !isPublishing && state.episodes.length > 0 && (
+              <p className="text-muted-foreground text-sm">
+                All episodes must finish uploading before you can publish.
+              </p>
+            )}
             <div className="flex flex-wrap justify-end gap-2">
-              <Button variant="outline" onClick={saveDraft}>
+              <Button
+                variant="outline"
+                onClick={saveDraft}
+                disabled={isPublishing}
+              >
                 Save as Draft
               </Button>
-              <Button onClick={handlePublish}>
+              <Button
+                onClick={handlePublish}
+                disabled={isPublishing || !canPublish}
+              >
                 <Sparkles className="size-4" aria-hidden />
-                Publish Series
+                {isPublishing ? "Publishing…" : "Publish Series"}
               </Button>
             </div>
           </CardContent>
@@ -81,6 +129,7 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
                 variant="link"
                 className="h-auto gap-2 p-0 text-primary"
                 onClick={onBack}
+                disabled={isPublishing}
               >
                 <Pencil className="size-4" aria-hidden />
                 Edit Episodes
@@ -104,9 +153,10 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
       <div className="flex flex-col gap-6">
         <UploadSeriesPreviewAside
           title={displayTitle}
-          genre={state.genre}
+          genre={formatUploadGenres(state.genres)}
           synopsis={state.synopsis}
           posterUrl={previewImage}
+          trailerUrl={state.trailerUrl}
           episodes={state.episodes}
         />
         <UploadReviewStepNav onBack={onBack} className="xl:hidden" />
@@ -158,6 +208,11 @@ function EpisodeReviewRow({
         </span>
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-2 pl-9">
+        {episode.media?.file ? (
+          <BadgePill variant="solid">Video ready</BadgePill>
+        ) : (
+          <BadgePill>No video</BadgePill>
+        )}
         <BadgePill>9:16 Vertical</BadgePill>
         <BadgePill variant={episode.access === "free" ? "solid" : "outline"}>
           {episode.access === "free"

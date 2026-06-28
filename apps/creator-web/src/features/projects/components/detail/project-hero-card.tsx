@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 import { Pencil, Plus } from "lucide-react"
@@ -35,13 +36,27 @@ export function ProjectHeroCard({ project }: ProjectHeroCardProps) {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <Button>
-            <Plus className="size-4" aria-hidden />
-            New Episode
+          <Button asChild>
+            <Link
+              to="/dashboard/projects/new"
+              search={{
+                seriesId: project.id,
+                step: "episodes",
+                addEpisode: true,
+              }}
+            >
+              <Plus className="size-4" aria-hidden />
+              New Episode
+            </Link>
           </Button>
-          <Button variant="outline" className="h-10 rounded-xl px-6">
-            <Pencil className="size-4" aria-hidden />
-            Edit Series
+          <Button asChild variant="outline" className="h-10 rounded-xl px-6">
+            <Link
+              to="/dashboard/projects/new"
+              search={{ seriesId: project.id, step: "info" }}
+            >
+              <Pencil className="size-4" aria-hidden />
+              Edit Series
+            </Link>
           </Button>
         </div>
       </div>

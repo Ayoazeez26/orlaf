@@ -12,6 +12,36 @@ export type ProjectsStatusFilter = "all" | ProjectStatus
 
 export type EpisodeAccess = "free" | "coins" | "premium"
 
+export type MediaJobStatus =
+  | "idle"
+  | "probing"
+  | "converting"
+  | "uploading"
+  | "processing"
+  | "ready"
+  | "failed"
+
+export interface UploadMediaAsset {
+  file: File
+  status: MediaJobStatus
+  progress: number
+  error?: string
+  durationSeconds?: number
+  previewObjectUrl?: string
+  episodeId?: string
+  videoHostingId?: string
+  hlsUrl?: string
+}
+
+export interface UploadPosterAsset {
+  file: File
+  previewObjectUrl: string
+  status: MediaJobStatus
+  progress: number
+  error?: string
+  remoteUrl?: string
+}
+
 export interface ProjectSummary {
   id: string
   slug: string
@@ -85,33 +115,81 @@ export interface ProjectDetail extends ProjectSummary {
   weeklyViews: WeeklyViewPoint[]
 }
 
+export type ProjectType = "short-series" | "short-film"
+export type SeriesAccess = "free" | "coins"
+
+export interface PersonEntry {
+  id: string
+  name: string
+  role: string
+}
+
 export interface UploadEpisodeDraft {
   id: string
+  backendEpisodeId?: string
   title: string
   synopsis: string
   duration: string
   access: EpisodeAccess
   autoCaption: boolean
+  media: UploadMediaAsset | null
 }
 
 export interface UploadWizardState {
   step: "info" | "episodes" | "review"
+  seriesId: string | null
+  projectType: ProjectType
   title: string
-  genre: string
+  genres: string[]
   language: string
   synopsis: string
   tags: string
+  access: SeriesAccess
+  aiConversionEnabled: boolean
+  autoCaptionEnabled: boolean
+  subtitleTracks: string[]
+  cast: PersonEntry[]
+  crew: PersonEntry[]
   episodes: UploadEpisodeDraft[]
   guideVisible: boolean
+  trailer: UploadMediaAsset | null
+  trailerUrl: string | null
+  poster: UploadPosterAsset | null
+  publishError: string | null
+  isPublishing: boolean
+  isContinuing: boolean
+  continueError: string | null
 }
 
 export type UploadWizardAction =
   | { type: "SET_STEP"; payload: UploadWizardState["step"] }
   | { type: "SET_FIELD"; payload: Partial<UploadWizardState> }
+  | { type: "TOGGLE_GENRE"; payload: string }
+  | { type: "TOGGLE_SUBTITLE"; payload: string }
+  | {
+      type: "UPDATE_PERSON"
+      payload: {
+        list: "cast" | "crew"
+        id: string
+        patch: Partial<PersonEntry>
+      }
+    }
+  | { type: "ADD_PERSON"; payload: "cast" | "crew" }
+  | {
+      type: "REMOVE_PERSON"
+      payload: { list: "cast" | "crew"; id: string }
+    }
   | { type: "ADD_EPISODES"; payload: number }
   | {
       type: "UPDATE_EPISODE"
       payload: { id: string; patch: Partial<UploadEpisodeDraft> }
     }
+  | { type: "REMOVE_EPISODE"; payload: { id: string } }
   | { type: "TOGGLE_GUIDE" }
+  | { type: "SET_TRAILER"; payload: UploadMediaAsset | null }
+  | { type: "UPDATE_TRAILER"; payload: Partial<UploadMediaAsset> }
+  | { type: "SET_POSTER"; payload: UploadPosterAsset | null }
+  | { type: "UPDATE_POSTER"; payload: Partial<UploadPosterAsset> }
+  | { type: "SET_TRAILER_URL"; payload: string | null }
+  | { type: "SET_SERIES_ID"; payload: string | null }
   | { type: "RESET" }

@@ -2,11 +2,13 @@ import {
   ChevronRight,
   FileText,
   LayoutGrid,
+  Loader2,
   Scissors,
   Upload,
   Wand2,
 } from "lucide-react"
 import { useState } from "react"
+import { useOnboardingPersist } from "../../hooks/use-onboarding-persist"
 import { useOnboarding } from "../../onboarding-context"
 import type { GetStartedMode } from "../../types"
 import { OnboardingNav } from "../onboarding-nav"
@@ -16,8 +18,7 @@ import { SelectionCard } from "../selection-card"
 interface GetStartedStepProps {
   progress: { currentIndex: number; total: number }
   onBack: () => void
-  onNext: () => void
-  onSkip: () => void
+  onComplete: () => void
 }
 
 const STUDIO_TOOL_ITEMS = [
@@ -29,10 +30,10 @@ const STUDIO_TOOL_ITEMS = [
 export function GetStartedStep({
   progress,
   onBack,
-  onNext,
-  onSkip,
+  onComplete,
 }: GetStartedStepProps) {
   const { data, dispatch } = useOnboarding()
+  const { saveGetStarted, isSaving, error } = useOnboardingPersist()
   const [selected, setSelected] = useState<GetStartedMode | null>(
     data.getStartedMode
   )
@@ -42,11 +43,22 @@ export function GetStartedStep({
     dispatch({ type: "SET_GET_STARTED_MODE", payload: mode })
   }
 
+  const handleFinish = async (mode: GetStartedMode | null) => {
+    try {
+      if (mode) {
+        await saveGetStarted(mode)
+      }
+      onComplete()
+    } catch {
+      // error shown below
+    }
+  }
+
   const handleNext = () => {
     if (selected) {
       dispatch({ type: "SET_GET_STARTED_MODE", payload: selected })
     }
-    onNext()
+    void handleFinish(selected)
   }
 
   return (
@@ -57,10 +69,10 @@ export function GetStartedStep({
       wide
       footer={
         <OnboardingNav
-          onSkip={onSkip}
+          onSkip={() => void handleFinish(null)}
           onNext={handleNext}
-          nextLabel="Continue to Dashboard"
-          nextDisabled={false}
+          nextLabel="Get Started"
+          nextDisabled={isSaving}
         />
       }
     >
@@ -72,6 +84,19 @@ export function GetStartedStep({
           Upload episodes or create your first series from scratch.
         </p>
       </div>
+
+      {error && (
+        <p className="mt-4 text-destructive text-sm" role="alert">
+          {error}
+        </p>
+      )}
+
+      {isSaving && (
+        <p className="mt-4 flex items-center gap-2 text-muted-foreground text-sm">
+          <Loader2 className="size-4 animate-spin" aria-hidden />
+          Finishing setup…
+        </p>
+      )}
 
       <div className="mt-8 flex flex-col gap-4 sm:flex-row">
         <SelectionCard

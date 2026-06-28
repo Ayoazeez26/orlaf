@@ -9,14 +9,14 @@ export function getStepSequence(data: OnboardingData): OnboardingStep[] {
       "signup",
       "verify",
       "creator-type",
-      "studio",
+      ...(data.creatorType === "studio" ? (["studio"] as const) : []),
       "content",
       "get-started",
     ]
   }
 
   if (data.authMethod === "email") {
-    steps.push("signup", "verify")
+    steps.push("signup", "verify", "consent")
   }
 
   if (data.authMethod === "google" || data.authMethod === "apple") {
@@ -58,6 +58,38 @@ export function getPrevStep(
 ): OnboardingStep | null {
   const sequence = getStepSequence(data)
   const index = sequence.indexOf(current)
-  if (index <= 0) return null
-  return sequence[index - 1] ?? null
+  if (index > 0) {
+    return sequence[index - 1] ?? null
+  }
+
+  return getStaticPrevStep(current, data)
+}
+
+function getStaticPrevStep(
+  current: OnboardingStep,
+  data: OnboardingData
+): OnboardingStep | null {
+  switch (current) {
+    case "studio":
+      return "creator-type"
+    case "content":
+      return data.creatorType === "studio" ? "studio" : "creator-type"
+    case "get-started":
+      return "content"
+    case "creator-type":
+      if (data.authMethod === "email") return "consent"
+      if (data.authMethod === "google" || data.authMethod === "apple") {
+        return "consent"
+      }
+      return "verify"
+    case "consent":
+      if (data.authMethod === "email") return "verify"
+      return "welcome"
+    case "verify":
+      return "signup"
+    case "signup":
+      return "welcome"
+    default:
+      return null
+  }
 }

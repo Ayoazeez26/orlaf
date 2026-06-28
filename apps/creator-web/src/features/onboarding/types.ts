@@ -32,6 +32,8 @@ export interface OnboardingStudio {
 export interface OnboardingData {
   authMethod: AuthMethod | null
   profile: OnboardingProfile
+  verificationId: string | null
+  maskedEmail: string | null
   verificationCode: string
   creatorType: CreatorType | null
   studio: OnboardingStudio
@@ -47,6 +49,8 @@ export const initialOnboardingData: OnboardingData = {
     email: "",
     password: "",
   },
+  verificationId: null,
+  maskedEmail: null,
   verificationCode: "",
   creatorType: null,
   studio: {

@@ -2,8 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
+import { Loader2 } from "lucide-react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { PasswordInput } from "@/components/password-input"
+import { useAuth } from "@/features/auth/auth-context"
 import { useOnboarding } from "../../onboarding-context"
 import { OnboardingShell } from "../onboarding-shell"
 
@@ -24,6 +28,9 @@ interface SignupStepProps {
 
 export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
   const { data, dispatch } = useOnboarding()
+  const { signUpWithEmail } = useAuth()
+  const [apiError, setApiError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const {
     register,
@@ -39,9 +46,45 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
     },
   })
 
-  const onSubmit = (values: SignupFormValues) => {
+  const onSubmit = async (values: SignupFormValues) => {
+    setIsSubmitting(true)
+    setApiError(null)
+
     dispatch({ type: "SET_PROFILE", payload: values })
-    onNext()
+
+    const result = await signUpWithEmail({
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      password: values.password,
+    })
+
+    setIsSubmitting(false)
+
+    if (result.outcome === "success") {
+      dispatch({
+        type: "SET_VERIFICATION_META",
+        payload: {
+          verificationId: result.data.verification_id,
+          maskedEmail: result.data.masked_email,
+        },
+      })
+      onNext()
+      return
+    }
+
+    if (result.outcome === "conflict") {
+      if (result.provider) {
+        setApiError(
+          `This email is already registered with ${result.provider}. Try that sign-in method instead.`
+        )
+      } else {
+        setApiError("This email is already registered. Please log in instead.")
+      }
+      return
+    }
+
+    setApiError(result.message)
   }
 
   return (
@@ -50,8 +93,20 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
       showBack
       onBack={onBack}
       footer={
-        <Button type="submit" form="signup-form" className="min-w-32">
-          Get Started
+        <Button
+          type="submit"
+          form="signup-form"
+          className="min-w-32"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+              Creating…
+            </>
+          ) : (
+            "Get Started"
+          )}
         </Button>
       }
     >
@@ -114,10 +169,10 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
 
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             placeholder="Min. 6 characters"
+            autoComplete="new-password"
             aria-invalid={!!errors.password}
             {...register("password")}
           />
@@ -127,6 +182,12 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
             </p>
           )}
         </div>
+
+        {apiError && (
+          <p className="text-destructive text-sm" role="alert">
+            {apiError}
+          </p>
+        )}
       </form>
     </OnboardingShell>
   )

@@ -1,4 +1,5 @@
 import { CONTENT_FORMATS } from "../../constants"
+import { useOnboardingPersist } from "../../hooks/use-onboarding-persist"
 import { useOnboarding } from "../../onboarding-context"
 import { FormatOption } from "../format-option"
 import { OnboardingNav } from "../onboarding-nav"
@@ -18,12 +19,32 @@ export function ContentFormatStep({
   onSkip,
 }: ContentFormatStepProps) {
   const { data, dispatch } = useOnboarding()
+  const { saveContent, saveContentSkip, isSaving, error } =
+    useOnboardingPersist()
 
   const handleToggle = (id: string) => {
     dispatch({ type: "TOGGLE_CONTENT_FORMAT", payload: id })
   }
 
   const hasSelection = data.contentFormats.length > 0
+
+  const handleNext = async () => {
+    try {
+      await saveContent(data.contentFormats)
+      onNext()
+    } catch {
+      // error shown below
+    }
+  }
+
+  const handleSkip = async () => {
+    try {
+      await saveContentSkip()
+      onSkip()
+    } catch {
+      // error shown below
+    }
+  }
 
   return (
     <OnboardingShell
@@ -32,9 +53,9 @@ export function ContentFormatStep({
       onBack={onBack}
       footer={
         <OnboardingNav
-          onSkip={onSkip}
-          onNext={onNext}
-          nextDisabled={!hasSelection}
+          onSkip={handleSkip}
+          onNext={handleNext}
+          nextDisabled={!hasSelection || isSaving}
         />
       }
     >
@@ -46,6 +67,12 @@ export function ContentFormatStep({
           Pick your starting format — you can always explore others later.
         </p>
       </div>
+
+      {error && (
+        <p className="mt-4 text-destructive text-sm" role="alert">
+          {error}
+        </p>
+      )}
 
       <div className="mt-8 flex flex-col gap-3">
         {CONTENT_FORMATS.map((format) => (

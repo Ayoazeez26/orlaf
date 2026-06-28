@@ -45,6 +45,39 @@ export const LANGUAGE_OPTIONS = [
   "Igbo",
   "Hausa",
   "Pidgin",
+  "Swahili",
+  "French",
+  "Spanish",
+  "Portuguese",
+  "Arabic",
+] as const
+
+export const SERIES_INFO_GENRE_OPTIONS = [
+  "Drama",
+  "Romance",
+  "Comedy",
+  "Thriller",
+  "Documentary",
+  "Anthology",
+  "Sci-Fi",
+  "Horror",
+  "Music",
+  "Action",
+] as const
+
+export const SUBTITLE_TRACK_OPTIONS = [
+  "English",
+  "Swahili",
+  "French",
+  "Spanish",
+  "Portuguese",
+  "Arabic",
+] as const
+
+export const UPLOAD_SERIES_TIPS = [
+  "Posters perform best with a clear central subject.",
+  "Add a trailer to boost discovery in the For You feed.",
+  "Coin-gated content earns 70% revenue share.",
 ] as const
 
 export function projectDetailPath(projectId: string, tab?: string) {

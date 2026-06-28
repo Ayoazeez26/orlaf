@@ -82,7 +82,7 @@ export function ProjectSettingsTab() {
                   Series Revenue
                 </p>
                 <p className="mt-2 font-bold text-3xl text-foreground tracking-tight">
-                  ${monetization.seriesRevenue}
+                  {monetization.seriesRevenue}
                 </p>
               </div>
               <Button variant="outline" className="w-full sm:w-auto" size="sm">
@@ -91,6 +91,42 @@ export function ProjectSettingsTab() {
               </Button>
             </CardContent>
           </Card>
+        </CardContent>
+      </Card>
+
+      <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6")}>
+        <CardHeader>
+          <p className="font-semibold text-foreground text-sm">Danger Zone</p>
+        </CardHeader>
+        <CardContent>
+          <DangerActionRow
+            title="Archive series"
+            description="Hide from public view but keep all data"
+            action={
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full border-destructive/40 text-destructive hover:bg-destructive/10 sm:w-auto"
+              >
+                Archive
+              </Button>
+            }
+          />
+          <DangerActionRow
+            title="Delete series"
+            description="Permanently remove this series and all episodes"
+            action={
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full border-destructive/40 text-destructive hover:bg-destructive/10 sm:w-auto"
+              >
+                Delete
+              </Button>
+            }
+          />
         </CardContent>
       </Card>
     </div>
@@ -113,6 +149,26 @@ function SettingRow({
         <p className="text-muted-foreground text-xs">{description}</p>
       </div>
       {children}
+    </div>
+  )
+}
+
+function DangerActionRow({
+  title,
+  description,
+  action,
+}: {
+  title: string
+  description: string
+  action: React.ReactNode
+}) {
+  return (
+    <div className="flex flex-col gap-3 py-3 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+      <div>
+        <p className="font-medium text-foreground text-sm">{title}</p>
+        <p className="text-muted-foreground text-xs">{description}</p>
+      </div>
+      {action}
     </div>
   )
 }

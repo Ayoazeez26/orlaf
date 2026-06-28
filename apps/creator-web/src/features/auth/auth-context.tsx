@@ -7,21 +7,32 @@ import {
   useMemo,
   useState,
 } from "react"
+import { getOnboardingStatus } from "@/features/onboarding/api/onboarding-api"
 import {
   getAccessToken,
   setAccessToken,
   setOnSessionExpired,
 } from "@/lib/http-client"
 import { getRouter } from "@/router"
+import type {
+  SignInEmailResult,
+  SignUpEmailResult,
+  VerifyEmailResult,
+} from "./api/auth-api"
 import {
   logout as logoutApi,
-  refreshSession,
+  signInWithEmail as signInWithEmailApi,
   signInWithGoogle as signInWithGoogleApi,
+  signUpWithEmail as signUpWithEmailApi,
+  verifyEmail as verifyEmailApi,
 } from "./api/auth-api"
-import { AUTH_SESSION_STORAGE_KEY } from "./constants"
+import { getAuthReady } from "./lib/auth-bootstrap"
 import { setAuthSnapshot } from "./lib/auth-snapshot"
 import { clearOnboardingComplete } from "./lib/onboarding-complete"
-import { resolvePostSignInRoute } from "./lib/post-sign-in-route"
+import {
+  onboardingStepFromApi,
+  resolvePostSignInRoute,
+} from "./lib/post-sign-in-route"
 
 type AuthStatus = "loading" | "authenticated" | "unauthenticated"
 
@@ -38,28 +49,21 @@ interface AuthContextValue {
     | { outcome: "verification_failed" }
     | { outcome: "error"; message: string }
   >
+  signUpWithEmail: (
+    input: Parameters<typeof signUpWithEmailApi>[0]
+  ) => Promise<SignUpEmailResult>
+  verifyEmailAndSignIn: (
+    verificationId: string,
+    code: string
+  ) => Promise<VerifyEmailResult>
+  signInWithEmail: (
+    input: Parameters<typeof signInWithEmailApi>[0]
+  ) => Promise<SignInEmailResult>
+  updateSession: (patch: Partial<SignInResponse>) => void
   signOut: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
-
-function persistSession(session: SignInResponse) {
-  sessionStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(session))
-}
-
-function loadPersistedSession(): SignInResponse | null {
-  try {
-    const raw = sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY)
-    if (!raw) return null
-    return JSON.parse(raw) as SignInResponse
-  } catch {
-    return null
-  }
-}
-
-function clearPersistedSession() {
-  sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY)
-}
 
 function syncSnapshot(status: AuthStatus, session: SignInResponse | null) {
   setAuthSnapshot({ status, session })
@@ -73,16 +77,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setSession(nextSession)
     setStatus("authenticated")
     syncSnapshot("authenticated", nextSession)
-    persistSession(nextSession)
   }, [])
 
   const applyUnauthenticated = useCallback(() => {
     setSession(null)
     setStatus("unauthenticated")
     setAccessToken(null)
-    clearPersistedSession()
     syncSnapshot("unauthenticated", null)
   }, [])
+
+  const updateSession = useCallback((patch: Partial<SignInResponse>) => {
+    setSession((prev) => {
+      if (!prev) return prev
+      const next = { ...prev, ...patch }
+      syncSnapshot("authenticated", next)
+      return next
+    })
+  }, [])
+
+  const navigateAfterSignIn = useCallback(
+    async (nextSession: SignInResponse) => {
+      let onboardingStep = null
+      if (
+        nextSession.account_state === "onboarding" &&
+        !nextSession.needs_consent
+      ) {
+        try {
+          const status = await getOnboardingStatus()
+          onboardingStep = onboardingStepFromApi(status)
+        } catch {
+          onboardingStep = null
+        }
+      }
+
+      const destination = resolvePostSignInRoute(nextSession, onboardingStep)
+      if (destination.search?.step) {
+        void getRouter().navigate({
+          to: destination.to,
+          search: destination.search,
+          replace: true,
+        })
+      } else {
+        void getRouter().navigate({ to: destination.to, replace: true })
+      }
+    },
+    []
+  )
+
+  const completeSignIn = useCallback(
+    async (nextSession: SignInResponse) => {
+      setAccessToken(nextSession.access_token)
+      applyAuthenticated(nextSession)
+      await navigateAfterSignIn(nextSession)
+    },
+    [applyAuthenticated, navigateAfterSignIn]
+  )
 
   useEffect(() => {
     setOnSessionExpired(() => {
@@ -93,23 +142,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [applyUnauthenticated])
 
   useEffect(() => {
-    async function bootstrap() {
-      try {
-        const { access_token } = await refreshSession()
-        setAccessToken(access_token)
-        const persisted = loadPersistedSession()
-        if (persisted) {
-          applyAuthenticated(persisted)
-        } else {
-          setStatus("authenticated")
-          syncSnapshot("authenticated", null)
-        }
-      } catch {
+    let active = true
+
+    getAuthReady().then((result) => {
+      if (!active) return
+      if (result.status === "authenticated" && result.session) {
+        applyAuthenticated(result.session)
+      } else {
         applyUnauthenticated()
       }
-    }
+    })
 
-    bootstrap()
+    return () => {
+      active = false
+    }
   }, [applyAuthenticated, applyUnauthenticated])
 
   const signInWithGoogle = useCallback(
@@ -120,23 +166,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return result
       }
 
-      setAccessToken(result.data.access_token)
-      applyAuthenticated(result.data)
-
-      const destination = resolvePostSignInRoute(result.data)
-      if (destination.search?.step) {
-        void getRouter().navigate({
-          to: destination.to,
-          search: destination.search,
-          replace: true,
-        })
-      } else {
-        void getRouter().navigate({ to: destination.to, replace: true })
-      }
-
+      await completeSignIn(result.data)
       return { outcome: "success" as const }
     },
-    [applyAuthenticated]
+    [completeSignIn]
+  )
+
+  const signUpWithEmail = useCallback(
+    (input: Parameters<typeof signUpWithEmailApi>[0]) =>
+      signUpWithEmailApi(input),
+    []
+  )
+
+  const verifyEmailAndSignIn = useCallback(
+    async (verificationId: string, code: string) => {
+      const result = await verifyEmailApi({
+        verification_id: verificationId,
+        code,
+        surface: "creator-web",
+      })
+
+      if (result.outcome === "success") {
+        await completeSignIn(result.data)
+      }
+
+      return result
+    },
+    [completeSignIn]
+  )
+
+  const signInWithEmail = useCallback(
+    async (input: Parameters<typeof signInWithEmailApi>[0]) => {
+      const result = await signInWithEmailApi(input)
+
+      if (result.outcome === "success") {
+        await completeSignIn(result.data)
+      }
+
+      return result
+    },
+    [completeSignIn]
   )
 
   const signOut = useCallback(async () => {
@@ -160,9 +229,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isLoading: status === "loading",
       session,
       signInWithGoogle,
+      signUpWithEmail,
+      verifyEmailAndSignIn,
+      signInWithEmail,
+      updateSession,
       signOut,
     }),
-    [status, session, signInWithGoogle, signOut]
+    [
+      status,
+      session,
+      signInWithGoogle,
+      signUpWithEmail,
+      verifyEmailAndSignIn,
+      signInWithEmail,
+      updateSession,
+      signOut,
+    ]
   )
 
   if (status === "loading") {

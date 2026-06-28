@@ -4,7 +4,6 @@ import { Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { getPolicies, recordConsent } from "@/features/auth/api/auth-api"
 import { useAuth } from "@/features/auth/auth-context"
-import { AUTH_SESSION_STORAGE_KEY } from "@/features/auth/constants"
 import { OnboardingShell } from "../onboarding-shell"
 
 interface ConsentStepProps {
@@ -14,7 +13,7 @@ interface ConsentStepProps {
 }
 
 export function ConsentStep({ progress, onBack, onNext }: ConsentStepProps) {
-  const { session } = useAuth()
+  const { session, updateSession } = useAuth()
   const [policies, setPolicies] = useState<PolicyVersions | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -38,12 +37,7 @@ export function ConsentStep({ progress, onBack, onNext }: ConsentStepProps) {
         accepted: true,
         policyVersions: policies,
       })
-      const raw = sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY)
-      if (raw) {
-        const stored = JSON.parse(raw) as { needs_consent?: boolean }
-        stored.needs_consent = false
-        sessionStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(stored))
-      }
+      updateSession({ needs_consent: false })
       onNext()
     } catch {
       setError("Unable to record consent. Please try again.")

@@ -7,22 +7,55 @@ import {
   useReducer,
 } from "react"
 import { PROJECT_THUMBNAILS } from "../constants"
-import { DEFAULT_UPLOAD_EPISODES } from "../data/mock-projects"
 import type {
+  PersonEntry,
   UploadEpisodeDraft,
   UploadWizardAction,
   UploadWizardState,
 } from "../types"
 
+function createPersonId(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+}
+
+function createInitialEpisode(index: number): UploadEpisodeDraft {
+  return {
+    id: `ep-${Date.now()}-${index}`,
+    title: `Episode ${index}`,
+    synopsis: "",
+    duration: "0:00",
+    access: "coins",
+    autoCaption: true,
+    media: null,
+  }
+}
+
+const initialEpisodes: UploadEpisodeDraft[] = [createInitialEpisode(1)]
+
 const initialState: UploadWizardState = {
   step: "info",
+  seriesId: null,
+  projectType: "short-series",
   title: "",
-  genre: "",
+  genres: [],
   language: "English",
   synopsis: "",
   tags: "",
+  access: "free",
+  aiConversionEnabled: true,
+  autoCaptionEnabled: true,
+  subtitleTracks: ["English"],
+  cast: [{ id: "cast-1", name: "", role: "" }],
+  crew: [{ id: "crew-1", name: "", role: "Director" }],
   guideVisible: true,
-  episodes: DEFAULT_UPLOAD_EPISODES.map((ep) => ({ ...ep })),
+  episodes: initialEpisodes,
+  trailer: null,
+  trailerUrl: null,
+  poster: null,
+  publishError: null,
+  isPublishing: false,
+  isContinuing: false,
+  continueError: null,
 }
 
 function createEpisode(index: number): UploadEpisodeDraft {
@@ -33,7 +66,18 @@ function createEpisode(index: number): UploadEpisodeDraft {
     duration: "0:00",
     access: "coins",
     autoCaption: true,
+    media: null,
   }
+}
+
+function updatePersonList(
+  list: PersonEntry[],
+  id: string,
+  patch: Partial<PersonEntry>
+) {
+  return list.map((person) =>
+    person.id === id ? { ...person, ...patch } : person
+  )
 }
 
 function uploadWizardReducer(
@@ -45,6 +89,51 @@ function uploadWizardReducer(
       return { ...state, step: action.payload }
     case "SET_FIELD":
       return { ...state, ...action.payload }
+    case "TOGGLE_GENRE": {
+      const genre = action.payload
+      if (state.genres.includes(genre)) {
+        return {
+          ...state,
+          genres: state.genres.filter((item) => item !== genre),
+        }
+      }
+      if (state.genres.length >= 3) return state
+      return { ...state, genres: [...state.genres, genre] }
+    }
+    case "TOGGLE_SUBTITLE": {
+      const track = action.payload
+      if (state.subtitleTracks.includes(track)) {
+        return {
+          ...state,
+          subtitleTracks: state.subtitleTracks.filter((item) => item !== track),
+        }
+      }
+      return { ...state, subtitleTracks: [...state.subtitleTracks, track] }
+    }
+    case "UPDATE_PERSON": {
+      const { list, id, patch } = action.payload
+      return {
+        ...state,
+        [list]: updatePersonList(state[list], id, patch),
+      }
+    }
+    case "ADD_PERSON": {
+      const list = action.payload
+      const entry: PersonEntry = {
+        id: createPersonId(list),
+        name: "",
+        role: list === "crew" ? "Director" : "",
+      }
+      return { ...state, [list]: [...state[list], entry] }
+    }
+    case "REMOVE_PERSON": {
+      const { list, id } = action.payload
+      if (state[list].length <= 1) return state
+      return {
+        ...state,
+        [list]: state[list].filter((person) => person.id !== id),
+      }
+    }
     case "ADD_EPISODES":
       return {
         ...state,
@@ -63,12 +152,31 @@ function uploadWizardReducer(
         ),
       }
     }
+    case "REMOVE_EPISODE":
+      return {
+        ...state,
+        episodes: state.episodes.filter((ep) => ep.id !== action.payload.id),
+      }
     case "TOGGLE_GUIDE":
       return { ...state, guideVisible: !state.guideVisible }
+    case "SET_TRAILER":
+      return { ...state, trailer: action.payload }
+    case "UPDATE_TRAILER":
+      if (!state.trailer) return state
+      return { ...state, trailer: { ...state.trailer, ...action.payload } }
+    case "SET_POSTER":
+      return { ...state, poster: action.payload }
+    case "UPDATE_POSTER":
+      if (!state.poster) return state
+      return { ...state, poster: { ...state.poster, ...action.payload } }
+    case "SET_TRAILER_URL":
+      return { ...state, trailerUrl: action.payload }
+    case "SET_SERIES_ID":
+      return { ...state, seriesId: action.payload }
     case "RESET":
       return {
         ...initialState,
-        episodes: DEFAULT_UPLOAD_EPISODES.map((ep) => ({ ...ep })),
+        episodes: [createInitialEpisode(1)],
       }
     default:
       return state
@@ -89,7 +197,10 @@ export function UploadWizardProvider({ children }: { children: ReactNode }) {
     () => ({
       state,
       dispatch,
-      previewImage: PROJECT_THUMBNAILS.theReturnees,
+      previewImage:
+        state.poster?.remoteUrl ??
+        state.poster?.previewObjectUrl ??
+        PROJECT_THUMBNAILS.theReturnees,
     }),
     [state]
   )

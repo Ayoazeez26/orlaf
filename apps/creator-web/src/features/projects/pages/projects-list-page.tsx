@@ -4,6 +4,7 @@ import { Plus } from "lucide-react"
 import { useMemo, useState } from "react"
 import { ProjectCard } from "../components/list/project-card"
 import { ProjectListRow } from "../components/list/project-list-row"
+import { ProjectsEmptyState } from "../components/list/projects-empty-state"
 import {
   ProjectsListCardToolbar,
   ProjectsListSkeleton,
@@ -25,6 +26,7 @@ export function ProjectsListPage() {
     [projects, filters]
   )
 
+  const showEmptyList = projects && projects.length === 0
   const showEmptyResults =
     projects && projects.length > 0 && filteredProjects.length === 0
 
@@ -59,10 +61,13 @@ export function ProjectsListPage() {
         </p>
       )}
 
+      {showEmptyList && <ProjectsEmptyState variant="no-projects" />}
+
       {showEmptyResults && (
-        <p className="text-muted-foreground text-sm">
-          No projects match your search or filters.
-        </p>
+        <ProjectsEmptyState
+          variant="no-results"
+          onClearFilters={() => setFilters(DEFAULT_PROJECTS_LIST_FILTERS)}
+        />
       )}
 
       {projects && filteredProjects.length > 0 && layout === "list" && (

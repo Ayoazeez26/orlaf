@@ -17,18 +17,25 @@ import {
   Eye,
   EyeOff,
   FileText,
+  Loader2,
   Plus,
   Sparkles,
   Subtitles,
-  Upload,
+  Trash2,
   Volume2,
 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { deleteEpisode } from "../../api/studio-api"
+import { useEpisodeAutosave } from "../../hooks/use-episode-autosave"
+import { useEpisodeMediaUpload } from "../../hooks/use-episode-media-upload"
 import { useSaveUploadDraft } from "../../hooks/use-save-upload-draft"
-import type { EpisodeAccess } from "../../types"
+import { formatUploadGenres } from "../../lib/format-upload-genres"
+import { MAX_EPISODE_FILE_BYTES } from "../../lib/media/upload-pipeline.types"
+import type { EpisodeAccess, UploadEpisodeDraft } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
 import { UploadSeriesPreviewAside } from "./upload-series-preview-aside"
 import { UploadEpisodesStepNav } from "./upload-step-nav"
+import { VideoUploadZone } from "./video-upload-zone"
 
 const ACCESS_OPTIONS: { value: EpisodeAccess; label: string }[] = [
   { value: "free", label: "Free" },
@@ -39,15 +46,58 @@ const ACCESS_OPTIONS: { value: EpisodeAccess; label: string }[] = [
 interface UploadEpisodesStepProps {
   onBack: () => void
   onNext: () => void
+  initialExpandedEpisodeId?: string
 }
 
 export function UploadEpisodesStep({
   onBack,
   onNext,
+  initialExpandedEpisodeId,
 }: UploadEpisodesStepProps) {
   const { state, dispatch, previewImage } = useUploadWizard()
   const saveDraft = useSaveUploadDraft()
-  const [expandedEpisode, setExpandedEpisode] = useState(state.episodes[0]?.id)
+  const { uploadEpisode, clearEpisode } = useEpisodeMediaUpload()
+  useEpisodeAutosave(state.episodes, state.seriesId)
+  const [expandedEpisode, setExpandedEpisode] = useState(
+    initialExpandedEpisodeId ?? state.episodes[0]?.id
+  )
+  const episodeCountRef = useRef(state.episodes.length)
+  const [deletingEpisodeId, setDeletingEpisodeId] = useState<string | null>(
+    null
+  )
+
+  useEffect(() => {
+    if (state.episodes.length > episodeCountRef.current) {
+      const newest = state.episodes[state.episodes.length - 1]
+      if (newest) setExpandedEpisode(newest.id)
+    }
+    episodeCountRef.current = state.episodes.length
+  }, [state.episodes])
+
+  async function handleDeleteEpisode(episode: UploadEpisodeDraft) {
+    if (deletingEpisodeId) return
+
+    const seriesId = state.seriesId
+    const backendEpisodeId = episode.backendEpisodeId
+
+    if (!seriesId || !backendEpisodeId) {
+      dispatch({ type: "REMOVE_EPISODE", payload: { id: episode.id } })
+      return
+    }
+
+    setDeletingEpisodeId(episode.id)
+    try {
+      await deleteEpisode(seriesId, backendEpisodeId)
+      dispatch({ type: "REMOVE_EPISODE", payload: { id: episode.id } })
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Failed to delete episode"
+      alert(message)
+    } finally {
+      setDeletingEpisodeId(null)
+    }
+  }
+
   const displayTitle = state.title.trim() || "The Returnees"
   const toolbarButtonClassName =
     "text-text-strong hover:text-text-strong aria-expanded:text-text-strong px-3 py-2"
@@ -146,26 +196,41 @@ export function UploadEpisodesStep({
               value={episode.id}
               className="overflow-hidden rounded-[24px] border bg-card"
             >
-              <AccordionTrigger className="items-center px-6 py-5 hover:no-underline">
-                <div className="flex min-w-0 items-center gap-4">
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted font-semibold text-sm text-text-strong">
-                    {index + 1}
-                  </span>
-                  <div className="min-w-0 space-y-1 text-left">
-                    <p className="truncate font-semibold text-[15px] text-text-strong">
-                      {episode.title}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-2 text-sm text-text-subtle">
-                      <span>
-                        Ep {index + 1} · {episode.duration}
-                      </span>
-                      <span className="rounded-full bg-primary/10 px-2.5 py-1 font-semibold text-primary text-xs">
-                        9:16 Vertical
-                      </span>
+              <div className="grid grid-cols-[1fr_auto] items-center">
+                <AccordionTrigger className="items-center px-6 py-5 hover:no-underline">
+                  <div className="flex min-w-0 items-center gap-4">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted font-semibold text-sm text-text-strong">
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0 space-y-1 text-left">
+                      <p className="truncate font-semibold text-[15px] text-text-strong">
+                        {episode.title}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2 text-sm text-text-subtle">
+                        <span>
+                          Ep {index + 1} · {episode.duration}
+                        </span>
+                        <span className="rounded-full bg-primary/10 px-2.5 py-1 font-semibold text-primary text-xs">
+                          9:16 Vertical
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </AccordionTrigger>
+                </AccordionTrigger>
+                <button
+                  type="button"
+                  onClick={() => void handleDeleteEpisode(episode)}
+                  disabled={deletingEpisodeId === episode.id}
+                  aria-label={`Delete ${episode.title}`}
+                  className="mr-6 flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-50"
+                >
+                  {deletingEpisodeId === episode.id ? (
+                    <Loader2 className="size-4 animate-spin" aria-hidden />
+                  ) : (
+                    <Trash2 className="size-4" aria-hidden />
+                  )}
+                </button>
+              </div>
               <AccordionContent className="border-t px-6 pt-6 pb-6">
                 <div className="space-y-5">
                   <div className="grid gap-5 lg:grid-cols-2">
@@ -173,18 +238,16 @@ export function UploadEpisodesStep({
                       <Label className="font-medium text-sm text-text-strong">
                         Upload Episode
                       </Label>
-                      <div className="mt-2 flex min-h-[210px] flex-col items-center justify-center gap-2 rounded-[24px] border-3 border-border border-dashed bg-background px-6 py-10 text-center">
-                        <Upload
-                          className="size-10 text-text-subtle"
-                          aria-hidden
-                        />
-                        <p className="font-medium text-[15px] text-text-strong">
-                          Upload this episode
-                        </p>
-                        <p className="text-sm text-text-subtle">
-                          MP4, MOV • Max 500MB
-                        </p>
-                      </div>
+                      <VideoUploadZone
+                        label=""
+                        hint="MP4, MOV • Max 500MB"
+                        media={episode.media}
+                        maxBytes={MAX_EPISODE_FILE_BYTES}
+                        onSelect={(file) =>
+                          void uploadEpisode(episode.id, file)
+                        }
+                        onClear={() => clearEpisode(episode.id)}
+                      />
                     </div>
 
                     <div className="space-y-5">
@@ -327,9 +390,10 @@ export function UploadEpisodesStep({
       <div className="flex flex-col gap-6">
         <UploadSeriesPreviewAside
           title={displayTitle}
-          genre={state.genre}
+          genre={formatUploadGenres(state.genres)}
           synopsis={state.synopsis}
           posterUrl={previewImage}
+          trailerUrl={state.trailerUrl}
           episodes={state.episodes}
           activeEpisodeId={expandedEpisode}
         />

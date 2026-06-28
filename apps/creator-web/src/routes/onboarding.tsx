@@ -1,8 +1,7 @@
 import { ClientOnly, createFileRoute, redirect } from "@tanstack/react-router"
 import { z } from "zod"
 import { ThemeSwitcher } from "@/components/theme-switcher"
-import { getAuthSnapshot } from "@/features/auth/lib/auth-snapshot"
-import { hasCompletedOnboarding } from "@/features/auth/lib/onboarding-complete"
+import { getAuthReady } from "@/features/auth/lib/auth-bootstrap"
 import { OnboardingProvider } from "@/features/onboarding/onboarding-context"
 import { OnboardingFlow } from "@/features/onboarding/onboarding-flow"
 
@@ -13,15 +12,21 @@ const onboardingSearchSchema = z.object({
 export const Route = createFileRoute("/onboarding")({
   ssr: false,
   validateSearch: onboardingSearchSchema,
-  beforeLoad: () => {
-    const { status, session } = getAuthSnapshot()
-    if (
-      status === "authenticated" &&
-      session &&
-      !session.needs_consent &&
-      hasCompletedOnboarding()
-    ) {
+  beforeLoad: async () => {
+    const { status, session } = await getAuthReady()
+    if (status !== "authenticated" || !session) return
+
+    if (session.account_state === "pending_approval") {
       throw redirect({ to: "/dashboard" })
+    }
+    if (session.account_state === "active") {
+      throw redirect({ to: "/dashboard" })
+    }
+    if (session.account_state === "suspended") {
+      throw redirect({ to: "/auth/suspended" })
+    }
+    if (session.account_state === "rejected") {
+      throw redirect({ to: "/auth/rejected" })
     }
   },
   component: OnboardingPage,

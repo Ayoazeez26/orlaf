@@ -9,6 +9,7 @@ import { OnboardingProgress } from "../onboarding-progress"
 
 interface WelcomeStepProps {
   progress: { currentIndex: number; total: number }
+  onContinueEmail: () => void
 }
 
 function AppleIcon() {
@@ -24,9 +25,14 @@ function AppleIcon() {
   )
 }
 
-export function WelcomeStep({ progress }: WelcomeStepProps) {
+export function WelcomeStep({ progress, onContinueEmail }: WelcomeStepProps) {
   const { dispatch } = useOnboarding()
   const [authError, setAuthError] = useState<string | null>(null)
+
+  const handleContinueEmail = () => {
+    dispatch({ type: "SET_AUTH_METHOD", payload: "email" })
+    onContinueEmail()
+  }
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center bg-background px-4 py-8 sm:py-10">
@@ -75,12 +81,11 @@ export function WelcomeStep({ progress }: WelcomeStepProps) {
             type="button"
             variant="outline"
             size="lg"
-            disabled
-            className="h-12 w-full cursor-not-allowed justify-center gap-3 rounded-xl font-medium text-base opacity-60"
+            onClick={handleContinueEmail}
+            className="h-12 w-full justify-center gap-3 rounded-xl font-medium text-base"
           >
             <Mail className="size-5 text-muted-foreground" />
             Continue with Email
-            <span className="text-muted-foreground text-xs">(Coming soon)</span>
           </Button>
         </div>
 

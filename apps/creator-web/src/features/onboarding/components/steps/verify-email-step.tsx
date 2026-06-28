@@ -4,35 +4,86 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@workspace/ui/components/input-otp"
-import { Mail } from "lucide-react"
+import { Loader2, Mail } from "lucide-react"
 import { useState } from "react"
+import { resendVerification } from "@/features/auth/api/auth-api"
+import { useAuth } from "@/features/auth/auth-context"
 import { useOnboarding } from "../../onboarding-context"
 import { OnboardingShell } from "../onboarding-shell"
 
 interface VerifyEmailStepProps {
   progress: { currentIndex: number; total: number }
   onBack: () => void
-  onNext: () => void
 }
 
-export function VerifyEmailStep({
-  progress,
-  onBack,
-  onNext,
-}: VerifyEmailStepProps) {
+export function VerifyEmailStep({ progress, onBack }: VerifyEmailStepProps) {
   const { data, dispatch } = useOnboarding()
+  const { verifyEmailAndSignIn } = useAuth()
   const [code, setCode] = useState(data.verificationCode)
+  const [isVerifying, setIsVerifying] = useState(false)
+  const [isResending, setIsResending] = useState(false)
   const [resent, setResent] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleVerify = () => {
-    if (code.length !== 6) return
-    dispatch({ type: "SET_VERIFICATION_CODE", payload: code })
-    onNext()
+  const emailHint = data.maskedEmail ?? data.profile.email ?? "your inbox"
+
+  const handleVerify = async () => {
+    if (code.length !== 6 || !data.verificationId) return
+
+    setIsVerifying(true)
+    setError(null)
+
+    const result = await verifyEmailAndSignIn(data.verificationId, code)
+
+    setIsVerifying(false)
+
+    if (result.outcome === "success") {
+      dispatch({ type: "SET_VERIFICATION_CODE", payload: code })
+      return
+    }
+
+    if (result.outcome === "invalid_code") {
+      setError(result.message)
+      return
+    }
+
+    if (result.outcome === "code_expired") {
+      setError(result.message)
+      return
+    }
+
+    if (result.outcome === "too_many_attempts") {
+      setError(result.message)
+      return
+    }
+
+    setError(result.message)
   }
 
-  const handleResend = () => {
-    setResent(true)
-    setTimeout(() => setResent(false), 3000)
+  const handleResend = async () => {
+    if (!data.verificationId || isResending) return
+
+    setIsResending(true)
+    setError(null)
+
+    const result = await resendVerification(data.verificationId)
+
+    setIsResending(false)
+
+    if (result.outcome === "success") {
+      setResent(true)
+      setTimeout(() => setResent(false), 3000)
+      return
+    }
+
+    if (result.outcome === "cooldown") {
+      setError(
+        `${result.message} Try again in ${result.retryAfterSeconds} seconds.`
+      )
+      return
+    }
+
+    setError(result.message)
   }
 
   return (
@@ -43,7 +94,7 @@ export function VerifyEmailStep({
         </div>
         <h1 className="font-semibold text-2xl">Verify your email</h1>
         <p className="mt-2 max-w-sm text-muted-foreground text-sm">
-          We sent a 6-digit code to your inbox. Enter it below.
+          We sent a 6-digit code to {emailHint}. Enter it below.
         </p>
       </div>
 
@@ -62,13 +113,26 @@ export function VerifyEmailStep({
         </InputOTP>
       </div>
 
+      {error && (
+        <p className="mt-4 text-center text-destructive text-sm" role="alert">
+          {error}
+        </p>
+      )}
+
       <Button
         type="button"
         className="mt-8 w-full text-base"
-        disabled={code.length !== 6}
+        disabled={code.length !== 6 || isVerifying || !data.verificationId}
         onClick={handleVerify}
       >
-        Verify
+        {isVerifying ? (
+          <>
+            <Loader2 className="size-4 animate-spin" aria-hidden />
+            Verifying…
+          </>
+        ) : (
+          "Verify"
+        )}
       </Button>
 
       <p className="mt-6 text-center text-muted-foreground text-sm">
@@ -76,9 +140,10 @@ export function VerifyEmailStep({
         <button
           type="button"
           onClick={handleResend}
-          className="font-medium text-primary hover:underline"
+          disabled={isResending}
+          className="font-medium text-primary hover:underline disabled:opacity-50"
         >
-          {resent ? "Code sent!" : "Resend"}
+          {isResending ? "Sending…" : resent ? "Code sent!" : "Resend"}
         </button>
       </p>
     </OnboardingShell>

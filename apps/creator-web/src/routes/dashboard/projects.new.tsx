@@ -4,6 +4,8 @@ import type { UploadWizardState } from "@/features/projects/types"
 
 type UploadSearch = {
   step?: UploadWizardState["step"]
+  seriesId?: string
+  addEpisode?: boolean
 }
 
 export const Route = createFileRoute("/dashboard/projects/new")({
@@ -14,6 +16,8 @@ export const Route = createFileRoute("/dashboard/projects/new")({
       search.step === "review"
         ? search.step
         : "info",
+    seriesId: typeof search.seriesId === "string" ? search.seriesId : undefined,
+    addEpisode: search.addEpisode === true || search.addEpisode === "true",
   }),
   component: UploadNewSeriesPage,
 })

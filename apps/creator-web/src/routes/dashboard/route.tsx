@@ -1,11 +1,11 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { getAuthSnapshot } from "@/features/auth/lib/auth-snapshot"
+import { getAuthReady } from "@/features/auth/lib/auth-bootstrap"
 import { DashboardLayout } from "@/features/dashboard/components/layout/dashboard-layout"
 
 export const Route = createFileRoute("/dashboard")({
   ssr: false,
-  beforeLoad: () => {
-    const { status } = getAuthSnapshot()
+  beforeLoad: async () => {
+    const { status } = await getAuthReady()
     if (status !== "authenticated") {
       throw redirect({ to: "/onboarding" })
     }

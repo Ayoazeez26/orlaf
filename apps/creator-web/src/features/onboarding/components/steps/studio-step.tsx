@@ -4,6 +4,7 @@ import { Label } from "@workspace/ui/components/label"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { TEAM_SIZE_OPTIONS } from "../../constants"
+import { useOnboardingPersist } from "../../hooks/use-onboarding-persist"
 import { useOnboarding } from "../../onboarding-context"
 import type { TeamSize } from "../../types"
 import { OnboardingNav } from "../onboarding-nav"
@@ -31,6 +32,7 @@ export function StudioStep({
   onSkip,
 }: StudioStepProps) {
   const { data, dispatch } = useOnboarding()
+  const { saveStudio, saveStudioSkip, isSaving, error } = useOnboardingPersist()
 
   const {
     register,
@@ -46,12 +48,34 @@ export function StudioStep({
 
   const teamSize = data.studio.teamSize
 
-  const onSubmit = (values: StudioFormValues) => {
+  const onSubmit = async (values: StudioFormValues) => {
+    const studioData = {
+      ...data,
+      studio: {
+        name: values.name,
+        teamSize,
+        website: values.website ?? "",
+      },
+    }
     dispatch({
       type: "SET_STUDIO",
       payload: { name: values.name, website: values.website ?? "" },
     })
-    onNext()
+    try {
+      await saveStudio(studioData)
+      onNext()
+    } catch {
+      // error shown below
+    }
+  }
+
+  const handleSkip = async () => {
+    try {
+      await saveStudioSkip()
+      onSkip()
+    } catch {
+      // error shown below
+    }
   }
 
   const handleTeamSize = (size: TeamSize) => {
@@ -63,7 +87,13 @@ export function StudioStep({
       progress={progress}
       showBack
       onBack={onBack}
-      footer={<OnboardingNav onSkip={onSkip} onNext={handleSubmit(onSubmit)} />}
+      footer={
+        <OnboardingNav
+          onSkip={handleSkip}
+          onNext={handleSubmit(onSubmit)}
+          nextDisabled={isSaving}
+        />
+      }
     >
       <div>
         <h1 className="font-semibold text-2xl">About your studio</h1>
@@ -71,6 +101,12 @@ export function StudioStep({
           Help us set up your team workspace.
         </p>
       </div>
+
+      {error && (
+        <p className="mt-4 text-destructive text-sm" role="alert">
+          {error}
+        </p>
+      )}
 
       <form className="mt-8 space-y-6" onSubmit={(e) => e.preventDefault()}>
         <div className="space-y-2">
