@@ -12,6 +12,9 @@ export default defineConfig(({ mode }) => {
   ).replace(/\/+$/, "")
 
   return {
+    worker: {
+      format: "es",
+    },
     plugins: [
       nitro({
         routeRules: {
