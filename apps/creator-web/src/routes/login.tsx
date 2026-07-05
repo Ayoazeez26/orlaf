@@ -21,7 +21,7 @@ export const Route = createFileRoute("/login")({
   ssr: false,
   beforeLoad: async () => {
     const { status, session } = await getAuthReady()
-    if (status !== "authenticated" || !session) return
+    if (status === "loading" || status !== "authenticated" || !session) return
 
     const destination = resolvePostSignInRoute(session)
     if (destination.search?.step) {

@@ -14,7 +14,9 @@ export const Route = createFileRoute("/onboarding")({
   validateSearch: onboardingSearchSchema,
   beforeLoad: async () => {
     const { status, session } = await getAuthReady()
-    if (status !== "authenticated" || !session) return
+    if (status === "loading" || status !== "authenticated" || !session) return
+
+    if (session.needs_consent) return
 
     if (session.account_state === "pending_approval") {
       throw redirect({ to: "/dashboard" })

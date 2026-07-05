@@ -6,6 +6,7 @@ export const Route = createFileRoute("/dashboard")({
   ssr: false,
   beforeLoad: async () => {
     const { status } = await getAuthReady()
+    if (status === "loading") return
     if (status !== "authenticated") {
       throw redirect({ to: "/onboarding" })
     }
