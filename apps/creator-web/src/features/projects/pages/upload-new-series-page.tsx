@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 import { useNavigate, useSearch } from "@tanstack/react-router"
-import { useEffect, useRef } from "react"
+import { useEffect, useLayoutEffect, useRef } from "react"
+import { usePreferences } from "@/features/settings/hooks/use-preferences"
 import { getSeries } from "../api/studio-api"
 import { BackToProjectsLink } from "../components/shared/back-to-projects-link"
 import { UploadEpisodesStep } from "../components/upload/upload-episodes-step"
 import { UploadReviewStep } from "../components/upload/upload-review-step"
 import { UploadSeriesInfoStep } from "../components/upload/upload-series-info-step"
 import { UploadStepper } from "../components/upload/upload-stepper"
+import { mapCreatorContentDefaults } from "../lib/map-creator-content-defaults"
 import { mapSeriesToWizardFields } from "../lib/map-series-to-wizard-state"
 import type { UploadWizardState } from "../types"
 import {
@@ -24,8 +26,10 @@ function UploadNewSeriesContent() {
   const navigate = useNavigate()
   const search = useSearch({ strict: false }) as UploadSearch
   const { state, dispatch } = useUploadWizard()
+  const { data: preferences, isLoading: preferencesLoading } = usePreferences()
   const seriesId = search.seriesId
   const prefilledSeriesId = useRef<string | null>(null)
+  const appliedCreatorDefaults = useRef(false)
 
   const seriesQuery = useQuery({
     queryKey: ["studio", "series", seriesId],
@@ -47,6 +51,15 @@ function UploadNewSeriesContent() {
     }
   }, [seriesQuery.data, seriesId, search.addEpisode, dispatch])
 
+  useLayoutEffect(() => {
+    if (seriesId || appliedCreatorDefaults.current || !preferences) return
+    appliedCreatorDefaults.current = true
+    dispatch({
+      type: "SET_FIELD",
+      payload: mapCreatorContentDefaults(preferences),
+    })
+  }, [seriesId, preferences, dispatch])
+
   const step = search.step ?? state.step
   const isEditing = Boolean(seriesId)
 
@@ -56,6 +69,15 @@ function UploadNewSeriesContent() {
       to: "/dashboard/projects/new",
       search: { step: next, seriesId },
     })
+  }
+
+  if (!seriesId && preferencesLoading) {
+    return (
+      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+        <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+        <div className="h-48 animate-pulse rounded-2xl bg-muted" />
+      </div>
+    )
   }
 
   if (seriesId && seriesQuery.isError) {

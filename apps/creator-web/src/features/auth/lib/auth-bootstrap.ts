@@ -2,7 +2,7 @@ import type { SignInResponse } from "@sable/contracts"
 import { setAccessToken } from "@/lib/http-client"
 import { fetchAuthSession, refreshSession } from "../api/auth-api"
 import type { AuthSnapshot } from "./auth-snapshot"
-import { setAuthSnapshot } from "./auth-snapshot"
+import { getAuthSnapshot, setAuthSnapshot } from "./auth-snapshot"
 import { markOnboardingComplete } from "./onboarding-complete"
 
 let readyPromise: Promise<AuthSnapshot> | null = null
@@ -30,12 +30,21 @@ async function runBootstrap(): Promise<AuthSnapshot> {
   }
 }
 
+/** Drop the cached bootstrap promise after sign-in / sign-out. */
+export function clearAuthBootstrapCache(): void {
+  readyPromise = null
+}
+
 /**
- * Runs the refresh-token + session check exactly once per page load and
- * resolves with the result. Route `beforeLoad` hooks and `AuthProvider` both
- * await this so neither acts on a stale/default "loading" snapshot.
+ * Route guards and AuthProvider await this. After the first bootstrap, returns
+ * the live in-memory snapshot so sign-out is not overridden by a stale promise.
  */
 export function getAuthReady(): Promise<AuthSnapshot> {
+  const current = getAuthSnapshot()
+  if (current.status !== "loading") {
+    return Promise.resolve(current)
+  }
+
   if (!readyPromise) {
     readyPromise = runBootstrap()
   }

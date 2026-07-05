@@ -31,6 +31,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react"
+import { useLayoutEffect, useRef } from "react"
 import { SelectionCard } from "@/features/onboarding/components/selection-card"
 import {
   LANGUAGE_OPTIONS,
@@ -421,6 +422,26 @@ function PersonEntryList({
 }) {
   const { dispatch } = useUploadWizard()
   const rolePlaceholder = list === "crew" ? "Director" : "e.g. Ada"
+  const nameInputRefs = useRef(new Map<string, HTMLInputElement>())
+  const pendingFocusRef = useRef(false)
+  const prevCountRef = useRef(entries.length)
+
+  useLayoutEffect(() => {
+    if (!pendingFocusRef.current || entries.length <= prevCountRef.current) {
+      prevCountRef.current = entries.length
+      return
+    }
+
+    pendingFocusRef.current = false
+    prevCountRef.current = entries.length
+    const newEntry = entries[entries.length - 1]
+    nameInputRefs.current.get(newEntry.id)?.focus()
+  }, [entries])
+
+  function handleAdd() {
+    pendingFocusRef.current = true
+    dispatch({ type: "ADD_PERSON", payload: list })
+  }
 
   return (
     <div className="space-y-3">
@@ -430,6 +451,13 @@ function PersonEntryList({
           className="flex flex-col gap-2 sm:flex-row sm:items-center"
         >
           <Input
+            ref={(element) => {
+              if (element) {
+                nameInputRefs.current.set(entry.id, element)
+              } else {
+                nameInputRefs.current.delete(entry.id)
+              }
+            }}
             className="bg-input-bg sm:flex-1"
             placeholder="Full name"
             value={entry.name}
@@ -481,7 +509,7 @@ function PersonEntryList({
         type="button"
         variant="outline"
         className="w-full border-dashed"
-        onClick={() => dispatch({ type: "ADD_PERSON", payload: list })}
+        onClick={handleAdd}
       >
         <Plus className="size-4" aria-hidden />
         Add {list} member

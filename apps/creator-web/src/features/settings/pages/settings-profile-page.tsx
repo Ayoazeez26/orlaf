@@ -1,52 +1,71 @@
 import { Button } from "@workspace/ui/components/button"
-import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
-import { Input } from "@workspace/ui/components/input"
-import { Textarea } from "@workspace/ui/components/textarea"
-import { Camera, ExternalLink, Loader2 } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
-import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
-import { uploadAvatar } from "../api/profile-upload"
 import {
-  useProfile,
-  useUpdateProfile,
-  useUpdateSocialLinks,
-} from "../hooks/use-profile"
-
-const SOCIAL_PLATFORMS = [
-  { key: "instagramUrl", label: "Instagram" },
-  { key: "twitterUrl", label: "Twitter / X" },
-  { key: "youtubeUrl", label: "YouTube" },
-  { key: "tiktokUrl", label: "TikTok" },
-] as const
-
-type SocialKey = (typeof SOCIAL_PLATFORMS)[number]["key"]
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
+import { Textarea } from "@workspace/ui/components/textarea"
+import { Download, Loader2 } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { uploadAvatar } from "../api/profile-upload"
+import { SettingsActionRow } from "../components/settings-action-row"
+import { SettingsField } from "../components/settings-field"
+import { SettingsSectionCard } from "../components/settings-section-card"
+import { PRONOUNS_OPTIONS } from "../constants"
+import { useProfile, useUpdateProfile } from "../hooks/use-profile"
+import { useSettingsDashboard } from "../hooks/use-settings-dashboard"
+import {
+  registerSettingsReset,
+  registerSettingsSave,
+} from "../lib/settings-form-actions"
 
 function getInitials(firstName: string, lastName: string, email: string) {
   const initials = `${firstName.charAt(0)}${lastName.charAt(0)}`.trim()
   return (initials || email.charAt(0) || "?").toUpperCase()
 }
 
+function buildInitialForm(
+  data: NonNullable<ReturnType<typeof useProfile>["data"]>,
+  dashboard: ReturnType<typeof useSettingsDashboard>["data"]
+) {
+  const username =
+    data.creatorProfile?.handle?.replace(/^@/, "") ??
+    dashboard?.profile.username ??
+    data.displayName?.replace(/^@/, "") ??
+    ""
+
+  return {
+    firstName: data.firstName ?? dashboard?.profile.firstName ?? "",
+    lastName: data.lastName ?? dashboard?.profile.lastName ?? "",
+    username,
+    pronouns: dashboard?.profile.pronouns ?? "She / her",
+    bio: data.bio ?? dashboard?.profile.bio ?? "",
+    phone: data.phone ?? dashboard?.profile.phone ?? "",
+    avatarUrl: data.avatarUrl ?? "",
+  }
+}
+
 export function SettingsProfilePage() {
   const { data } = useProfile()
+  const { data: dashboard } = useSettingsDashboard()
   const updateProfile = useUpdateProfile()
-  const updateSocialLinks = useUpdateSocialLinks()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
   const [avatarError, setAvatarError] = useState<string | null>(null)
+  const initialFormRef = useRef<ReturnType<typeof buildInitialForm> | null>(
+    null
+  )
 
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
-    displayName: "",
+    username: "",
+    pronouns: "She / her",
     bio: "",
     phone: "",
     avatarUrl: "",
-  })
-  const [social, setSocial] = useState<Record<SocialKey, string>>({
-    instagramUrl: "",
-    twitterUrl: "",
-    youtubeUrl: "",
-    tiktokUrl: "",
   })
 
   const hasInitialized = useRef(false)
@@ -54,25 +73,55 @@ export function SettingsProfilePage() {
   useEffect(() => {
     if (!data || hasInitialized.current) return
     hasInitialized.current = true
-    setForm({
-      firstName: data.firstName ?? "",
-      lastName: data.lastName ?? "",
-      displayName: data.displayName ?? "",
-      bio: data.bio ?? "",
-      phone: data.phone ?? "",
-      avatarUrl: data.avatarUrl ?? "",
-    })
-    setSocial({
-      instagramUrl: data.instagramUrl ?? "",
-      twitterUrl: data.twitterUrl ?? "",
-      youtubeUrl: data.youtubeUrl ?? "",
-      tiktokUrl: data.tiktokUrl ?? "",
-    })
-  }, [data])
+    const initial = buildInitialForm(data, dashboard)
+    initialFormRef.current = initial
+    setForm(initial)
+  }, [data, dashboard])
+
+  useEffect(() => {
+    if (!data) return
+
+    function handleSave() {
+      const avatarUrl = form.avatarUrl.trim() ? form.avatarUrl : null
+      updateProfile.mutate(
+        {
+          firstName: form.firstName,
+          lastName: form.lastName,
+          displayName: form.username
+            ? `@${form.username.replace(/^@/, "")}`
+            : undefined,
+          bio: form.bio,
+          phone: form.phone,
+          avatarUrl,
+        },
+        {
+          onSuccess: () => {
+            if (initialFormRef.current) {
+              initialFormRef.current = { ...form, avatarUrl: avatarUrl ?? "" }
+            }
+          },
+        }
+      )
+    }
+
+    function handleReset() {
+      if (initialFormRef.current) {
+        setForm(initialFormRef.current)
+      }
+    }
+
+    const unregisterSave = registerSettingsSave(handleSave)
+    const unregisterReset = registerSettingsReset(handleReset)
+    return () => {
+      unregisterSave()
+      unregisterReset()
+    }
+  }, [data, form, updateProfile])
 
   if (!data) return null
 
   const initials = getInitials(form.firstName, form.lastName, data.email)
+  const email = data.email
 
   async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -94,115 +143,110 @@ export function SettingsProfilePage() {
     }
   }
 
-  function handleSaveProfile() {
-    updateProfile.mutate({
-      firstName: form.firstName,
-      lastName: form.lastName,
-      displayName: form.displayName,
-      bio: form.bio,
-      phone: form.phone,
-    })
-  }
-
-  function handleUpdateLinks() {
-    // Backend validates non-empty values as URLs, so omit cleared fields
-    // rather than sending empty strings.
-    const payload = Object.fromEntries(
-      Object.entries(social).filter(([, value]) => value.trim() !== "")
-    )
-    updateSocialLinks.mutate(payload)
-  }
-
   return (
-    <div className="max-w-3xl space-y-6">
-      <Card className={FROSTED_CARD_SURFACE_CLASS}>
-        <CardHeader>
-          <p className="font-semibold text-foreground">Personal Information</p>
-          <p className="text-muted-foreground text-sm">
-            Update your creator profile visible to audiences
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center gap-4 border-border border-b pb-6">
-            <div className="relative">
-              {form.avatarUrl ? (
-                <img
-                  src={form.avatarUrl}
-                  alt="Profile avatar"
-                  className="size-20 rounded-full border-2 border-border-zinc-200 object-cover"
-                />
-              ) : (
-                <span className="flex size-20 items-center justify-center rounded-full border-2 border-border-zinc-200 bg-primary/10 font-semibold text-primary text-xl">
-                  {initials}
-                </span>
-              )}
-              <button
+    <div className="space-y-6">
+      <SettingsSectionCard
+        title="Profile"
+        description="How you appear to your audience and the Sable team."
+      >
+        <div className="space-y-6">
+          <div className="flex flex-wrap items-center gap-4 border-border border-b pb-6">
+            {form.avatarUrl ? (
+              <img
+                src={form.avatarUrl}
+                alt="Profile avatar"
+                className="size-16 rounded-full border-2 border-border object-cover"
+              />
+            ) : (
+              <span className="flex size-16 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary text-xl">
+                {initials}
+              </span>
+            )}
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
                 type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-lg"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploadingAvatar}
-                className="absolute -right-1 -bottom-1 flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground disabled:opacity-60"
               >
                 {isUploadingAvatar ? (
-                  <Loader2 className="size-3.5 animate-spin" aria-hidden />
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
                 ) : (
-                  <Camera className="size-3.5" aria-hidden />
+                  "Upload photo"
                 )}
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                onChange={handleAvatarChange}
-              />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground"
+                onClick={() => setForm((prev) => ({ ...prev, avatarUrl: "" }))}
+              >
+                Remove
+              </Button>
             </div>
-            <div>
-              <p className="font-semibold text-foreground">Profile Photo</p>
-              <p className="text-muted-foreground text-sm">
-                JPG, PNG or WebP. Max 2 MB.
-              </p>
-              {avatarError && (
-                <p className="text-destructive text-xs">{avatarError}</p>
-              )}
-            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleAvatarChange}
+            />
+            {avatarError ? (
+              <p className="w-full text-destructive text-xs">{avatarError}</p>
+            ) : null}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field
-              label="First Name"
+            <SettingsField
+              label="First name"
               value={form.firstName}
               onChange={(value) =>
                 setForm((prev) => ({ ...prev, firstName: value }))
               }
             />
-            <Field
-              label="Last Name"
+            <SettingsField
+              label="Last name"
               value={form.lastName}
               onChange={(value) =>
                 setForm((prev) => ({ ...prev, lastName: value }))
               }
             />
-          </div>
-          <Field
-            label="Display Name"
-            value={form.displayName}
-            onChange={(value) =>
-              setForm((prev) => ({ ...prev, displayName: value }))
-            }
-          />
-          <div className="space-y-2">
-            <p className="font-medium text-foreground text-sm">Bio</p>
-            <Textarea
-              value={form.bio}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, bio: e.target.value }))
+            <SettingsField
+              label="Username"
+              value={form.username}
+              prefix="@"
+              onChange={(value) =>
+                setForm((prev) => ({
+                  ...prev,
+                  username: value.replace(/^@/, ""),
+                }))
               }
-              className="min-h-[92px] bg-input-bg"
             />
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Email" value={data.email} readOnly />
-            <Field
+            <div className="space-y-2">
+              <p className="font-medium text-foreground text-sm">Pronouns</p>
+              <Select
+                value={form.pronouns}
+                onValueChange={(value) =>
+                  setForm((prev) => ({ ...prev, pronouns: value }))
+                }
+              >
+                <SelectTrigger className="h-10 w-full bg-input-bg">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRONOUNS_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <SettingsField label="Email" value={email} readOnly />
+            <SettingsField
               label="Phone"
               value={form.phone}
               onChange={(value) =>
@@ -210,6 +254,18 @@ export function SettingsProfilePage() {
               }
             />
           </div>
+
+          <div className="space-y-2">
+            <p className="font-medium text-foreground text-sm">Bio</p>
+            <Textarea
+              value={form.bio}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, bio: e.target.value }))
+              }
+              className="min-h-[90px] bg-input-bg"
+            />
+          </div>
+
           {updateProfile.isError && (
             <p className="text-destructive text-sm">
               {updateProfile.error instanceof Error
@@ -217,94 +273,53 @@ export function SettingsProfilePage() {
                 : "Failed to save profile"}
             </p>
           )}
-          <div className="flex items-center justify-end gap-3">
-            {updateProfile.isSuccess && !updateProfile.isPending && (
-              <p className="text-muted-foreground text-sm">Saved</p>
-            )}
-            <Button
-              type="button"
-              onClick={handleSaveProfile}
-              disabled={updateProfile.isPending}
-            >
-              {updateProfile.isPending ? "Saving..." : "Save Changes"}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          {updateProfile.isSuccess && !updateProfile.isPending ? (
+            <p className="text-muted-foreground text-sm">Saved</p>
+          ) : null}
+        </div>
+      </SettingsSectionCard>
 
-      <Card className={FROSTED_CARD_SURFACE_CLASS}>
-        <CardHeader>
-          <p className="font-semibold text-foreground">Social Links</p>
-          <p className="text-muted-foreground text-sm">
-            Connect your social presence
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {SOCIAL_PLATFORMS.map(({ key, label }) => (
-            <div
-              key={key}
-              className="grid grid-cols-1 items-center gap-2 sm:grid-cols-[8.5rem_1fr] sm:gap-x-3"
-            >
-              <p className="inline-flex items-center gap-2 text-foreground text-sm">
-                <ExternalLink
-                  className="size-3.5 shrink-0 text-muted-foreground"
-                  aria-hidden
-                />
-                {label}
-              </p>
-              <Input
-                value={social[key]}
-                placeholder={`Your ${label} URL`}
-                onChange={(e) =>
-                  setSocial((prev) => ({ ...prev, [key]: e.target.value }))
-                }
-                className="bg-input-bg"
-              />
-            </div>
-          ))}
-          {updateSocialLinks.isError && (
-            <p className="text-destructive text-sm">
-              {updateSocialLinks.error instanceof Error
-                ? updateSocialLinks.error.message
-                : "Failed to update links"}
-            </p>
-          )}
-          <div className="flex justify-end pt-1">
+      <SettingsSectionCard
+        title="Account management"
+        description="Control your data, visibility, and account status."
+      >
+        <SettingsActionRow
+          title="Export your data"
+          description="Profile, preferences, and activity — emailed as a download link."
+          action={
             <Button
               type="button"
               variant="outline"
-              onClick={handleUpdateLinks}
-              disabled={updateSocialLinks.isPending}
+              className="gap-2 rounded-lg"
             >
-              {updateSocialLinks.isPending ? "Updating..." : "Update Links"}
+              <Download className="size-4" aria-hidden />
+              Export
             </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  readOnly,
-}: {
-  label: string
-  value: string
-  onChange?: (value: string) => void
-  readOnly?: boolean
-}) {
-  return (
-    <div className="space-y-2">
-      <p className="font-medium text-foreground text-sm">{label}</p>
-      <Input
-        value={value}
-        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-        className="bg-input-bg"
-        readOnly={readOnly}
-      />
+          }
+        />
+        <SettingsActionRow
+          title="Deactivate account"
+          description="Temporarily disable sign-in. Reactivate within 30 days."
+          action={
+            <Button type="button" variant="outline" className="rounded-lg">
+              Deactivate
+            </Button>
+          }
+        />
+        <SettingsActionRow
+          title="Delete account"
+          description="Permanently remove your account and all personal data."
+          destructive
+          action={
+            <Button
+              type="button"
+              className="rounded-lg bg-trend-negative text-white hover:bg-trend-negative/90"
+            >
+              Delete
+            </Button>
+          }
+        />
+      </SettingsSectionCard>
     </div>
   )
 }

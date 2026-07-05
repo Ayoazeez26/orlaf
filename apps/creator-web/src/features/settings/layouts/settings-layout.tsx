@@ -1,7 +1,7 @@
 import { Outlet } from "@tanstack/react-router"
 import { SettingsPageHeader } from "../components/settings-page-header"
 import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
-import { SettingsTabNav } from "../components/settings-tab-nav"
+import { SettingsSidebar } from "../components/settings-sidebar"
 import { useSettingsDashboard } from "../hooks/use-settings-dashboard"
 
 export function SettingsLayout() {
@@ -20,10 +20,12 @@ export function SettingsLayout() {
       )}
 
       {data && (
-        <>
-          <SettingsTabNav />
-          <Outlet />
-        </>
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+          <SettingsSidebar />
+          <div className="min-w-0 flex-1">
+            <Outlet />
+          </div>
+        </div>
       )}
     </div>
   )

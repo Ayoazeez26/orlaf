@@ -68,8 +68,8 @@ export function UploadEpisodesStep({
 
   useEffect(() => {
     if (state.episodes.length > episodeCountRef.current) {
-      const newest = state.episodes[state.episodes.length - 1]
-      if (newest) setExpandedEpisode(newest.id)
+      const firstNewEpisode = state.episodes[episodeCountRef.current]
+      if (firstNewEpisode) setExpandedEpisode(firstNewEpisode.id)
     }
     episodeCountRef.current = state.episodes.length
   }, [state.episodes])

@@ -3,6 +3,7 @@ import { Button } from "@workspace/ui/components/button"
 import { Loader2 } from "lucide-react"
 import { useLayoutEffect, useRef, useState } from "react"
 import { useAuth } from "../auth-context"
+import { MfaVerifyDialog } from "./mfa-verify-dialog"
 
 interface GoogleSignInButtonProps {
   label?: string
@@ -45,6 +46,7 @@ export function GoogleSignInButton({
 }: GoogleSignInButtonProps) {
   const { signInWithGoogle } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
+  const [mfaToken, setMfaToken] = useState<string | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [buttonWidth, setButtonWidth] = useState(0)
 
@@ -91,6 +93,10 @@ export function GoogleSignInButton({
         onSuccess?.()
         return
       }
+      if (result.outcome === "requires_2fa") {
+        setMfaToken(result.mfaToken)
+        return
+      }
       if (result.outcome === "conflict") {
         onError?.(
           `This email is already registered with ${result.provider}. Try that sign-in method instead.`
@@ -123,32 +129,46 @@ export function GoogleSignInButton({
   }
 
   return (
-    <div ref={containerRef} className="relative h-12 w-full">
-      <Button
-        type="button"
-        variant="outline"
-        size="lg"
-        tabIndex={-1}
-        aria-hidden
-        className={`${buttonClassName} pointer-events-none`}
-      >
-        <GoogleIcon />
-        {label}
-      </Button>
-      {buttonWidth > 0 && (
-        <div className="[&_iframe]:!h-12 [&_iframe]:!w-full absolute inset-0 z-10 flex cursor-pointer items-stretch opacity-[0.01] [&>div]:flex [&>div]:h-full [&>div]:w-full">
-          <GoogleLogin
-            onSuccess={handleSuccess}
-            onError={() => onError?.("Google sign-in was cancelled or failed.")}
-            theme="outline"
-            size="large"
-            width={buttonWidth}
-            text="continue_with"
-            shape="pill"
-          />
-        </div>
-      )}
-      <span className="sr-only">{label}</span>
-    </div>
+    <>
+      <div ref={containerRef} className="relative h-12 w-full">
+        <Button
+          type="button"
+          variant="outline"
+          size="lg"
+          tabIndex={-1}
+          aria-hidden
+          className={`${buttonClassName} pointer-events-none`}
+        >
+          <GoogleIcon />
+          {label}
+        </Button>
+        {buttonWidth > 0 && (
+          <div className="[&_iframe]:!h-12 [&_iframe]:!w-full absolute inset-0 z-10 flex cursor-pointer items-stretch opacity-[0.01] [&>div]:flex [&>div]:h-full [&>div]:w-full">
+            <GoogleLogin
+              onSuccess={handleSuccess}
+              onError={() =>
+                onError?.("Google sign-in was cancelled or failed.")
+              }
+              theme="outline"
+              size="large"
+              width={buttonWidth}
+              text="continue_with"
+              shape="pill"
+            />
+          </div>
+        )}
+        <span className="sr-only">{label}</span>
+      </div>
+
+      <MfaVerifyDialog
+        open={mfaToken !== null}
+        mfaToken={mfaToken ?? ""}
+        onOpenChange={(open) => {
+          if (!open) setMfaToken(null)
+        }}
+        onSuccess={onSuccess}
+        onError={onError}
+      />
+    </>
   )
 }

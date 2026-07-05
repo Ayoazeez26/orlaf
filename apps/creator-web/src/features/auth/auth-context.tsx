@@ -18,6 +18,7 @@ import type {
   SignInEmailResult,
   SignUpEmailResult,
   VerifyEmailResult,
+  VerifyMfaResult,
 } from "./api/auth-api"
 import {
   logout as logoutApi,
@@ -25,9 +26,10 @@ import {
   signInWithGoogle as signInWithGoogleApi,
   signUpWithEmail as signUpWithEmailApi,
   verifyEmail as verifyEmailApi,
+  verifyMfa as verifyMfaApi,
 } from "./api/auth-api"
-import { getAuthReady } from "./lib/auth-bootstrap"
-import { setAuthSnapshot } from "./lib/auth-snapshot"
+import { clearAuthBootstrapCache, getAuthReady } from "./lib/auth-bootstrap"
+import { getAuthSnapshot, setAuthSnapshot } from "./lib/auth-snapshot"
 import { clearOnboardingComplete } from "./lib/onboarding-complete"
 import {
   onboardingStepFromApi,
@@ -45,10 +47,15 @@ interface AuthContextValue {
     idToken: string
   ) => Promise<
     | { outcome: "success" }
+    | { outcome: "requires_2fa"; mfaToken: string }
     | { outcome: "conflict"; provider: string }
     | { outcome: "verification_failed" }
     | { outcome: "error"; message: string }
   >
+  verifyMfaAndSignIn: (
+    mfaToken: string,
+    code: string
+  ) => Promise<VerifyMfaResult>
   signUpWithEmail: (
     input: Parameters<typeof signUpWithEmailApi>[0]
   ) => Promise<SignUpEmailResult>
@@ -127,6 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const completeSignIn = useCallback(
     async (nextSession: SignInResponse) => {
       setAccessToken(nextSession.access_token)
+      clearAuthBootstrapCache()
       applyAuthenticated(nextSession)
       await navigateAfterSignIn(nextSession)
     },
@@ -136,6 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setOnSessionExpired(() => {
       applyUnauthenticated()
+      clearAuthBootstrapCache()
       void getRouter().navigate({ to: "/onboarding", replace: true })
     })
     return () => setOnSessionExpired(null)
@@ -146,8 +155,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     getAuthReady().then((result) => {
       if (!active) return
-      if (result.status === "authenticated" && result.session) {
-        applyAuthenticated(result.session)
+
+      const live = getAuthSnapshot()
+      const resolved = live.status !== "loading" ? live : result
+
+      if (resolved.status === "authenticated" && resolved.session) {
+        applyAuthenticated(resolved.session)
       } else {
         applyUnauthenticated()
       }
@@ -162,12 +175,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async (idToken: string) => {
       const result = await signInWithGoogleApi(idToken)
 
+      if (result.outcome === "requires_2fa") {
+        return result
+      }
+
       if (result.outcome !== "success") {
         return result
       }
 
       await completeSignIn(result.data)
       return { outcome: "success" as const }
+    },
+    [completeSignIn]
+  )
+
+  const verifyMfaAndSignIn = useCallback(
+    async (mfaToken: string, code: string) => {
+      const result = await verifyMfaApi({ mfa_token: mfaToken, code })
+
+      if (result.outcome === "success") {
+        await completeSignIn(result.data)
+      }
+
+      return result
     },
     [completeSignIn]
   )
@@ -186,6 +216,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         surface: "creator-web",
       })
 
+      if (result.outcome === "requires_2fa") {
+        return result
+      }
+
       if (result.outcome === "success") {
         await completeSignIn(result.data)
       }
@@ -198,6 +232,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithEmail = useCallback(
     async (input: Parameters<typeof signInWithEmailApi>[0]) => {
       const result = await signInWithEmailApi(input)
+
+      if (result.outcome === "requires_2fa") {
+        return result
+      }
 
       if (result.outcome === "success") {
         await completeSignIn(result.data)
@@ -218,6 +256,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       applyUnauthenticated()
       clearOnboardingComplete()
+      clearAuthBootstrapCache()
       void getRouter().navigate({ to: "/onboarding", replace: true })
     }
   }, [applyUnauthenticated])
@@ -229,6 +268,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isLoading: status === "loading",
       session,
       signInWithGoogle,
+      verifyMfaAndSignIn,
       signUpWithEmail,
       verifyEmailAndSignIn,
       signInWithEmail,
@@ -239,6 +279,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       status,
       session,
       signInWithGoogle,
+      verifyMfaAndSignIn,
       signUpWithEmail,
       verifyEmailAndSignIn,
       signInWithEmail,

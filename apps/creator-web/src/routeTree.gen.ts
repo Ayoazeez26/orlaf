@@ -28,10 +28,13 @@ import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/s
 import { Route as DashboardRevenueIndexRouteImport } from './routes/dashboard/revenue/index'
 import { Route as DashboardPromotionsIndexRouteImport } from './routes/dashboard/promotions/index'
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard/projects/index'
+import { Route as DashboardSettingsTeamRouteImport } from './routes/dashboard/settings/team'
 import { Route as DashboardSettingsStudioRouteImport } from './routes/dashboard/settings/studio'
 import { Route as DashboardSettingsSecurityRouteImport } from './routes/dashboard/settings/security'
 import { Route as DashboardSettingsPreferencesRouteImport } from './routes/dashboard/settings/preferences'
 import { Route as DashboardSettingsNotificationsRouteImport } from './routes/dashboard/settings/notifications'
+import { Route as DashboardSettingsEarningsRouteImport } from './routes/dashboard/settings/earnings'
+import { Route as DashboardSettingsArchiveRouteImport } from './routes/dashboard/settings/archive'
 import { Route as DashboardRevenueSettingsRouteImport } from './routes/dashboard/revenue/settings'
 import { Route as DashboardRevenuePayoutsRouteImport } from './routes/dashboard/revenue/payouts'
 import { Route as DashboardRevenueAnalyticsRouteImport } from './routes/dashboard/revenue/analytics'
@@ -139,6 +142,11 @@ const DashboardProjectsIndexRoute = DashboardProjectsIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardProjectsRoute,
 } as any)
+const DashboardSettingsTeamRoute = DashboardSettingsTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => DashboardSettingsRoute,
+} as any)
 const DashboardSettingsStudioRoute = DashboardSettingsStudioRouteImport.update({
   id: '/studio',
   path: '/studio',
@@ -160,6 +168,18 @@ const DashboardSettingsNotificationsRoute =
   DashboardSettingsNotificationsRouteImport.update({
     id: '/notifications',
     path: '/notifications',
+    getParentRoute: () => DashboardSettingsRoute,
+  } as any)
+const DashboardSettingsEarningsRoute =
+  DashboardSettingsEarningsRouteImport.update({
+    id: '/earnings',
+    path: '/earnings',
+    getParentRoute: () => DashboardSettingsRoute,
+  } as any)
+const DashboardSettingsArchiveRoute =
+  DashboardSettingsArchiveRouteImport.update({
+    id: '/archive',
+    path: '/archive',
     getParentRoute: () => DashboardSettingsRoute,
   } as any)
 const DashboardRevenueSettingsRoute =
@@ -243,10 +263,13 @@ export interface FileRoutesByFullPath {
   '/dashboard/revenue/analytics': typeof DashboardRevenueAnalyticsRoute
   '/dashboard/revenue/payouts': typeof DashboardRevenuePayoutsRoute
   '/dashboard/revenue/settings': typeof DashboardRevenueSettingsRoute
+  '/dashboard/settings/archive': typeof DashboardSettingsArchiveRoute
+  '/dashboard/settings/earnings': typeof DashboardSettingsEarningsRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsRoute
   '/dashboard/settings/preferences': typeof DashboardSettingsPreferencesRoute
   '/dashboard/settings/security': typeof DashboardSettingsSecurityRoute
   '/dashboard/settings/studio': typeof DashboardSettingsStudioRoute
+  '/dashboard/settings/team': typeof DashboardSettingsTeamRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
   '/dashboard/promotions/': typeof DashboardPromotionsIndexRoute
   '/dashboard/revenue/': typeof DashboardRevenueIndexRoute
@@ -272,10 +295,13 @@ export interface FileRoutesByTo {
   '/dashboard/revenue/analytics': typeof DashboardRevenueAnalyticsRoute
   '/dashboard/revenue/payouts': typeof DashboardRevenuePayoutsRoute
   '/dashboard/revenue/settings': typeof DashboardRevenueSettingsRoute
+  '/dashboard/settings/archive': typeof DashboardSettingsArchiveRoute
+  '/dashboard/settings/earnings': typeof DashboardSettingsEarningsRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsRoute
   '/dashboard/settings/preferences': typeof DashboardSettingsPreferencesRoute
   '/dashboard/settings/security': typeof DashboardSettingsSecurityRoute
   '/dashboard/settings/studio': typeof DashboardSettingsStudioRoute
+  '/dashboard/settings/team': typeof DashboardSettingsTeamRoute
   '/dashboard/projects': typeof DashboardProjectsIndexRoute
   '/dashboard/promotions': typeof DashboardPromotionsIndexRoute
   '/dashboard/revenue': typeof DashboardRevenueIndexRoute
@@ -308,10 +334,13 @@ export interface FileRoutesById {
   '/dashboard/revenue/analytics': typeof DashboardRevenueAnalyticsRoute
   '/dashboard/revenue/payouts': typeof DashboardRevenuePayoutsRoute
   '/dashboard/revenue/settings': typeof DashboardRevenueSettingsRoute
+  '/dashboard/settings/archive': typeof DashboardSettingsArchiveRoute
+  '/dashboard/settings/earnings': typeof DashboardSettingsEarningsRoute
   '/dashboard/settings/notifications': typeof DashboardSettingsNotificationsRoute
   '/dashboard/settings/preferences': typeof DashboardSettingsPreferencesRoute
   '/dashboard/settings/security': typeof DashboardSettingsSecurityRoute
   '/dashboard/settings/studio': typeof DashboardSettingsStudioRoute
+  '/dashboard/settings/team': typeof DashboardSettingsTeamRoute
   '/dashboard/projects/': typeof DashboardProjectsIndexRoute
   '/dashboard/promotions/': typeof DashboardPromotionsIndexRoute
   '/dashboard/revenue/': typeof DashboardRevenueIndexRoute
@@ -345,10 +374,13 @@ export interface FileRouteTypes {
     | '/dashboard/revenue/analytics'
     | '/dashboard/revenue/payouts'
     | '/dashboard/revenue/settings'
+    | '/dashboard/settings/archive'
+    | '/dashboard/settings/earnings'
     | '/dashboard/settings/notifications'
     | '/dashboard/settings/preferences'
     | '/dashboard/settings/security'
     | '/dashboard/settings/studio'
+    | '/dashboard/settings/team'
     | '/dashboard/projects/'
     | '/dashboard/promotions/'
     | '/dashboard/revenue/'
@@ -374,10 +406,13 @@ export interface FileRouteTypes {
     | '/dashboard/revenue/analytics'
     | '/dashboard/revenue/payouts'
     | '/dashboard/revenue/settings'
+    | '/dashboard/settings/archive'
+    | '/dashboard/settings/earnings'
     | '/dashboard/settings/notifications'
     | '/dashboard/settings/preferences'
     | '/dashboard/settings/security'
     | '/dashboard/settings/studio'
+    | '/dashboard/settings/team'
     | '/dashboard/projects'
     | '/dashboard/promotions'
     | '/dashboard/revenue'
@@ -409,10 +444,13 @@ export interface FileRouteTypes {
     | '/dashboard/revenue/analytics'
     | '/dashboard/revenue/payouts'
     | '/dashboard/revenue/settings'
+    | '/dashboard/settings/archive'
+    | '/dashboard/settings/earnings'
     | '/dashboard/settings/notifications'
     | '/dashboard/settings/preferences'
     | '/dashboard/settings/security'
     | '/dashboard/settings/studio'
+    | '/dashboard/settings/team'
     | '/dashboard/projects/'
     | '/dashboard/promotions/'
     | '/dashboard/revenue/'
@@ -568,6 +606,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProjectsIndexRouteImport
       parentRoute: typeof DashboardProjectsRoute
     }
+    '/dashboard/settings/team': {
+      id: '/dashboard/settings/team'
+      path: '/team'
+      fullPath: '/dashboard/settings/team'
+      preLoaderRoute: typeof DashboardSettingsTeamRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
     '/dashboard/settings/studio': {
       id: '/dashboard/settings/studio'
       path: '/studio'
@@ -594,6 +639,20 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/dashboard/settings/notifications'
       preLoaderRoute: typeof DashboardSettingsNotificationsRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
+    '/dashboard/settings/earnings': {
+      id: '/dashboard/settings/earnings'
+      path: '/earnings'
+      fullPath: '/dashboard/settings/earnings'
+      preLoaderRoute: typeof DashboardSettingsEarningsRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
+    '/dashboard/settings/archive': {
+      id: '/dashboard/settings/archive'
+      path: '/archive'
+      fullPath: '/dashboard/settings/archive'
+      preLoaderRoute: typeof DashboardSettingsArchiveRouteImport
       parentRoute: typeof DashboardSettingsRoute
     }
     '/dashboard/revenue/settings': {
@@ -738,18 +797,24 @@ const DashboardRevenueRouteWithChildren =
   DashboardRevenueRoute._addFileChildren(DashboardRevenueRouteChildren)
 
 interface DashboardSettingsRouteChildren {
+  DashboardSettingsArchiveRoute: typeof DashboardSettingsArchiveRoute
+  DashboardSettingsEarningsRoute: typeof DashboardSettingsEarningsRoute
   DashboardSettingsNotificationsRoute: typeof DashboardSettingsNotificationsRoute
   DashboardSettingsPreferencesRoute: typeof DashboardSettingsPreferencesRoute
   DashboardSettingsSecurityRoute: typeof DashboardSettingsSecurityRoute
   DashboardSettingsStudioRoute: typeof DashboardSettingsStudioRoute
+  DashboardSettingsTeamRoute: typeof DashboardSettingsTeamRoute
   DashboardSettingsIndexRoute: typeof DashboardSettingsIndexRoute
 }
 
 const DashboardSettingsRouteChildren: DashboardSettingsRouteChildren = {
+  DashboardSettingsArchiveRoute: DashboardSettingsArchiveRoute,
+  DashboardSettingsEarningsRoute: DashboardSettingsEarningsRoute,
   DashboardSettingsNotificationsRoute: DashboardSettingsNotificationsRoute,
   DashboardSettingsPreferencesRoute: DashboardSettingsPreferencesRoute,
   DashboardSettingsSecurityRoute: DashboardSettingsSecurityRoute,
   DashboardSettingsStudioRoute: DashboardSettingsStudioRoute,
+  DashboardSettingsTeamRoute: DashboardSettingsTeamRoute,
   DashboardSettingsIndexRoute: DashboardSettingsIndexRoute,
 }
 

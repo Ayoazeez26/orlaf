@@ -7,14 +7,27 @@ import type {
   PolicyVersions,
   SignInResponse,
   VerifyEmailBody,
+  VerifyMfaRequest,
 } from "@sable/contracts"
 import { ApiError, apiFetch, apiRequest } from "@/lib/http-client"
 
 export type SignInGoogleResult =
   | { outcome: "success"; data: SignInResponse }
+  | { outcome: "requires_2fa"; mfaToken: string }
   | { outcome: "conflict"; provider: string }
   | { outcome: "verification_failed" }
   | { outcome: "error"; message: string }
+
+function authClientMetadata() {
+  return {
+    device_label: navigator.userAgent.slice(0, 120),
+    user_agent: navigator.userAgent,
+  }
+}
+
+function isMfaRequired(data: SignInResponse) {
+  return Boolean(data.requires_2fa && data.mfa_token)
+}
 
 export async function signInWithGoogle(
   idToken: string
@@ -22,7 +35,7 @@ export async function signInWithGoogle(
   const body: GoogleSignInBody = {
     id_token: idToken,
     surface: "creator-web",
-    device_label: navigator.userAgent.slice(0, 120),
+    ...authClientMetadata(),
   }
 
   try {
@@ -59,6 +72,9 @@ export async function signInWithGoogle(
     }
 
     const data = (await response.json()) as SignInResponse
+    if (isMfaRequired(data) && data.mfa_token) {
+      return { outcome: "requires_2fa", mfaToken: data.mfa_token }
+    }
     return { outcome: "success", data }
   } catch {
     return {
@@ -172,6 +188,7 @@ export async function signUpWithEmail(
 
 export type VerifyEmailResult =
   | { outcome: "success"; data: SignInResponse }
+  | { outcome: "requires_2fa"; mfaToken: string }
   | { outcome: "invalid_code"; message: string }
   | { outcome: "code_expired"; message: string }
   | { outcome: "too_many_attempts"; message: string }
@@ -187,7 +204,7 @@ export async function verifyEmail(
       body: JSON.stringify({
         ...body,
         surface: body.surface ?? "creator-web",
-        device_label: navigator.userAgent.slice(0, 120),
+        ...authClientMetadata(),
       }),
     })
 
@@ -230,7 +247,12 @@ export async function verifyEmail(
       }
     }
 
-    return { outcome: "success", data: data as unknown as SignInResponse }
+    const verifyData = data as unknown as SignInResponse
+    if (isMfaRequired(verifyData) && verifyData.mfa_token) {
+      return { outcome: "requires_2fa", mfaToken: verifyData.mfa_token }
+    }
+
+    return { outcome: "success", data: verifyData }
   } catch {
     return {
       outcome: "error",
@@ -285,6 +307,7 @@ export async function resendVerification(
 
 export type SignInEmailResult =
   | { outcome: "success"; data: SignInResponse }
+  | { outcome: "requires_2fa"; mfaToken: string }
   | { outcome: "invalid_credentials"; message: string }
   | {
       outcome: "email_not_verified"
@@ -301,7 +324,7 @@ export async function signInWithEmail(
   const payload: EmailSignInBody = {
     ...body,
     surface: body.surface ?? "creator-web",
-    device_label: navigator.userAgent.slice(0, 120),
+    ...authClientMetadata(),
   }
 
   try {
@@ -338,7 +361,63 @@ export async function signInWithEmail(
       }
     }
 
-    return { outcome: "success", data: data as unknown as SignInResponse }
+    const signInData = data as unknown as SignInResponse
+    if (isMfaRequired(signInData) && signInData.mfa_token) {
+      return { outcome: "requires_2fa", mfaToken: signInData.mfa_token }
+    }
+
+    return { outcome: "success", data: signInData }
+  } catch {
+    return {
+      outcome: "error",
+      message: "Unable to reach the server. Check your connection and API URL.",
+    }
+  }
+}
+
+export type VerifyMfaResult =
+  | { outcome: "success"; data: SignInResponse }
+  | { outcome: "invalid_code"; message: string }
+  | { outcome: "error"; message: string }
+
+export async function verifyMfa(
+  body: VerifyMfaRequest
+): Promise<VerifyMfaResult> {
+  try {
+    const response = await apiFetch("/api/v1/auth/2fa/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    })
+
+    const data = await parseJsonBody(response)
+
+    if (response.status === 400) {
+      return {
+        outcome: "invalid_code",
+        message: parseErrorMessage(data, "Invalid verification code."),
+      }
+    }
+
+    if (!response.ok) {
+      return {
+        outcome: "error",
+        message: parseErrorMessage(
+          data,
+          `Verification failed (${response.status})`
+        ),
+      }
+    }
+
+    const signInData = data as unknown as SignInResponse
+    if (isMfaRequired(signInData) || !signInData.access_token) {
+      return {
+        outcome: "error",
+        message: "Sign-in could not be completed. Please try again.",
+      }
+    }
+
+    return { outcome: "success", data: signInData }
   } catch {
     return {
       outcome: "error",

@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
+import type { ColorScheme } from "@sable/contracts"
 import {
   Select,
   SelectContent,
@@ -7,101 +7,252 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select"
 import { Switch } from "@workspace/ui/components/switch"
-import { useState } from "react"
-import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
+import { cn } from "@workspace/ui/lib/utils"
+import { Monitor, Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
+import { useEffect, useRef, useState } from "react"
+import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
+import { SettingsSectionCard } from "../components/settings-section-card"
+import { applyDisplayPreferences } from "../hooks/use-apply-creator-preferences"
+import { usePreferences, useUpdatePreferences } from "../hooks/use-preferences"
 import {
-  LANGUAGE_OPTIONS,
-  TIMEZONE_OPTIONS,
-  VISIBILITY_OPTIONS,
-} from "../constants"
-import { useSettingsDashboard } from "../hooks/use-settings-dashboard"
+  formToPreferencesPatch,
+  LANGUAGE_SELECT_OPTIONS,
+  type PreferencesFormState,
+  preferencesToForm,
+  TIMEZONE_SELECT_OPTIONS,
+  timezoneLabel,
+  timezoneValue,
+  VISIBILITY_SELECT_OPTIONS,
+  visibilityLabel,
+  visibilityValue,
+} from "../lib/map-preferences"
+import {
+  registerSettingsReset,
+  registerSettingsSave,
+} from "../lib/settings-form-actions"
+
+const COLOR_SCHEMES = [
+  { value: "light", label: "Light", icon: Sun },
+  { value: "dark", label: "Dark", icon: Moon },
+  { value: "system", label: "System", icon: Monitor },
+] as const
 
 export function SettingsPreferencesPage() {
-  const { data } = useSettingsDashboard()
-  const [prefs, setPrefs] = useState(data?.preferences)
-  if (!data || !prefs) return null
+  const { data, isLoading, isError } = usePreferences()
+  const updatePreferences = useUpdatePreferences()
+  const { setTheme } = useTheme()
+  const setThemeRef = useRef(setTheme)
+  setThemeRef.current = setTheme
+  const [mounted, setMounted] = useState(false)
+  const initialFormRef = useRef<PreferencesFormState | null>(null)
+  const savedPreferencesRef = useRef(data)
+  savedPreferencesRef.current = data
+  const [form, setForm] = useState<PreferencesFormState | null>(null)
 
-  function updatePrefs(patch: Partial<typeof prefs>) {
-    setPrefs((prev) => (prev ? { ...prev, ...patch } : prev))
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!data) return
+    const initial = preferencesToForm(data)
+    initialFormRef.current = initial
+    setForm(initial)
+  }, [data])
+
+  // Sync to saved display prefs when opening the page or after a successful save.
+  useEffect(() => {
+    if (!data) return
+    applyDisplayPreferences(data, (theme) => setThemeRef.current(theme))
+  }, [data])
+
+  // Revert unsaved display previews when leaving the page.
+  useEffect(() => {
+    return () => {
+      const saved = savedPreferencesRef.current
+      if (!saved) return
+      applyDisplayPreferences(saved, (theme) => setThemeRef.current(theme))
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!form) return
+
+    function handleSave() {
+      updatePreferences.mutate(formToPreferencesPatch(form), {
+        onSuccess: (saved) => {
+          const next = preferencesToForm(saved)
+          initialFormRef.current = next
+          setForm(next)
+          applyDisplayPreferences(saved, setTheme)
+        },
+      })
+    }
+
+    function handleReset() {
+      const initial = initialFormRef.current
+      if (!initial) return
+      setForm(initial)
+      applyDisplayPreferences(initial, setTheme)
+    }
+
+    const unregisterSave = registerSettingsSave(handleSave)
+    const unregisterReset = registerSettingsReset(handleReset)
+    return () => {
+      unregisterSave()
+      unregisterReset()
+    }
+  }, [form, setTheme, updatePreferences])
+
+  if (isLoading || !form) {
+    return <SettingsPageSkeleton />
+  }
+
+  if (isError) {
+    return (
+      <p className="text-destructive text-sm">
+        Could not load preferences. Please try again.
+      </p>
+    )
+  }
+
+  function updateForm(patch: Partial<PreferencesFormState>) {
+    if (patch.reducedMotion !== undefined && typeof document !== "undefined") {
+      document.documentElement.toggleAttribute(
+        "data-reduced-motion",
+        patch.reducedMotion
+      )
+    }
+    setForm((prev) => (prev ? { ...prev, ...patch } : prev))
   }
 
   return (
-    <div className="max-w-3xl space-y-6">
-      <Card className={FROSTED_CARD_SURFACE_CLASS}>
-        <CardHeader>
-          <p className="font-semibold text-foreground">Content Defaults</p>
-          <p className="text-muted-foreground text-sm">
-            Default settings for new series and episodes
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="grid grid-cols-1 gap-4 border-b pb-4 sm:grid-cols-2">
+    <div className="space-y-6">
+      <SettingsSectionCard
+        title="Content Defaults"
+        description="Default settings for new series and episodes."
+      >
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SelectField
-              label="Default Language"
-              value={prefs.defaultLanguage}
-              onChange={(v) => updatePrefs({ defaultLanguage: v })}
-              options={LANGUAGE_OPTIONS}
+              label="Default language"
+              value={form.defaultLanguage}
+              onChange={(value) => updateForm({ defaultLanguage: value })}
+              options={LANGUAGE_SELECT_OPTIONS}
             />
             <SelectField
-              label="Default Visibility"
-              value={prefs.defaultVisibility}
-              onChange={(v) => updatePrefs({ defaultVisibility: v })}
-              options={VISIBILITY_OPTIONS}
+              label="Default visibility"
+              value={visibilityLabel(form.defaultVisibility)}
+              onChange={(value) =>
+                updateForm({ defaultVisibility: visibilityValue(value) })
+              }
+              options={VISIBILITY_SELECT_OPTIONS}
             />
           </div>
           <ToggleRow
             title="Enable comments by default"
             description="Allow viewers to comment on new episodes"
-            checked={prefs.commentsEnabledByDefault}
-            onChange={(v) => updatePrefs({ commentsEnabledByDefault: v })}
+            checked={form.commentsEnabledByDefault}
+            onChange={(value) =>
+              updateForm({ commentsEnabledByDefault: value })
+            }
           />
           <ToggleRow
             title="Auto-publish after processing"
-            description="Automatically publish episodes once encoding completes"
-            checked={prefs.autoPublishAfterProcessing}
-            onChange={(v) => updatePrefs({ autoPublishAfterProcessing: v })}
+            description="Publish the series when you click Publish and all episodes are ready"
+            checked={form.autoPublishAfterProcessing}
+            onChange={(value) =>
+              updateForm({ autoPublishAfterProcessing: value })
+            }
           />
           <ToggleRow
             title="Enable tipping by default"
             description="Let viewers send tips on your content"
-            checked={prefs.tippingEnabledByDefault}
-            onChange={(v) => updatePrefs({ tippingEnabledByDefault: v })}
+            checked={form.tippingEnabledByDefault}
+            onChange={(value) => updateForm({ tippingEnabledByDefault: value })}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </SettingsSectionCard>
 
-      <Card className={FROSTED_CARD_SURFACE_CLASS}>
-        <CardHeader>
-          <p className="font-semibold text-foreground">
-            Display &amp; Accessibility
-          </p>
-          <p className="text-muted-foreground text-sm">
-            Customize your dashboard experience
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="grid grid-cols-1 gap-4 border-b pb-4 sm:grid-cols-2">
+      <SettingsSectionCard
+        title="Display & Accessibility"
+        description="Customize your dashboard experience."
+      >
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SelectField
-              label="Dashboard Language"
-              value={prefs.dashboardLanguage}
-              onChange={(v) => updatePrefs({ dashboardLanguage: v })}
-              options={LANGUAGE_OPTIONS}
+              label="Dashboard language"
+              value={form.dashboardLanguage}
+              onChange={(value) => updateForm({ dashboardLanguage: value })}
+              options={LANGUAGE_SELECT_OPTIONS}
             />
             <SelectField
               label="Timezone"
-              value={prefs.timezone}
-              onChange={(v) => updatePrefs({ timezone: v })}
-              options={TIMEZONE_OPTIONS}
+              value={timezoneLabel(form.timezone)}
+              onChange={(value) =>
+                updateForm({ timezone: timezoneValue(value) })
+              }
+              options={TIMEZONE_SELECT_OPTIONS}
             />
           </div>
+
+          <div className="space-y-3">
+            <div>
+              <p className="font-medium text-foreground text-sm">
+                Color scheme
+              </p>
+              <p className="text-muted-foreground text-sm">
+                System matches your device automatically.
+              </p>
+            </div>
+            {mounted ? (
+              <div className="inline-flex w-full max-w-md items-center gap-1 rounded-xl border border-border bg-muted/40 p-1 sm:w-auto">
+                {COLOR_SCHEMES.map(({ value, label, icon: Icon }) => {
+                  const active = form.colorScheme === value
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => {
+                        setTheme(value)
+                        updateForm({ colorScheme: value as ColorScheme })
+                      }}
+                      className={cn(
+                        "flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 font-medium text-sm transition-colors sm:flex-none",
+                        active
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground"
+                      )}
+                    >
+                      <Icon className="size-4" aria-hidden />
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+            ) : null}
+          </div>
+
           <ToggleRow
             title="Reduced motion"
             description="Minimize animations throughout the dashboard"
-            checked={prefs.reducedMotion}
-            onChange={(v) => updatePrefs({ reducedMotion: v })}
+            checked={form.reducedMotion}
+            onChange={(value) => updateForm({ reducedMotion: value })}
           />
-        </CardContent>
-      </Card>
+        </div>
+      </SettingsSectionCard>
+
+      {updatePreferences.isError && (
+        <p className="text-destructive text-sm">
+          {updatePreferences.error instanceof Error
+            ? updatePreferences.error.message
+            : "Failed to save preferences"}
+        </p>
+      )}
+      {updatePreferences.isSuccess && !updatePreferences.isPending ? (
+        <p className="text-muted-foreground text-sm">Saved</p>
+      ) : null}
     </div>
   )
 }
@@ -121,7 +272,7 @@ function SelectField({
     <div className="min-w-0 space-y-2">
       <p className="font-medium text-foreground text-sm">{label}</p>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="h-10 w-full bg-input-bg dark:bg-input-bg">
+        <SelectTrigger className="h-10 w-full bg-input-bg">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -150,7 +301,7 @@ function ToggleRow({
   return (
     <div className="flex items-center justify-between gap-4 py-1">
       <div>
-        <p className="text-foreground text-sm">{title}</p>
+        <p className="font-medium text-foreground text-sm">{title}</p>
         <p className="text-muted-foreground text-sm">{description}</p>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} aria-label={title} />

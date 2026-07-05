@@ -2,7 +2,10 @@ import { useNavigate, useSearch } from "@tanstack/react-router"
 import { useCallback, useEffect, useRef } from "react"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { useAuth } from "@/features/auth/auth-context"
-import { onboardingStepFromApi } from "@/features/auth/lib/post-sign-in-route"
+import {
+  onboardingStepFromApi,
+  resolvePostSignInRoute,
+} from "@/features/auth/lib/post-sign-in-route"
 import { getOnboardingStatus } from "./api/onboarding-api"
 import { ConsentStep } from "./components/steps/consent-step"
 import { ContentFormatStep } from "./components/steps/content-format-step"
@@ -76,7 +79,23 @@ export function OnboardingFlow() {
   }, [search.step, data.creatorType, dispatch])
 
   useEffect(() => {
-    if (!isAuthenticated || !session || search.step) return
+    if (!isAuthenticated || !session) return
+
+    const destination = resolvePostSignInRoute(session)
+    if (destination.to !== "/onboarding") {
+      if (destination.search?.step) {
+        void navigate({
+          to: destination.to,
+          search: destination.search,
+          replace: true,
+        })
+      } else {
+        void navigate({ to: destination.to, replace: true })
+      }
+      return
+    }
+
+    if (search.step) return
 
     if (session.needs_consent) {
       navigateToStep("consent")
@@ -86,7 +105,7 @@ export function OnboardingFlow() {
     if (session.account_state === "onboarding") {
       navigateToStep("creator-type")
     }
-  }, [isAuthenticated, session, search.step, navigateToStep])
+  }, [isAuthenticated, session, search.step, navigateToStep, navigate])
 
   const handleComplete = useCallback(async () => {
     if (!isAuthenticated) {

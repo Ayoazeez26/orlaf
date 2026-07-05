@@ -62,7 +62,6 @@ export interface DashboardEarnMoreCard {
 export interface DashboardHomeData {
   user: DashboardUser
   kpis: AnalyticsKpi[]
-  projects: DashboardProject[]
   engagementChart: DashboardEngagementPoint[]
   topEpisodes: TopEpisodeRow[]
 }

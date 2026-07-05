@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react"
+import { fetchPreferences } from "@/features/settings/api/preferences-api"
 import { publishSeries } from "../api/studio-api"
 import { formatDuration } from "../lib/media/format-duration"
 import { probeMediaFile } from "../lib/media/probe-media"
@@ -42,9 +43,20 @@ export function useMediaUploadPipeline() {
 
     setIsPublishing(true)
     setPublishError(null)
+
+    let publishLabel = "Submitting for review…"
+    try {
+      const prefs = await fetchPreferences()
+      if (prefs.autoPublishAfterProcessing) {
+        publishLabel = "Publishing…"
+      }
+    } catch {
+      // fall back to review copy
+    }
+
     setProgress({
       phase: "submitting",
-      label: "Submitting for review…",
+      label: publishLabel,
       value: 0.5,
     })
 

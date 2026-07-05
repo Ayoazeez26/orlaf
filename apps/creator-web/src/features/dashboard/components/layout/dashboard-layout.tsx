@@ -1,8 +1,11 @@
 import { Outlet } from "@tanstack/react-router"
+import { useApplyCreatorPreferences } from "@/features/settings/hooks/use-apply-creator-preferences"
 import { DashboardMobileHeader } from "./dashboard-mobile-header"
 import { DashboardSidebar } from "./dashboard-sidebar"
 
 export function DashboardLayout() {
+  useApplyCreatorPreferences()
+
   return (
     <div className="flex h-svh flex-col overflow-hidden bg-background lg:flex-row">
       <DashboardSidebar />

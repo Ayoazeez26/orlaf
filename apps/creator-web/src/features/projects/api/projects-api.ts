@@ -6,6 +6,7 @@ import type {
   StudioSeries,
 } from "@sable/contracts"
 import { apiRequest } from "@/lib/http-client"
+import { formatRelativeUpdatedAt } from "../lib/format-relative-time"
 import type { EpisodeAccess, ProjectDetail, ProjectSummary } from "../types"
 
 const STATUS_MAP: Record<StudioSeries["status"], ProjectSummary["status"]> = {
@@ -45,16 +46,23 @@ function mapSeriesToSummary(
   series: StudioSeries & { _count?: { episodes: number } },
   index: number
 ): ProjectSummary {
+  const updatedAtMs = new Date(series.updatedAt).getTime()
+  const episodeCount = series._count?.episodes ?? series.episodes?.length
+  const isShortFilm = series.type === "short_film"
+
   return {
     id: series.id,
     slug: series.id,
     title: series.title,
     thumbnailUrl: series.posterUrl ?? undefined,
-    type: series.type === "short_film" ? "Short film" : "Short series",
+    type: isShortFilm ? "Short film" : "Short series",
     status: STATUS_MAP[series.status],
-    episodeCount: series._count?.episodes ?? series.episodes?.length,
-    updatedAt: new Date(series.updatedAt).toLocaleDateString(),
-    updatedAtMs: new Date(series.updatedAt).getTime(),
+    episodeCount: isShortFilm ? undefined : episodeCount,
+    duration: isShortFilm
+      ? formatDuration(series.episodes?.[0]?.durationSeconds ?? null)
+      : undefined,
+    updatedAt: formatRelativeUpdatedAt(updatedAtMs),
+    updatedAtMs,
     genre: series.genres[0],
     language: series.language,
     iconVariant: ICON_VARIANTS[index % ICON_VARIANTS.length],
@@ -137,6 +145,19 @@ export async function updateProjectSettings(
   }
 
   return fetchProject(id)
+}
+
+export async function archiveProject(id: string): Promise<void> {
+  await apiRequest(`/api/v1/studio/series/${id}/archive`, {
+    method: "POST",
+    body: JSON.stringify({}),
+  })
+}
+
+export async function deleteProject(id: string): Promise<void> {
+  await apiRequest(`/api/v1/studio/series/${id}`, {
+    method: "DELETE",
+  })
 }
 
 async function listSeriesFromStudio(): Promise<StudioSeries[]> {

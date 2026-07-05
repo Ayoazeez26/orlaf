@@ -1,14 +1,19 @@
+import type { RegisteredRouter } from "@tanstack/react-router"
 import { createRouter as createTanStackRouter } from "@tanstack/react-router"
 import { routeTree } from "./routeTree.gen"
 
-export function getRouter() {
-  const router = createTanStackRouter({
-    routeTree,
+let router: RegisteredRouter | undefined
 
-    scrollRestoration: true,
-    defaultPreload: "intent",
-    defaultPreloadStaleTime: 0,
-  })
+export function getRouter() {
+  if (!router) {
+    router = createTanStackRouter({
+      routeTree,
+
+      scrollRestoration: true,
+      defaultPreload: "intent",
+      defaultPreloadStaleTime: 0,
+    })
+  }
 
   return router
 }

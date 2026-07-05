@@ -1,17 +1,30 @@
-import { useParams } from "@tanstack/react-router"
+import { useNavigate, useParams } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
 import { Switch } from "@workspace/ui/components/switch"
 import { cn } from "@workspace/ui/lib/utils"
-import { BarChart2 } from "lucide-react"
+import { BarChart2, Loader2 } from "lucide-react"
+import { useState } from "react"
+import { SettingsModalShell } from "@/features/settings/components/settings-modal-shell"
 import { FROSTED_CARD_SURFACE_CLASS } from "../../constants/frosted-card"
-import { useProject, useUpdateProjectSettings } from "../../hooks/use-project"
+import {
+  useArchiveProject,
+  useDeleteProject,
+  useProject,
+  useUpdateProjectSettings,
+} from "../../hooks/use-project"
 
 export function ProjectSettingsTab() {
+  const navigate = useNavigate()
   const { projectId } = useParams({ strict: false })
   const id = projectId ?? ""
   const { data: project } = useProject(id)
   const updateSettings = useUpdateProjectSettings(id)
+  const archiveProject = useArchiveProject(id)
+  const deleteProject = useDeleteProject(id)
+  const [archiveOpen, setArchiveOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   if (!project) return null
 
@@ -20,6 +33,28 @@ export function ProjectSettingsTab() {
 
   function patchVisibility(key: keyof typeof visibility, value: boolean) {
     updateSettings.mutate({ [key]: value })
+  }
+
+  async function handleArchive() {
+    setActionError(null)
+    try {
+      await archiveProject.mutateAsync()
+      setArchiveOpen(false)
+      void navigate({ to: "/dashboard/projects" })
+    } catch {
+      setActionError("Unable to archive this series. Please try again.")
+    }
+  }
+
+  async function handleDelete() {
+    setActionError(null)
+    try {
+      await deleteProject.mutateAsync()
+      setDeleteOpen(false)
+      void navigate({ to: "/dashboard/projects" })
+    } catch {
+      setActionError("Unable to delete this series. Please try again.")
+    }
   }
 
   return (
@@ -99,6 +134,11 @@ export function ProjectSettingsTab() {
           <p className="font-semibold text-foreground text-sm">Danger Zone</p>
         </CardHeader>
         <CardContent>
+          {actionError ? (
+            <p className="mb-3 text-destructive text-sm" role="alert">
+              {actionError}
+            </p>
+          ) : null}
           <DangerActionRow
             title="Archive series"
             description="Hide from public view but keep all data"
@@ -108,6 +148,8 @@ export function ProjectSettingsTab() {
                 variant="outline"
                 size="sm"
                 className="w-full border-destructive/40 text-destructive hover:bg-destructive/10 sm:w-auto"
+                disabled={archiveProject.isPending || deleteProject.isPending}
+                onClick={() => setArchiveOpen(true)}
               >
                 Archive
               </Button>
@@ -122,6 +164,8 @@ export function ProjectSettingsTab() {
                 variant="outline"
                 size="sm"
                 className="w-full border-destructive/40 text-destructive hover:bg-destructive/10 sm:w-auto"
+                disabled={archiveProject.isPending || deleteProject.isPending}
+                onClick={() => setDeleteOpen(true)}
               >
                 Delete
               </Button>
@@ -129,6 +173,83 @@ export function ProjectSettingsTab() {
           />
         </CardContent>
       </Card>
+
+      <SettingsModalShell
+        open={archiveOpen}
+        onOpenChange={setArchiveOpen}
+        title="Archive series?"
+        description={`"${project.title}" will be hidden from your projects list. You can restore it from Settings → Archive.`}
+        footer={
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setArchiveOpen(false)}
+              disabled={archiveProject.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => void handleArchive()}
+              disabled={archiveProject.isPending}
+            >
+              {archiveProject.isPending ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                  Archiving…
+                </>
+              ) : (
+                "Archive series"
+              )}
+            </Button>
+          </div>
+        }
+      >
+        <p className="text-muted-foreground text-sm">
+          Episodes and analytics data are kept. The series can be restored
+          within 90 days from the archive.
+        </p>
+      </SettingsModalShell>
+
+      <SettingsModalShell
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title="Delete series permanently?"
+        description={`This permanently removes "${project.title}" and all of its episodes. This cannot be undone.`}
+        footer={
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+              disabled={deleteProject.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => void handleDelete()}
+              disabled={deleteProject.isPending}
+            >
+              {deleteProject.isPending ? (
+                <>
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                  Deleting…
+                </>
+              ) : (
+                "Delete series"
+              )}
+            </Button>
+          </div>
+        }
+      >
+        <p className="text-muted-foreground text-sm">
+          Uploaded videos and episode data will be removed from your studio.
+        </p>
+      </SettingsModalShell>
     </div>
   )
 }
