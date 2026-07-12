@@ -74,7 +74,7 @@ export function SettingsEarningsPage() {
               </p>
             </div>
             <Select value={threshold} onValueChange={setThreshold}>
-              <SelectTrigger className="h-10 w-full bg-input-bg sm:w-40">
+              <SelectTrigger className="h-10 w-full sm:w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -144,7 +144,7 @@ export function SettingsEarningsPage() {
             </p>
           </div>
           <Select defaultValue={earnings.taxResidency}>
-            <SelectTrigger className="h-10 w-full bg-input-bg sm:w-48">
+            <SelectTrigger className="h-10 w-full sm:w-48">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

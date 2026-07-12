@@ -1,7 +1,10 @@
 import { useParams } from "@tanstack/react-router"
-import { WeeklyViewsChart } from "@/features/analytics/components/charts/weekly-views-chart"
+import { AnalyticsMetricCard } from "@/features/analytics/components/shared/analytics-metric-card"
 import { useProject } from "../../hooks/use-project"
-import { MetricStatCard } from "../shared/metric-stat-card"
+import { AudienceRetentionChart } from "../analytics/audience-retention-chart"
+import { DevicesListCard } from "../analytics/devices-list-card"
+import { ProjectViewershipTrendChart } from "../analytics/project-viewership-trend-chart"
+import { TrafficSourcesCard } from "../analytics/traffic-sources-card"
 
 export function ProjectAnalyticsTab() {
   const { projectId } = useParams({ strict: false })
@@ -9,14 +12,37 @@ export function ProjectAnalyticsTab() {
 
   if (!project) return null
 
+  const { analytics } = project
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {project.analyticsMetrics.map((metric) => (
-          <MetricStatCard key={metric.label} metric={metric} />
+        {analytics.kpis.map((kpi) => (
+          <AnalyticsMetricCard key={kpi.label} kpi={kpi} />
         ))}
       </div>
-      <WeeklyViewsChart data={project.weeklyViews} />
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <ProjectViewershipTrendChart
+          data={analytics.viewershipTrend}
+          className="lg:col-span-2"
+        />
+        <DevicesListCard data={analytics.devices} />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <AudienceRetentionChart
+          data={analytics.audienceRetention}
+          className="lg:col-span-2"
+        />
+        <TrafficSourcesCard data={analytics.trafficSources} />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {analytics.engagementKpis.map((kpi) => (
+          <AnalyticsMetricCard key={kpi.label} kpi={kpi} />
+        ))}
+      </div>
     </div>
   )
 }

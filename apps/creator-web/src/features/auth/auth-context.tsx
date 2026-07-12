@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from "react"
+import { AppLoadingScreen } from "@/components/app-loading-screen"
 import { getOnboardingStatus } from "@/features/onboarding/api/onboarding-api"
 import {
   getAccessToken,
@@ -28,6 +29,7 @@ import {
   verifyEmail as verifyEmailApi,
   verifyMfa as verifyMfaApi,
 } from "./api/auth-api"
+import { useAuthBootstrapProgress } from "./hooks/use-auth-bootstrap-progress"
 import { clearAuthBootstrapCache, getAuthReady } from "./lib/auth-bootstrap"
 import { getAuthSnapshot, setAuthSnapshot } from "./lib/auth-snapshot"
 import { clearOnboardingComplete } from "./lib/onboarding-complete"
@@ -296,10 +298,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 function AuthBootstrapFallback() {
+  const progress = useAuthBootstrapProgress()
+
   return (
-    <div className="flex min-h-svh items-center justify-center bg-background">
-      <p className="text-muted-foreground text-sm">Loading…</p>
-    </div>
+    <AppLoadingScreen
+      progress={progress}
+      title="Signing you in"
+      message="Checking your session…"
+    />
   )
 }
 

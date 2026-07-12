@@ -35,7 +35,6 @@ import { useLayoutEffect, useRef } from "react"
 import { SelectionCard } from "@/features/onboarding/components/selection-card"
 import {
   LANGUAGE_OPTIONS,
-  SERIES_INFO_GENRE_OPTIONS,
   SUBTITLE_TRACK_OPTIONS,
   UPLOAD_SERIES_TIPS,
 } from "../../constants"
@@ -45,6 +44,7 @@ import {
   useContinueFromInfo,
 } from "../../hooks/use-continue-from-info"
 import { usePosterTrailerUpload } from "../../hooks/use-poster-trailer-upload"
+import { usePublicGenres } from "../../hooks/use-public-genres"
 import { MAX_TRAILER_FILE_BYTES } from "../../lib/media/upload-pipeline.types"
 import type { PersonEntry } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
@@ -57,6 +57,8 @@ interface UploadSeriesInfoStepProps {
 
 export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
   const { state, dispatch } = useUploadWizard()
+  const { data: genreOptions = [], isLoading: genresLoading } =
+    usePublicGenres()
   const { uploadPoster, uploadTrailer, clearPoster, clearTrailer } =
     usePosterTrailerUpload()
   const { continueFromInfo } = useContinueFromInfo()
@@ -70,7 +72,7 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
 
   return (
     <div className="flex flex-col gap-8 xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start">
-      <div className="min-w-0 space-y-6">
+      <div className="w-full min-w-0 max-w-[740px] space-y-6">
         <UploadInfoSectionCard
           icon={FileText}
           title="Basics"
@@ -151,6 +153,7 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
             <ImageUploadZone
               label="Film poster"
               hint="9:16 vertical · JPG / PNG · up to 10MB"
+              aspectRatio="9/16"
               previewUrl={state.poster?.previewObjectUrl ?? null}
               status={state.poster?.status}
               progress={state.poster?.progress}
@@ -163,6 +166,7 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
             <VideoUploadZone
               label="Trailer"
               hint="9:16 vertical · MP4 / MOV · up to 100MB"
+              aspectRatio="9/16"
               media={state.trailer}
               maxBytes={MAX_TRAILER_FILE_BYTES}
               onSelect={(file) => void uploadTrailer(file)}
@@ -177,16 +181,20 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
           subtitle="Pick up to 3 genres that describe your project."
         >
           <div className="flex flex-wrap gap-2">
-            {SERIES_INFO_GENRE_OPTIONS.map((genre) => (
-              <ToggleChip
-                key={genre}
-                label={genre}
-                selected={state.genres.includes(genre)}
-                onClick={() =>
-                  dispatch({ type: "TOGGLE_GENRE", payload: genre })
-                }
-              />
-            ))}
+            {genresLoading ? (
+              <p className="text-muted-foreground text-sm">Loading genres…</p>
+            ) : (
+              genreOptions.map((genre) => (
+                <ToggleChip
+                  key={genre.id}
+                  label={genre.name}
+                  selected={state.genres.includes(genre.name)}
+                  onClick={() =>
+                    dispatch({ type: "TOGGLE_GENRE", payload: genre.name })
+                  }
+                />
+              ))
+            )}
           </div>
         </UploadInfoSectionCard>
 
@@ -204,7 +212,7 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
                   dispatch({ type: "SET_FIELD", payload: { language } })
                 }
               >
-                <SelectTrigger className="w-full bg-input-bg">
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

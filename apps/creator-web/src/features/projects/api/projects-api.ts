@@ -6,8 +6,10 @@ import type {
   StudioSeries,
 } from "@sable/contracts"
 import { apiRequest } from "@/lib/http-client"
+import { MOCK_PROJECT_ANALYTICS } from "../data/mock-project-analytics"
 import { formatRelativeUpdatedAt } from "../lib/format-relative-time"
 import type { EpisodeAccess, ProjectDetail, ProjectSummary } from "../types"
+import { updateSeries } from "./studio-api"
 
 const STATUS_MAP: Record<StudioSeries["status"], ProjectSummary["status"]> = {
   draft: "draft",
@@ -17,11 +19,17 @@ const STATUS_MAP: Record<StudioSeries["status"], ProjectSummary["status"]> = {
   archived: "draft",
 }
 
-const ICON_VARIANTS: ProjectSummary["iconVariant"][] = [
-  "purple",
-  "pink",
-  "blue",
-]
+const ICON_VARIANT_BY_STATUS: Record<
+  ProjectSummary["status"],
+  ProjectSummary["iconVariant"]
+> = {
+  published: "purple",
+  in_review: "pink",
+  scheduled: "pink",
+  draft: "blue",
+  ongoing: "purple",
+  completed: "purple",
+}
 
 function mapAccessType(access: EpisodeAccessType): EpisodeAccess {
   switch (access) {
@@ -44,11 +52,12 @@ function formatDuration(seconds: number | null | undefined): string {
 
 function mapSeriesToSummary(
   series: StudioSeries & { _count?: { episodes: number } },
-  index: number
+  _index: number
 ): ProjectSummary {
   const updatedAtMs = new Date(series.updatedAt).getTime()
   const episodeCount = series._count?.episodes ?? series.episodes?.length
   const isShortFilm = series.type === "short_film"
+  const status = STATUS_MAP[series.status]
 
   return {
     id: series.id,
@@ -56,7 +65,7 @@ function mapSeriesToSummary(
     title: series.title,
     thumbnailUrl: series.posterUrl ?? undefined,
     type: isShortFilm ? "Short film" : "Short series",
-    status: STATUS_MAP[series.status],
+    status,
     episodeCount: isShortFilm ? undefined : episodeCount,
     duration: isShortFilm
       ? formatDuration(series.episodes?.[0]?.durationSeconds ?? null)
@@ -65,7 +74,7 @@ function mapSeriesToSummary(
     updatedAtMs,
     genre: series.genres[0],
     language: series.language,
-    iconVariant: ICON_VARIANTS[index % ICON_VARIANTS.length],
+    iconVariant: ICON_VARIANT_BY_STATUS[status],
   }
 }
 
@@ -109,17 +118,34 @@ export async function fetchProject(id: string): Promise<ProjectDetail> {
       tippingEnabled: series.tippingEnabled,
       seriesRevenue: "$0",
     },
+    subtitleTracks:
+      series.subtitleLanguages.length > 0
+        ? series.subtitleLanguages
+        : ["English"],
+    autoCaptionEnabled: series.autoCaptions,
+    access: "free",
     overviewMetrics: [],
     analyticsMetrics: [],
+    analytics: MOCK_PROJECT_ANALYTICS,
     recentEpisodes: episodes.slice(0, 5),
     episodes,
     weeklyViews: [],
   }
 }
 
+export type ProjectSettingsPatch = Partial<
+  ProjectDetail["visibility"] &
+    ProjectDetail["monetization"] & {
+      language?: string
+      subtitleTracks?: string[]
+      autoCaptionEnabled?: boolean
+      access?: ProjectDetail["access"]
+    }
+>
+
 export async function updateProjectSettings(
   id: string,
-  patch: Partial<ProjectDetail["visibility"] & ProjectDetail["monetization"]>
+  patch: ProjectSettingsPatch
 ): Promise<ProjectDetail> {
   if (
     patch.public !== undefined ||
@@ -144,7 +170,28 @@ export async function updateProjectSettings(
     })
   }
 
-  return fetchProject(id)
+  if (
+    patch.language !== undefined ||
+    patch.subtitleTracks !== undefined ||
+    patch.autoCaptionEnabled !== undefined
+  ) {
+    await updateSeries(id, {
+      ...(patch.language !== undefined && { language: patch.language }),
+      ...(patch.subtitleTracks !== undefined && {
+        subtitleLanguages: patch.subtitleTracks,
+      }),
+      ...(patch.autoCaptionEnabled !== undefined && {
+        autoCaptions: patch.autoCaptionEnabled,
+      }),
+    })
+  }
+
+  const detail = await fetchProject(id)
+
+  return {
+    ...detail,
+    ...(patch.access !== undefined && { access: patch.access }),
+  }
 }
 
 export async function archiveProject(id: string): Promise<void> {

@@ -1,6 +1,6 @@
 import { Progress } from "@workspace/ui/components/progress"
 import { cn } from "@workspace/ui/lib/utils"
-import { Upload, X } from "lucide-react"
+import { Check, Upload, X } from "lucide-react"
 import { type DragEvent, useRef } from "react"
 import { formatMediaDuration } from "../../hooks/use-media-upload-pipeline"
 import type { MediaJobStatus, UploadMediaAsset } from "../../types"
@@ -24,6 +24,8 @@ interface VideoUploadZoneProps {
   onSelect: (file: File) => void
   onClear: () => void
   disabled?: boolean
+  /** When set, drop zone uses a fixed aspect ratio instead of min-height. */
+  aspectRatio?: "9/16"
 }
 
 export function VideoUploadZone({
@@ -35,6 +37,7 @@ export function VideoUploadZone({
   onSelect,
   onClear,
   disabled,
+  aspectRatio,
 }: VideoUploadZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const isBusy =
@@ -42,6 +45,7 @@ export function VideoUploadZone({
     media.status !== "ready" &&
     media.status !== "failed" &&
     media.status !== "idle"
+  const isReady = media?.status === "ready"
 
   const handleFiles = (files: FileList | null) => {
     const file = files?.[0]
@@ -56,7 +60,13 @@ export function VideoUploadZone({
   }
 
   const dropZoneClassName = cn(
-    "relative flex min-h-52 w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border border-dashed bg-input-bg/50 px-4 py-8 text-center transition-colors",
+    "relative flex w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-xl px-4 text-center transition-colors",
+    aspectRatio === "9/16"
+      ? "aspect-[9/16] max-w-[240px] py-4"
+      : "min-h-52 py-8",
+    isReady
+      ? "border border-primary/30 bg-primary/5"
+      : "border border-dashed bg-input-bg/50",
     disabled || isBusy
       ? "cursor-not-allowed opacity-80"
       : "cursor-pointer hover:border-primary/40 hover:bg-primary/5"
@@ -66,6 +76,10 @@ export function VideoUploadZone({
   const handleDrop = (e: DragEvent) => {
     e.preventDefault()
     if (!disabled && !isBusy) handleFiles(e.dataTransfer.files)
+  }
+
+  const openPicker = () => {
+    if (!disabled && !isBusy) inputRef.current?.click()
   }
 
   return (
@@ -90,51 +104,65 @@ export function VideoUploadZone({
         }}
       />
       {media?.file ? (
-        <div className={dropZoneClassName}>
-          {media.previewObjectUrl ? (
-            <img
-              src={media.previewObjectUrl}
-              alt=""
-              className="absolute inset-0 size-full object-cover opacity-40"
-            />
-          ) : null}
-          <div className="relative z-10 w-full max-w-xs space-y-2">
-            <p className="font-medium text-foreground text-sm">
-              {media.file.name}
-            </p>
-            <p className="text-muted-foreground text-xs">
-              {formatMediaDuration(media.durationSeconds ?? null)}
-            </p>
-            {media.status !== "idle" && media.status !== "ready" ? (
-              <div className="space-y-1.5">
-                <p className="text-muted-foreground text-xs">
-                  {STATUS_LABELS[media.status]}
-                  {media.error ? `: ${media.error}` : ""}
-                </p>
-                {media.status !== "failed" ? (
-                  <Progress value={media.progress * 100} className="h-1.5" />
-                ) : null}
-              </div>
-            ) : null}
-            {media.status === "ready" ? (
-              <p className="font-medium text-primary text-xs">Ready</p>
-            ) : null}
-          </div>
+        isReady ? (
           <button
             type="button"
-            className="relative z-10 rounded-full bg-background/90 p-1.5"
-            disabled={isBusy}
-            onClick={onClear}
+            disabled={disabled}
+            onClick={openPicker}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            className={dropZoneClassName}
           >
-            <X className="size-4" aria-hidden />
-            <span className="sr-only">Remove file</span>
+            <Check className="size-6 text-primary" aria-hidden />
+            <p className="max-w-full truncate font-semibold text-foreground text-sm">
+              {media.file.name}
+            </p>
+            <p className="text-muted-foreground text-xs">Click to replace</p>
           </button>
-        </div>
+        ) : (
+          <div className={dropZoneClassName}>
+            {media.previewObjectUrl ? (
+              <img
+                src={media.previewObjectUrl}
+                alt=""
+                className="absolute inset-0 size-full object-cover opacity-40"
+              />
+            ) : null}
+            <div className="relative z-10 w-full max-w-xs space-y-2">
+              <p className="font-medium text-foreground text-sm">
+                {media.file.name}
+              </p>
+              <p className="text-muted-foreground text-xs">
+                {formatMediaDuration(media.durationSeconds ?? null)}
+              </p>
+              {media.status !== "idle" ? (
+                <div className="space-y-1.5">
+                  <p className="text-muted-foreground text-xs">
+                    {STATUS_LABELS[media.status]}
+                    {media.error ? `: ${media.error}` : ""}
+                  </p>
+                  {media.status !== "failed" ? (
+                    <Progress value={media.progress * 100} className="h-1.5" />
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
+            <button
+              type="button"
+              className="relative z-10 rounded-full bg-background/90 p-1.5"
+              disabled={isBusy}
+              onClick={onClear}
+            >
+              <X className="size-4" aria-hidden />
+              <span className="sr-only">Remove file</span>
+            </button>
+          </div>
+        )
       ) : (
         <button
           type="button"
           disabled={disabled || isBusy}
-          onClick={() => inputRef.current?.click()}
+          onClick={openPicker}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           className={dropZoneClassName}
@@ -159,6 +187,8 @@ interface ImageUploadZoneProps {
   onSelect: (file: File, previewUrl: string) => void
   onClear: () => void
   maxBytes?: number
+  /** When set, drop zone uses a fixed aspect ratio instead of min-height. */
+  aspectRatio?: "9/16"
 }
 
 export function ImageUploadZone({
@@ -171,6 +201,7 @@ export function ImageUploadZone({
   onSelect,
   onClear,
   maxBytes = 10 * 1024 * 1024,
+  aspectRatio,
 }: ImageUploadZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null)
   const isBusy =
@@ -180,7 +211,10 @@ export function ImageUploadZone({
     status !== "idle"
 
   const dropZoneClassName = cn(
-    "relative flex min-h-52 w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border border-dashed bg-input-bg/50 px-4 py-8 text-center transition-colors",
+    "relative flex w-full flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border border-dashed bg-input-bg/50 px-4 text-center transition-colors",
+    aspectRatio === "9/16"
+      ? "aspect-[9/16] max-w-[240px] py-4"
+      : "min-h-52 py-8",
     isBusy
       ? "cursor-not-allowed opacity-80"
       : "cursor-pointer hover:border-primary/40 hover:bg-primary/5"

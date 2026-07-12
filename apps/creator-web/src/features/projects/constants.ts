@@ -52,19 +52,6 @@ export const LANGUAGE_OPTIONS = [
   "Arabic",
 ] as const
 
-export const SERIES_INFO_GENRE_OPTIONS = [
-  "Drama",
-  "Romance",
-  "Comedy",
-  "Thriller",
-  "Documentary",
-  "Anthology",
-  "Sci-Fi",
-  "Horror",
-  "Music",
-  "Action",
-] as const
-
 export const SUBTITLE_TRACK_OPTIONS = [
   "English",
   "Swahili",

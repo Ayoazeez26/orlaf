@@ -1,0 +1,37 @@
+import { cn } from "@workspace/ui/lib/utils"
+import { COIN_ECONOMY_VIEWS } from "../constants"
+import type { CoinEconomyView } from "../types"
+
+interface CoinEconomyViewTabsProps {
+  active: CoinEconomyView
+  onChange: (view: CoinEconomyView) => void
+}
+
+export function CoinEconomyViewTabs({
+  active,
+  onChange,
+}: CoinEconomyViewTabsProps) {
+  return (
+    <div className="inline-flex rounded-full border border-border bg-muted/40 p-1">
+      {COIN_ECONOMY_VIEWS.map((view) => {
+        const isActive = view.key === active
+
+        return (
+          <button
+            key={view.key}
+            type="button"
+            onClick={() => onChange(view.key)}
+            className={cn(
+              "rounded-full px-4 py-1.5 font-medium text-sm transition-colors",
+              isActive
+                ? "bg-card text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            {view.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}

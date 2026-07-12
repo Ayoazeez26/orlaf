@@ -12,7 +12,6 @@ import type { DashboardNavGroup } from "./types"
 
 export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
   {
-    label: "Studio",
     items: [
       { label: "Home", to: "/dashboard", icon: Home },
       { label: "Projects", to: "/dashboard/projects", icon: FolderKanban },

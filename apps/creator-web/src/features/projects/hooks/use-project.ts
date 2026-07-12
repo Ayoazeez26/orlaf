@@ -4,10 +4,10 @@ import {
   archiveProject,
   deleteProject,
   fetchProject,
+  type ProjectSettingsPatch,
   updateProjectSettings,
 } from "../api/projects-api"
 import { projectKeys } from "../data/query-keys"
-import type { ProjectDetail } from "../types"
 
 export function useProject(id: string) {
   return useQuery({
@@ -21,11 +21,8 @@ export function useUpdateProjectSettings(projectId: string) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (
-      patch: Partial<
-        ProjectDetail["visibility"] & ProjectDetail["monetization"]
-      >
-    ) => updateProjectSettings(projectId, patch),
+    mutationFn: (patch: ProjectSettingsPatch) =>
+      updateProjectSettings(projectId, patch),
     onSuccess: (data) => {
       queryClient.setQueryData(projectKeys.detail(projectId), data)
     },

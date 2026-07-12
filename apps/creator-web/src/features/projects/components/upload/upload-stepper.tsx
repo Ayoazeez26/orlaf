@@ -36,18 +36,24 @@ export function UploadStepper({ currentStep }: UploadStepperProps) {
             )}
             <span
               className={cn(
-                "inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 font-medium text-sm",
-                isActive && "bg-primary-gradient text-primary-foreground",
-                isComplete &&
-                  !isActive &&
-                  "bg-upload-step-complete text-primary dark:bg-background",
+                "inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 font-medium text-sm",
+                isActive && "bg-primary text-primary-foreground",
+                isComplete && !isActive && "bg-primary/10 text-primary",
                 !isActive && !isComplete && "bg-muted text-muted-foreground"
               )}
             >
               {isComplete ? (
-                <Check className="size-3.5" aria-hidden />
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <Check className="size-3" strokeWidth={3} aria-hidden />
+                </span>
+              ) : isActive ? (
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary-foreground/20">
+                  {step.number}
+                </span>
               ) : (
-                <span>{step.number}</span>
+                <span className="flex size-5 shrink-0 items-center justify-center">
+                  {step.number}
+                </span>
               )}
               {step.label}
             </span>

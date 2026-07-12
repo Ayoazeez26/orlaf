@@ -1,5 +1,6 @@
 import { PROJECT_THUMBNAILS } from "../constants"
 import type { ProjectDetail, ProjectSummary } from "../types"
+import { MOCK_PROJECT_ANALYTICS } from "./mock-project-analytics"
 
 const JOLLOF_DESCRIPTION =
   "A gripping tale of love, power, and deception in the heart of Lagos's elite social circles. When a contract marriage between two powerful families turns into something real, secrets threaten to destroy everything."
@@ -150,9 +151,12 @@ const JOLLOF_DETAIL: ProjectDetail = {
     commentsEnabled: true,
   },
   monetization: {
-    tippingEnabled: false,
+    tippingEnabled: true,
     seriesRevenue: "8,420",
   },
+  subtitleTracks: ["English"],
+  autoCaptionEnabled: true,
+  access: "free",
   overviewMetrics: [
     { label: "Total Views", value: "1.2M", change: "+12%", icon: "views" },
     { label: "Revenue", value: "8,420", change: "+24%", icon: "revenue" },
@@ -180,6 +184,7 @@ const JOLLOF_DETAIL: ProjectDetail = {
     },
     { label: "Revenue", value: "8,420", change: "+24%", icon: "revenue" },
   ],
+  analytics: MOCK_PROJECT_ANALYTICS,
   recentEpisodes: JOLLOF_EPISODES.slice(0, 4),
   episodes: JOLLOF_EPISODES,
   weeklyViews: [
@@ -216,8 +221,12 @@ function buildGenericDetail(summary: ProjectSummary): ProjectDetail {
       tippingEnabled: false,
       seriesRevenue: "2,100",
     },
+    subtitleTracks: ["English"],
+    autoCaptionEnabled: true,
+    access: "free",
     overviewMetrics: JOLLOF_DETAIL.overviewMetrics,
     analyticsMetrics: JOLLOF_DETAIL.analyticsMetrics,
+    analytics: MOCK_PROJECT_ANALYTICS,
     recentEpisodes: JOLLOF_EPISODES.slice(0, 3),
     episodes: JOLLOF_EPISODES.slice(0, episodeCount > 4 ? 4 : episodeCount),
     weeklyViews: JOLLOF_DETAIL.weeklyViews,

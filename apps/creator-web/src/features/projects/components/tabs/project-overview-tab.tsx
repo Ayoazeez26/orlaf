@@ -75,7 +75,7 @@ export function ProjectOverviewTab() {
           <CardContent className="space-y-4">
             {project.recentEpisodes.map((episode) => (
               <div key={episode.id} className="flex gap-3">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-background font-medium text-[10px] text-muted-foreground">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 font-semibold text-primary text-sm">
                   {episode.number}
                 </span>
                 <div className="min-w-0">

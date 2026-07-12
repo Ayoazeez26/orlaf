@@ -23,6 +23,7 @@ import {
   Subtitles,
   Trash2,
   Volume2,
+  X,
 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { deleteEpisode } from "../../api/studio-api"
@@ -113,7 +114,7 @@ export function UploadEpisodesStep({
 
   return (
     <div className="flex flex-col gap-8 xl:grid xl:grid-cols-[1fr_320px]">
-      <div className="min-w-0 space-y-6">
+      <div className="w-full min-w-0 max-w-[740px] space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-semibold text-foreground text-lg">
@@ -152,10 +153,8 @@ export function UploadEpisodesStep({
               Save Draft
             </Button>
             <Button
-              variant="outline"
-              className={toolbarButtonClassName}
-              onClick={() => dispatch({ type: "ADD_EPISODES", payload: 1 })}
               size="lg"
+              onClick={() => dispatch({ type: "ADD_EPISODES", payload: 1 })}
             >
               <Plus className="size-4" aria-hidden />
               Add New Episode
@@ -242,7 +241,7 @@ export function UploadEpisodesStep({
               </div>
               <AccordionContent className="border-t px-6 pt-6 pb-6">
                 <div className="space-y-5">
-                  <div className="grid gap-5 lg:grid-cols-2">
+                  <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
                     <div className="space-y-3">
                       <Label className="font-medium text-sm text-text-strong">
                         Upload Episode
@@ -250,6 +249,7 @@ export function UploadEpisodesStep({
                       <VideoUploadZone
                         label=""
                         hint="MP4, MOV • Max 500MB"
+                        aspectRatio="9/16"
                         media={episode.media}
                         maxBytes={MAX_EPISODE_FILE_BYTES}
                         onSelect={(file) =>
@@ -298,6 +298,10 @@ export function UploadEpisodesStep({
                           }
                         />
                       </div>
+
+                      {state.autoCaptionEnabled ? (
+                        <EpisodeSubtitleUploadField />
+                      ) : null}
                     </div>
                   </div>
 
@@ -414,6 +418,65 @@ export function UploadEpisodesStep({
           className="xl:hidden"
         />
       </div>
+    </div>
+  )
+}
+
+/** UI-only subtitle file picker — not wired to upload/API yet. */
+function EpisodeSubtitleUploadField() {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [fileName, setFileName] = useState<string | null>(null)
+
+  return (
+    <div className="space-y-2">
+      <div>
+        <p className="font-medium text-sm text-text-strong">Subtitles</p>
+        <p className="text-muted-foreground text-xs">
+          SRT or VTT file (optional). Duration is auto-detected from the
+          uploaded video.
+        </p>
+      </div>
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".srt,.vtt,text/vtt,application/x-subrip"
+        className="sr-only"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) setFileName(file.name)
+          e.target.value = ""
+        }}
+      />
+      {fileName ? (
+        <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl border border-primary/30 bg-primary/5 px-4 py-3">
+            <Subtitles
+              className="size-4 shrink-0 text-foreground"
+              aria-hidden
+            />
+            <span className="truncate font-medium text-foreground text-sm">
+              {fileName}
+            </span>
+          </div>
+          <button
+            type="button"
+            className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/5 text-muted-foreground transition-colors hover:bg-primary/10"
+            onClick={() => setFileName(null)}
+            aria-label="Remove subtitle file"
+          >
+            <X className="size-4" aria-hidden />
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-input-bg/50 px-4 py-3 text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
+        >
+          <Subtitles className="size-4 shrink-0" aria-hidden />
+          <span className="text-sm">Upload .srt or .vtt</span>
+        </button>
+      )}
     </div>
   )
 }

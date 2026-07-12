@@ -53,7 +53,7 @@ export function ConsentStep({ progress, onBack, onNext }: ConsentStepProps) {
           Review our policies
         </h1>
         <p className="mt-2 text-muted-foreground text-sm">
-          Please accept our terms to continue using OrlAf Creators.
+          Please accept our terms to continue using Sable Creators.
         </p>
       </div>
 

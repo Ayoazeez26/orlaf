@@ -233,7 +233,7 @@ export function SettingsProfilePage() {
                   setForm((prev) => ({ ...prev, pronouns: value }))
                 }
               >
-                <SelectTrigger className="h-10 w-full bg-input-bg">
+                <SelectTrigger className="h-10 w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

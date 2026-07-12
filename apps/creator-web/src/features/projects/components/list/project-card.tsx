@@ -16,38 +16,55 @@ interface ProjectCardProps {
   project: ProjectSummary
 }
 
+function buildMetaLine(project: ProjectSummary) {
+  const parts = [project.type]
+
+  if (project.genre) parts.push(project.genre)
+
+  if (project.episodeCount !== undefined) {
+    parts.push(`${project.episodeCount} eps`)
+  } else if (project.duration) {
+    parts.push(project.duration)
+  }
+
+  parts.push(`Updated ${project.updatedAt}`)
+
+  return parts.join(" · ")
+}
+
 export function ProjectCard({ project }: ProjectCardProps) {
   return (
-    <article className="group flex w-full flex-col">
+    <article className="group flex w-full flex-col rounded-[20px] border border-[#E2E4EB] bg-[#F9FAFE] p-3">
       <Link
         {...projectDetailPath(project.id)}
-        className="block w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="relative block w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <ProjectListThumbnail
           variant={project.iconVariant}
-          className="h-40 w-full rounded-xl"
+          className="aspect-[3/4] h-auto w-full rounded-2xl"
+          iconClassName="size-8"
+        />
+        <ProjectStatusBadge
+          status={project.status}
+          variant="overlay"
+          className="absolute top-3 left-3"
         />
       </Link>
-      <div className="mt-4 flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              {...projectDetailPath(project.id)}
-              className="truncate font-semibold text-foreground text-sm transition-colors group-hover:text-primary"
-            >
-              {project.title}
-            </Link>
-            <ProjectStatusBadge status={project.status} />
-          </div>
-          <p className="mt-1 text-muted-foreground text-xs">
-            {project.updatedAt}
-            {project.episodeCount !== undefined
-              ? ` • ${project.episodeCount} Episodes`
-              : project.duration
-                ? ` • ${project.duration}`
-                : null}
-          </p>
-        </div>
+      <div className="mt-4 min-w-0 flex-1">
+        <Link
+          {...projectDetailPath(project.id)}
+          className="block truncate font-bold text-foreground transition-colors group-hover:text-primary"
+        >
+          {project.title}
+        </Link>
+        <p className="mt-1 text-muted-foreground text-sm">
+          {buildMetaLine(project)}
+        </p>
+      </div>
+      <div className="mt-4 flex items-center justify-between border-border border-t pt-3">
+        <span className="text-muted-foreground text-sm">
+          {project.views ?? "—"}
+        </span>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon-sm" className="shrink-0">

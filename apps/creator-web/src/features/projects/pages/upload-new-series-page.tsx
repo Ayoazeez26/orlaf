@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useNavigate, useSearch } from "@tanstack/react-router"
+import { Button } from "@workspace/ui/components/button"
+import { Save } from "lucide-react"
 import { useEffect, useLayoutEffect, useRef } from "react"
 import { usePreferences } from "@/features/settings/hooks/use-preferences"
 import { getSeries } from "../api/studio-api"
@@ -8,6 +10,7 @@ import { UploadEpisodesStep } from "../components/upload/upload-episodes-step"
 import { UploadReviewStep } from "../components/upload/upload-review-step"
 import { UploadSeriesInfoStep } from "../components/upload/upload-series-info-step"
 import { UploadStepper } from "../components/upload/upload-stepper"
+import { useSaveUploadDraft } from "../hooks/use-save-upload-draft"
 import { mapCreatorContentDefaults } from "../lib/map-creator-content-defaults"
 import { mapSeriesToWizardFields } from "../lib/map-series-to-wizard-state"
 import type { UploadWizardState } from "../types"
@@ -26,6 +29,7 @@ function UploadNewSeriesContent() {
   const navigate = useNavigate()
   const search = useSearch({ strict: false }) as UploadSearch
   const { state, dispatch } = useUploadWizard()
+  const saveDraft = useSaveUploadDraft()
   const { data: preferences, isLoading: preferencesLoading } = usePreferences()
   const seriesId = search.seriesId
   const prefilledSeriesId = useRef<string | null>(null)
@@ -101,15 +105,26 @@ function UploadNewSeriesContent() {
   return (
     <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
       <div className="space-y-4">
-        <BackToProjectsLink projectId={seriesId} />
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <BackToProjectsLink projectId={seriesId} />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={saveDraft}
+            className="shrink-0"
+          >
+            <Save className="size-4" aria-hidden />
+            Save draft
+          </Button>
+        </div>
         <div>
           <h1 className="font-semibold text-2xl text-foreground">
-            {isEditing ? "Edit Series" : "Upload New Series"}
+            {isEditing ? "Edit Project" : "Upload New Project"}
           </h1>
           <p className="mt-1 text-muted-foreground text-sm">
             {isEditing
-              ? "Update your series details and episodes"
-              : "Set up your series and add episodes"}
+              ? "Update your series details and publish changes to Sable."
+              : "Set up your series and publish it to Sable."}
           </p>
         </div>
         <UploadStepper currentStep={step} />

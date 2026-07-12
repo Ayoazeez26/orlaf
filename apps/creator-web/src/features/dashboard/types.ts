@@ -46,7 +46,7 @@ export interface DashboardNavItem {
 }
 
 export interface DashboardNavGroup {
-  label: string
+  label?: string
   items: DashboardNavItem[]
 }
 

@@ -10,33 +10,357 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WorkspaceRoleRouteRouteImport } from './routes/workspace/$role/route'
+import { Route as WorkspaceRoleIndexRouteImport } from './routes/workspace/$role/index'
+import { Route as WorkspaceRoleAnalyticsRouteImport } from './routes/workspace/$role/analytics'
+import { Route as WorkspaceRoleSplatRouteImport } from './routes/workspace/$role/$'
+import { Route as WorkspaceRoleSupportIndexRouteImport } from './routes/workspace/$role/support/index'
+import { Route as WorkspaceRoleSubscriptionsIndexRouteImport } from './routes/workspace/$role/subscriptions/index'
+import { Route as WorkspaceRoleStreamersIndexRouteImport } from './routes/workspace/$role/streamers/index'
+import { Route as WorkspaceRoleSettingsIndexRouteImport } from './routes/workspace/$role/settings/index'
+import { Route as WorkspaceRoleRevenueSplitIndexRouteImport } from './routes/workspace/$role/revenue-split/index'
+import { Route as WorkspaceRolePromotionsIndexRouteImport } from './routes/workspace/$role/promotions/index'
+import { Route as WorkspaceRoleProjectsIndexRouteImport } from './routes/workspace/$role/projects/index'
+import { Route as WorkspaceRolePayoutsIndexRouteImport } from './routes/workspace/$role/payouts/index'
+import { Route as WorkspaceRoleOnboardingIndexRouteImport } from './routes/workspace/$role/onboarding/index'
+import { Route as WorkspaceRoleNotificationsIndexRouteImport } from './routes/workspace/$role/notifications/index'
+import { Route as WorkspaceRoleModerationIndexRouteImport } from './routes/workspace/$role/moderation/index'
+import { Route as WorkspaceRoleDiscoveryIndexRouteImport } from './routes/workspace/$role/discovery/index'
+import { Route as WorkspaceRoleCreatorsIndexRouteImport } from './routes/workspace/$role/creators/index'
+import { Route as WorkspaceRoleCoinEconomyIndexRouteImport } from './routes/workspace/$role/coin-economy/index'
+import { Route as WorkspaceRoleAuditLogIndexRouteImport } from './routes/workspace/$role/audit-log/index'
+import { Route as WorkspaceRoleStreamersStreamerIdRouteImport } from './routes/workspace/$role/streamers/$streamerId'
+import { Route as WorkspaceRolePromotionsCampaignIdRouteImport } from './routes/workspace/$role/promotions/$campaignId'
+import { Route as WorkspaceRoleProjectsProjectIdRouteImport } from './routes/workspace/$role/projects/$projectId'
+import { Route as WorkspaceRoleOnboardingApplicationIdRouteImport } from './routes/workspace/$role/onboarding/$applicationId'
+import { Route as WorkspaceRoleModerationReportIdRouteImport } from './routes/workspace/$role/moderation/$reportId'
+import { Route as WorkspaceRoleCreatorsCreatorIdRouteImport } from './routes/workspace/$role/creators/$creatorId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkspaceRoleRouteRoute = WorkspaceRoleRouteRouteImport.update({
+  id: '/workspace/$role',
+  path: '/workspace/$role',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkspaceRoleIndexRoute = WorkspaceRoleIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => WorkspaceRoleRouteRoute,
+} as any)
+const WorkspaceRoleAnalyticsRoute = WorkspaceRoleAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => WorkspaceRoleRouteRoute,
+} as any)
+const WorkspaceRoleSplatRoute = WorkspaceRoleSplatRouteImport.update({
+  id: '/$',
+  path: '/$',
+  getParentRoute: () => WorkspaceRoleRouteRoute,
+} as any)
+const WorkspaceRoleSupportIndexRoute =
+  WorkspaceRoleSupportIndexRouteImport.update({
+    id: '/support/',
+    path: '/support/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleSubscriptionsIndexRoute =
+  WorkspaceRoleSubscriptionsIndexRouteImport.update({
+    id: '/subscriptions/',
+    path: '/subscriptions/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleStreamersIndexRoute =
+  WorkspaceRoleStreamersIndexRouteImport.update({
+    id: '/streamers/',
+    path: '/streamers/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleSettingsIndexRoute =
+  WorkspaceRoleSettingsIndexRouteImport.update({
+    id: '/settings/',
+    path: '/settings/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleRevenueSplitIndexRoute =
+  WorkspaceRoleRevenueSplitIndexRouteImport.update({
+    id: '/revenue-split/',
+    path: '/revenue-split/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRolePromotionsIndexRoute =
+  WorkspaceRolePromotionsIndexRouteImport.update({
+    id: '/promotions/',
+    path: '/promotions/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleProjectsIndexRoute =
+  WorkspaceRoleProjectsIndexRouteImport.update({
+    id: '/projects/',
+    path: '/projects/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRolePayoutsIndexRoute =
+  WorkspaceRolePayoutsIndexRouteImport.update({
+    id: '/payouts/',
+    path: '/payouts/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleOnboardingIndexRoute =
+  WorkspaceRoleOnboardingIndexRouteImport.update({
+    id: '/onboarding/',
+    path: '/onboarding/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleNotificationsIndexRoute =
+  WorkspaceRoleNotificationsIndexRouteImport.update({
+    id: '/notifications/',
+    path: '/notifications/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleModerationIndexRoute =
+  WorkspaceRoleModerationIndexRouteImport.update({
+    id: '/moderation/',
+    path: '/moderation/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleDiscoveryIndexRoute =
+  WorkspaceRoleDiscoveryIndexRouteImport.update({
+    id: '/discovery/',
+    path: '/discovery/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleCreatorsIndexRoute =
+  WorkspaceRoleCreatorsIndexRouteImport.update({
+    id: '/creators/',
+    path: '/creators/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleCoinEconomyIndexRoute =
+  WorkspaceRoleCoinEconomyIndexRouteImport.update({
+    id: '/coin-economy/',
+    path: '/coin-economy/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleAuditLogIndexRoute =
+  WorkspaceRoleAuditLogIndexRouteImport.update({
+    id: '/audit-log/',
+    path: '/audit-log/',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleStreamersStreamerIdRoute =
+  WorkspaceRoleStreamersStreamerIdRouteImport.update({
+    id: '/streamers/$streamerId',
+    path: '/streamers/$streamerId',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRolePromotionsCampaignIdRoute =
+  WorkspaceRolePromotionsCampaignIdRouteImport.update({
+    id: '/promotions/$campaignId',
+    path: '/promotions/$campaignId',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleProjectsProjectIdRoute =
+  WorkspaceRoleProjectsProjectIdRouteImport.update({
+    id: '/projects/$projectId',
+    path: '/projects/$projectId',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleOnboardingApplicationIdRoute =
+  WorkspaceRoleOnboardingApplicationIdRouteImport.update({
+    id: '/onboarding/$applicationId',
+    path: '/onboarding/$applicationId',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleModerationReportIdRoute =
+  WorkspaceRoleModerationReportIdRouteImport.update({
+    id: '/moderation/$reportId',
+    path: '/moderation/$reportId',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
+const WorkspaceRoleCreatorsCreatorIdRoute =
+  WorkspaceRoleCreatorsCreatorIdRouteImport.update({
+    id: '/creators/$creatorId',
+    path: '/creators/$creatorId',
+    getParentRoute: () => WorkspaceRoleRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/workspace/$role': typeof WorkspaceRoleRouteRouteWithChildren
+  '/workspace/$role/$': typeof WorkspaceRoleSplatRoute
+  '/workspace/$role/analytics': typeof WorkspaceRoleAnalyticsRoute
+  '/workspace/$role/': typeof WorkspaceRoleIndexRoute
+  '/workspace/$role/creators/$creatorId': typeof WorkspaceRoleCreatorsCreatorIdRoute
+  '/workspace/$role/moderation/$reportId': typeof WorkspaceRoleModerationReportIdRoute
+  '/workspace/$role/onboarding/$applicationId': typeof WorkspaceRoleOnboardingApplicationIdRoute
+  '/workspace/$role/projects/$projectId': typeof WorkspaceRoleProjectsProjectIdRoute
+  '/workspace/$role/promotions/$campaignId': typeof WorkspaceRolePromotionsCampaignIdRoute
+  '/workspace/$role/streamers/$streamerId': typeof WorkspaceRoleStreamersStreamerIdRoute
+  '/workspace/$role/audit-log/': typeof WorkspaceRoleAuditLogIndexRoute
+  '/workspace/$role/coin-economy/': typeof WorkspaceRoleCoinEconomyIndexRoute
+  '/workspace/$role/creators/': typeof WorkspaceRoleCreatorsIndexRoute
+  '/workspace/$role/discovery/': typeof WorkspaceRoleDiscoveryIndexRoute
+  '/workspace/$role/moderation/': typeof WorkspaceRoleModerationIndexRoute
+  '/workspace/$role/notifications/': typeof WorkspaceRoleNotificationsIndexRoute
+  '/workspace/$role/onboarding/': typeof WorkspaceRoleOnboardingIndexRoute
+  '/workspace/$role/payouts/': typeof WorkspaceRolePayoutsIndexRoute
+  '/workspace/$role/projects/': typeof WorkspaceRoleProjectsIndexRoute
+  '/workspace/$role/promotions/': typeof WorkspaceRolePromotionsIndexRoute
+  '/workspace/$role/revenue-split/': typeof WorkspaceRoleRevenueSplitIndexRoute
+  '/workspace/$role/settings/': typeof WorkspaceRoleSettingsIndexRoute
+  '/workspace/$role/streamers/': typeof WorkspaceRoleStreamersIndexRoute
+  '/workspace/$role/subscriptions/': typeof WorkspaceRoleSubscriptionsIndexRoute
+  '/workspace/$role/support/': typeof WorkspaceRoleSupportIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/workspace/$role/$': typeof WorkspaceRoleSplatRoute
+  '/workspace/$role/analytics': typeof WorkspaceRoleAnalyticsRoute
+  '/workspace/$role': typeof WorkspaceRoleIndexRoute
+  '/workspace/$role/creators/$creatorId': typeof WorkspaceRoleCreatorsCreatorIdRoute
+  '/workspace/$role/moderation/$reportId': typeof WorkspaceRoleModerationReportIdRoute
+  '/workspace/$role/onboarding/$applicationId': typeof WorkspaceRoleOnboardingApplicationIdRoute
+  '/workspace/$role/projects/$projectId': typeof WorkspaceRoleProjectsProjectIdRoute
+  '/workspace/$role/promotions/$campaignId': typeof WorkspaceRolePromotionsCampaignIdRoute
+  '/workspace/$role/streamers/$streamerId': typeof WorkspaceRoleStreamersStreamerIdRoute
+  '/workspace/$role/audit-log': typeof WorkspaceRoleAuditLogIndexRoute
+  '/workspace/$role/coin-economy': typeof WorkspaceRoleCoinEconomyIndexRoute
+  '/workspace/$role/creators': typeof WorkspaceRoleCreatorsIndexRoute
+  '/workspace/$role/discovery': typeof WorkspaceRoleDiscoveryIndexRoute
+  '/workspace/$role/moderation': typeof WorkspaceRoleModerationIndexRoute
+  '/workspace/$role/notifications': typeof WorkspaceRoleNotificationsIndexRoute
+  '/workspace/$role/onboarding': typeof WorkspaceRoleOnboardingIndexRoute
+  '/workspace/$role/payouts': typeof WorkspaceRolePayoutsIndexRoute
+  '/workspace/$role/projects': typeof WorkspaceRoleProjectsIndexRoute
+  '/workspace/$role/promotions': typeof WorkspaceRolePromotionsIndexRoute
+  '/workspace/$role/revenue-split': typeof WorkspaceRoleRevenueSplitIndexRoute
+  '/workspace/$role/settings': typeof WorkspaceRoleSettingsIndexRoute
+  '/workspace/$role/streamers': typeof WorkspaceRoleStreamersIndexRoute
+  '/workspace/$role/subscriptions': typeof WorkspaceRoleSubscriptionsIndexRoute
+  '/workspace/$role/support': typeof WorkspaceRoleSupportIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/workspace/$role': typeof WorkspaceRoleRouteRouteWithChildren
+  '/workspace/$role/$': typeof WorkspaceRoleSplatRoute
+  '/workspace/$role/analytics': typeof WorkspaceRoleAnalyticsRoute
+  '/workspace/$role/': typeof WorkspaceRoleIndexRoute
+  '/workspace/$role/creators/$creatorId': typeof WorkspaceRoleCreatorsCreatorIdRoute
+  '/workspace/$role/moderation/$reportId': typeof WorkspaceRoleModerationReportIdRoute
+  '/workspace/$role/onboarding/$applicationId': typeof WorkspaceRoleOnboardingApplicationIdRoute
+  '/workspace/$role/projects/$projectId': typeof WorkspaceRoleProjectsProjectIdRoute
+  '/workspace/$role/promotions/$campaignId': typeof WorkspaceRolePromotionsCampaignIdRoute
+  '/workspace/$role/streamers/$streamerId': typeof WorkspaceRoleStreamersStreamerIdRoute
+  '/workspace/$role/audit-log/': typeof WorkspaceRoleAuditLogIndexRoute
+  '/workspace/$role/coin-economy/': typeof WorkspaceRoleCoinEconomyIndexRoute
+  '/workspace/$role/creators/': typeof WorkspaceRoleCreatorsIndexRoute
+  '/workspace/$role/discovery/': typeof WorkspaceRoleDiscoveryIndexRoute
+  '/workspace/$role/moderation/': typeof WorkspaceRoleModerationIndexRoute
+  '/workspace/$role/notifications/': typeof WorkspaceRoleNotificationsIndexRoute
+  '/workspace/$role/onboarding/': typeof WorkspaceRoleOnboardingIndexRoute
+  '/workspace/$role/payouts/': typeof WorkspaceRolePayoutsIndexRoute
+  '/workspace/$role/projects/': typeof WorkspaceRoleProjectsIndexRoute
+  '/workspace/$role/promotions/': typeof WorkspaceRolePromotionsIndexRoute
+  '/workspace/$role/revenue-split/': typeof WorkspaceRoleRevenueSplitIndexRoute
+  '/workspace/$role/settings/': typeof WorkspaceRoleSettingsIndexRoute
+  '/workspace/$role/streamers/': typeof WorkspaceRoleStreamersIndexRoute
+  '/workspace/$role/subscriptions/': typeof WorkspaceRoleSubscriptionsIndexRoute
+  '/workspace/$role/support/': typeof WorkspaceRoleSupportIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/workspace/$role'
+    | '/workspace/$role/$'
+    | '/workspace/$role/analytics'
+    | '/workspace/$role/'
+    | '/workspace/$role/creators/$creatorId'
+    | '/workspace/$role/moderation/$reportId'
+    | '/workspace/$role/onboarding/$applicationId'
+    | '/workspace/$role/projects/$projectId'
+    | '/workspace/$role/promotions/$campaignId'
+    | '/workspace/$role/streamers/$streamerId'
+    | '/workspace/$role/audit-log/'
+    | '/workspace/$role/coin-economy/'
+    | '/workspace/$role/creators/'
+    | '/workspace/$role/discovery/'
+    | '/workspace/$role/moderation/'
+    | '/workspace/$role/notifications/'
+    | '/workspace/$role/onboarding/'
+    | '/workspace/$role/payouts/'
+    | '/workspace/$role/projects/'
+    | '/workspace/$role/promotions/'
+    | '/workspace/$role/revenue-split/'
+    | '/workspace/$role/settings/'
+    | '/workspace/$role/streamers/'
+    | '/workspace/$role/subscriptions/'
+    | '/workspace/$role/support/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/workspace/$role/$'
+    | '/workspace/$role/analytics'
+    | '/workspace/$role'
+    | '/workspace/$role/creators/$creatorId'
+    | '/workspace/$role/moderation/$reportId'
+    | '/workspace/$role/onboarding/$applicationId'
+    | '/workspace/$role/projects/$projectId'
+    | '/workspace/$role/promotions/$campaignId'
+    | '/workspace/$role/streamers/$streamerId'
+    | '/workspace/$role/audit-log'
+    | '/workspace/$role/coin-economy'
+    | '/workspace/$role/creators'
+    | '/workspace/$role/discovery'
+    | '/workspace/$role/moderation'
+    | '/workspace/$role/notifications'
+    | '/workspace/$role/onboarding'
+    | '/workspace/$role/payouts'
+    | '/workspace/$role/projects'
+    | '/workspace/$role/promotions'
+    | '/workspace/$role/revenue-split'
+    | '/workspace/$role/settings'
+    | '/workspace/$role/streamers'
+    | '/workspace/$role/subscriptions'
+    | '/workspace/$role/support'
+  id:
+    | '__root__'
+    | '/'
+    | '/workspace/$role'
+    | '/workspace/$role/$'
+    | '/workspace/$role/analytics'
+    | '/workspace/$role/'
+    | '/workspace/$role/creators/$creatorId'
+    | '/workspace/$role/moderation/$reportId'
+    | '/workspace/$role/onboarding/$applicationId'
+    | '/workspace/$role/projects/$projectId'
+    | '/workspace/$role/promotions/$campaignId'
+    | '/workspace/$role/streamers/$streamerId'
+    | '/workspace/$role/audit-log/'
+    | '/workspace/$role/coin-economy/'
+    | '/workspace/$role/creators/'
+    | '/workspace/$role/discovery/'
+    | '/workspace/$role/moderation/'
+    | '/workspace/$role/notifications/'
+    | '/workspace/$role/onboarding/'
+    | '/workspace/$role/payouts/'
+    | '/workspace/$role/projects/'
+    | '/workspace/$role/promotions/'
+    | '/workspace/$role/revenue-split/'
+    | '/workspace/$role/settings/'
+    | '/workspace/$role/streamers/'
+    | '/workspace/$role/subscriptions/'
+    | '/workspace/$role/support/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  WorkspaceRoleRouteRoute: typeof WorkspaceRoleRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +372,246 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workspace/$role': {
+      id: '/workspace/$role'
+      path: '/workspace/$role'
+      fullPath: '/workspace/$role'
+      preLoaderRoute: typeof WorkspaceRoleRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workspace/$role/': {
+      id: '/workspace/$role/'
+      path: '/'
+      fullPath: '/workspace/$role/'
+      preLoaderRoute: typeof WorkspaceRoleIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/analytics': {
+      id: '/workspace/$role/analytics'
+      path: '/analytics'
+      fullPath: '/workspace/$role/analytics'
+      preLoaderRoute: typeof WorkspaceRoleAnalyticsRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/$': {
+      id: '/workspace/$role/$'
+      path: '/$'
+      fullPath: '/workspace/$role/$'
+      preLoaderRoute: typeof WorkspaceRoleSplatRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/support/': {
+      id: '/workspace/$role/support/'
+      path: '/support'
+      fullPath: '/workspace/$role/support/'
+      preLoaderRoute: typeof WorkspaceRoleSupportIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/subscriptions/': {
+      id: '/workspace/$role/subscriptions/'
+      path: '/subscriptions'
+      fullPath: '/workspace/$role/subscriptions/'
+      preLoaderRoute: typeof WorkspaceRoleSubscriptionsIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/streamers/': {
+      id: '/workspace/$role/streamers/'
+      path: '/streamers'
+      fullPath: '/workspace/$role/streamers/'
+      preLoaderRoute: typeof WorkspaceRoleStreamersIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/settings/': {
+      id: '/workspace/$role/settings/'
+      path: '/settings'
+      fullPath: '/workspace/$role/settings/'
+      preLoaderRoute: typeof WorkspaceRoleSettingsIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/revenue-split/': {
+      id: '/workspace/$role/revenue-split/'
+      path: '/revenue-split'
+      fullPath: '/workspace/$role/revenue-split/'
+      preLoaderRoute: typeof WorkspaceRoleRevenueSplitIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/promotions/': {
+      id: '/workspace/$role/promotions/'
+      path: '/promotions'
+      fullPath: '/workspace/$role/promotions/'
+      preLoaderRoute: typeof WorkspaceRolePromotionsIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/projects/': {
+      id: '/workspace/$role/projects/'
+      path: '/projects'
+      fullPath: '/workspace/$role/projects/'
+      preLoaderRoute: typeof WorkspaceRoleProjectsIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/payouts/': {
+      id: '/workspace/$role/payouts/'
+      path: '/payouts'
+      fullPath: '/workspace/$role/payouts/'
+      preLoaderRoute: typeof WorkspaceRolePayoutsIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/onboarding/': {
+      id: '/workspace/$role/onboarding/'
+      path: '/onboarding'
+      fullPath: '/workspace/$role/onboarding/'
+      preLoaderRoute: typeof WorkspaceRoleOnboardingIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/notifications/': {
+      id: '/workspace/$role/notifications/'
+      path: '/notifications'
+      fullPath: '/workspace/$role/notifications/'
+      preLoaderRoute: typeof WorkspaceRoleNotificationsIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/moderation/': {
+      id: '/workspace/$role/moderation/'
+      path: '/moderation'
+      fullPath: '/workspace/$role/moderation/'
+      preLoaderRoute: typeof WorkspaceRoleModerationIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/discovery/': {
+      id: '/workspace/$role/discovery/'
+      path: '/discovery'
+      fullPath: '/workspace/$role/discovery/'
+      preLoaderRoute: typeof WorkspaceRoleDiscoveryIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/creators/': {
+      id: '/workspace/$role/creators/'
+      path: '/creators'
+      fullPath: '/workspace/$role/creators/'
+      preLoaderRoute: typeof WorkspaceRoleCreatorsIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/coin-economy/': {
+      id: '/workspace/$role/coin-economy/'
+      path: '/coin-economy'
+      fullPath: '/workspace/$role/coin-economy/'
+      preLoaderRoute: typeof WorkspaceRoleCoinEconomyIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/audit-log/': {
+      id: '/workspace/$role/audit-log/'
+      path: '/audit-log'
+      fullPath: '/workspace/$role/audit-log/'
+      preLoaderRoute: typeof WorkspaceRoleAuditLogIndexRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/streamers/$streamerId': {
+      id: '/workspace/$role/streamers/$streamerId'
+      path: '/streamers/$streamerId'
+      fullPath: '/workspace/$role/streamers/$streamerId'
+      preLoaderRoute: typeof WorkspaceRoleStreamersStreamerIdRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/promotions/$campaignId': {
+      id: '/workspace/$role/promotions/$campaignId'
+      path: '/promotions/$campaignId'
+      fullPath: '/workspace/$role/promotions/$campaignId'
+      preLoaderRoute: typeof WorkspaceRolePromotionsCampaignIdRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/projects/$projectId': {
+      id: '/workspace/$role/projects/$projectId'
+      path: '/projects/$projectId'
+      fullPath: '/workspace/$role/projects/$projectId'
+      preLoaderRoute: typeof WorkspaceRoleProjectsProjectIdRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/onboarding/$applicationId': {
+      id: '/workspace/$role/onboarding/$applicationId'
+      path: '/onboarding/$applicationId'
+      fullPath: '/workspace/$role/onboarding/$applicationId'
+      preLoaderRoute: typeof WorkspaceRoleOnboardingApplicationIdRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/moderation/$reportId': {
+      id: '/workspace/$role/moderation/$reportId'
+      path: '/moderation/$reportId'
+      fullPath: '/workspace/$role/moderation/$reportId'
+      preLoaderRoute: typeof WorkspaceRoleModerationReportIdRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
+    '/workspace/$role/creators/$creatorId': {
+      id: '/workspace/$role/creators/$creatorId'
+      path: '/creators/$creatorId'
+      fullPath: '/workspace/$role/creators/$creatorId'
+      preLoaderRoute: typeof WorkspaceRoleCreatorsCreatorIdRouteImport
+      parentRoute: typeof WorkspaceRoleRouteRoute
+    }
   }
 }
 
+interface WorkspaceRoleRouteRouteChildren {
+  WorkspaceRoleSplatRoute: typeof WorkspaceRoleSplatRoute
+  WorkspaceRoleAnalyticsRoute: typeof WorkspaceRoleAnalyticsRoute
+  WorkspaceRoleIndexRoute: typeof WorkspaceRoleIndexRoute
+  WorkspaceRoleCreatorsCreatorIdRoute: typeof WorkspaceRoleCreatorsCreatorIdRoute
+  WorkspaceRoleModerationReportIdRoute: typeof WorkspaceRoleModerationReportIdRoute
+  WorkspaceRoleOnboardingApplicationIdRoute: typeof WorkspaceRoleOnboardingApplicationIdRoute
+  WorkspaceRoleProjectsProjectIdRoute: typeof WorkspaceRoleProjectsProjectIdRoute
+  WorkspaceRolePromotionsCampaignIdRoute: typeof WorkspaceRolePromotionsCampaignIdRoute
+  WorkspaceRoleStreamersStreamerIdRoute: typeof WorkspaceRoleStreamersStreamerIdRoute
+  WorkspaceRoleAuditLogIndexRoute: typeof WorkspaceRoleAuditLogIndexRoute
+  WorkspaceRoleCoinEconomyIndexRoute: typeof WorkspaceRoleCoinEconomyIndexRoute
+  WorkspaceRoleCreatorsIndexRoute: typeof WorkspaceRoleCreatorsIndexRoute
+  WorkspaceRoleDiscoveryIndexRoute: typeof WorkspaceRoleDiscoveryIndexRoute
+  WorkspaceRoleModerationIndexRoute: typeof WorkspaceRoleModerationIndexRoute
+  WorkspaceRoleNotificationsIndexRoute: typeof WorkspaceRoleNotificationsIndexRoute
+  WorkspaceRoleOnboardingIndexRoute: typeof WorkspaceRoleOnboardingIndexRoute
+  WorkspaceRolePayoutsIndexRoute: typeof WorkspaceRolePayoutsIndexRoute
+  WorkspaceRoleProjectsIndexRoute: typeof WorkspaceRoleProjectsIndexRoute
+  WorkspaceRolePromotionsIndexRoute: typeof WorkspaceRolePromotionsIndexRoute
+  WorkspaceRoleRevenueSplitIndexRoute: typeof WorkspaceRoleRevenueSplitIndexRoute
+  WorkspaceRoleSettingsIndexRoute: typeof WorkspaceRoleSettingsIndexRoute
+  WorkspaceRoleStreamersIndexRoute: typeof WorkspaceRoleStreamersIndexRoute
+  WorkspaceRoleSubscriptionsIndexRoute: typeof WorkspaceRoleSubscriptionsIndexRoute
+  WorkspaceRoleSupportIndexRoute: typeof WorkspaceRoleSupportIndexRoute
+}
+
+const WorkspaceRoleRouteRouteChildren: WorkspaceRoleRouteRouteChildren = {
+  WorkspaceRoleSplatRoute: WorkspaceRoleSplatRoute,
+  WorkspaceRoleAnalyticsRoute: WorkspaceRoleAnalyticsRoute,
+  WorkspaceRoleIndexRoute: WorkspaceRoleIndexRoute,
+  WorkspaceRoleCreatorsCreatorIdRoute: WorkspaceRoleCreatorsCreatorIdRoute,
+  WorkspaceRoleModerationReportIdRoute: WorkspaceRoleModerationReportIdRoute,
+  WorkspaceRoleOnboardingApplicationIdRoute:
+    WorkspaceRoleOnboardingApplicationIdRoute,
+  WorkspaceRoleProjectsProjectIdRoute: WorkspaceRoleProjectsProjectIdRoute,
+  WorkspaceRolePromotionsCampaignIdRoute:
+    WorkspaceRolePromotionsCampaignIdRoute,
+  WorkspaceRoleStreamersStreamerIdRoute: WorkspaceRoleStreamersStreamerIdRoute,
+  WorkspaceRoleAuditLogIndexRoute: WorkspaceRoleAuditLogIndexRoute,
+  WorkspaceRoleCoinEconomyIndexRoute: WorkspaceRoleCoinEconomyIndexRoute,
+  WorkspaceRoleCreatorsIndexRoute: WorkspaceRoleCreatorsIndexRoute,
+  WorkspaceRoleDiscoveryIndexRoute: WorkspaceRoleDiscoveryIndexRoute,
+  WorkspaceRoleModerationIndexRoute: WorkspaceRoleModerationIndexRoute,
+  WorkspaceRoleNotificationsIndexRoute: WorkspaceRoleNotificationsIndexRoute,
+  WorkspaceRoleOnboardingIndexRoute: WorkspaceRoleOnboardingIndexRoute,
+  WorkspaceRolePayoutsIndexRoute: WorkspaceRolePayoutsIndexRoute,
+  WorkspaceRoleProjectsIndexRoute: WorkspaceRoleProjectsIndexRoute,
+  WorkspaceRolePromotionsIndexRoute: WorkspaceRolePromotionsIndexRoute,
+  WorkspaceRoleRevenueSplitIndexRoute: WorkspaceRoleRevenueSplitIndexRoute,
+  WorkspaceRoleSettingsIndexRoute: WorkspaceRoleSettingsIndexRoute,
+  WorkspaceRoleStreamersIndexRoute: WorkspaceRoleStreamersIndexRoute,
+  WorkspaceRoleSubscriptionsIndexRoute: WorkspaceRoleSubscriptionsIndexRoute,
+  WorkspaceRoleSupportIndexRoute: WorkspaceRoleSupportIndexRoute,
+}
+
+const WorkspaceRoleRouteRouteWithChildren =
+  WorkspaceRoleRouteRoute._addFileChildren(WorkspaceRoleRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  WorkspaceRoleRouteRoute: WorkspaceRoleRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

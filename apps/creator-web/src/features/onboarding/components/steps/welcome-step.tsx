@@ -3,6 +3,7 @@ import { Button } from "@workspace/ui/components/button"
 import { Separator } from "@workspace/ui/components/separator"
 import { Mail } from "lucide-react"
 import { useState } from "react"
+import { SableBrandMark } from "@/components/sable-brand-mark"
 import { GoogleSignInButton } from "@/features/auth/components/google-sign-in-button"
 import { useOnboarding } from "../../onboarding-context"
 import { OnboardingProgress } from "../onboarding-progress"
@@ -36,10 +37,7 @@ export function WelcomeStep({ progress, onContinueEmail }: WelcomeStepProps) {
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center bg-background px-4 py-8 sm:py-10">
-      <p className="mb-6 font-semibold text-foreground text-lg">
-        <span className="font-bold">OrlAf</span>{" "}
-        <span className="text-muted-foreground">Creators</span>
-      </p>
+      <SableBrandMark className="mb-6" subtitle="Creators" />
       <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
         <div className="text-center">
           <h1 className="font-semibold text-xl sm:text-2xl">

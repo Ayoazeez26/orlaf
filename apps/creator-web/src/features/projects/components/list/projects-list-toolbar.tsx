@@ -17,18 +17,24 @@ export function ProjectsListCardToolbar({
   onFiltersChange,
 }: ProjectsListCardToolbarProps) {
   return (
-    <div className="flex flex-col gap-4 border-border border-b px-5 py-4 sm:px-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <ProjectsListSearch
-          value={filters.searchQuery}
-          onChange={(searchQuery) => onFiltersChange({ searchQuery })}
-        />
-        <ProjectsViewToggle layout={layout} onLayoutChange={onLayoutChange} />
+    <div className="border-border border-b px-5 py-4 sm:px-6">
+      <div className="flex items-center gap-3 lg:gap-4">
+        <div className="w-full max-w-xs shrink-0">
+          <ProjectsListSearch
+            value={filters.searchQuery}
+            onChange={(searchQuery) => onFiltersChange({ searchQuery })}
+          />
+        </div>
+        <div className="flex min-w-0 flex-1 justify-center overflow-x-auto">
+          <ProjectsStatusFilterPills
+            value={filters.statusFilter}
+            onChange={(statusFilter) => onFiltersChange({ statusFilter })}
+          />
+        </div>
+        <div className="shrink-0">
+          <ProjectsViewToggle layout={layout} onLayoutChange={onLayoutChange} />
+        </div>
       </div>
-      <ProjectsStatusFilterPills
-        value={filters.statusFilter}
-        onChange={(statusFilter) => onFiltersChange({ statusFilter })}
-      />
     </div>
   )
 }

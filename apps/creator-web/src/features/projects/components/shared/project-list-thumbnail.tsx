@@ -4,18 +4,18 @@ import type { ProjectIconVariant } from "../../types"
 
 const PROJECT_ICON_STYLES: Record<
   ProjectIconVariant,
-  { gradient: string; icon: LucideIcon }
+  { color: string; icon: LucideIcon }
 > = {
   purple: {
-    gradient: "linear-gradient(180deg, #7C3AED 0%, #2C105C 100%)",
+    color: "#7C3AED",
     icon: Clapperboard,
   },
   pink: {
-    gradient: "linear-gradient(180deg, #EC4899 0%, #5B1638 100%)",
+    color: "#EC4899",
     icon: Film,
   },
   blue: {
-    gradient: "linear-gradient(180deg, #0EA5E9 0%, #023D5A 100%)",
+    color: "#0EA5E9",
     icon: Clapperboard,
   },
 }
@@ -23,13 +23,15 @@ const PROJECT_ICON_STYLES: Record<
 interface ProjectListThumbnailProps {
   variant: ProjectIconVariant
   className?: string
+  iconClassName?: string
 }
 
 export function ProjectListThumbnail({
   variant,
   className,
+  iconClassName,
 }: ProjectListThumbnailProps) {
-  const { gradient, icon: Icon } = PROJECT_ICON_STYLES[variant]
+  const { color, icon: Icon } = PROJECT_ICON_STYLES[variant]
 
   return (
     <div
@@ -37,9 +39,13 @@ export function ProjectListThumbnail({
         "flex h-[70px] w-12 shrink-0 items-center justify-center rounded-xl text-white",
         className
       )}
-      style={{ background: gradient }}
+      style={{ backgroundColor: color }}
     >
-      <Icon className="size-5" strokeWidth={1.75} aria-hidden />
+      <Icon
+        className={cn("size-5", iconClassName)}
+        strokeWidth={1.75}
+        aria-hidden
+      />
     </div>
   )
 }

@@ -9,7 +9,7 @@ export function MetricCardsRow({ kpis }: MetricCardsRowProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {kpis.map((kpi) => (
-        <AnalyticsMetricCard key={kpi.label} kpi={kpi} />
+        <AnalyticsMetricCard key={kpi.label} kpi={kpi} showTrend={false} />
       ))}
     </div>
   )

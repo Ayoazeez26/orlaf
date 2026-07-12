@@ -11,11 +11,13 @@ export function DashboardNav({ onNavigate }: DashboardNavProps) {
 
   return (
     <nav className="flex flex-col gap-6">
-      {DASHBOARD_NAV_GROUPS.map((group) => (
-        <div key={group.label} className="space-y-1">
-          <p className="px-3 font-medium text-[11px] text-muted-foreground uppercase tracking-wider">
-            {group.label}
-          </p>
+      {DASHBOARD_NAV_GROUPS.map((group, index) => (
+        <div key={group.label ?? index} className="space-y-1">
+          {group.label && (
+            <p className="px-3 font-medium text-[11px] text-muted-foreground uppercase tracking-wider">
+              {group.label}
+            </p>
+          )}
           <div className="flex flex-col gap-0.5">
             {group.items.map((item) => {
               const isActive =

@@ -19,12 +19,12 @@ export function HomePage() {
     <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
       <WelcomeHeader displayName={user.displayName} />
       <MetricCardsRow kpis={kpis} />
+      <PromotionBanner />
       <RecentProjectsCard
         projects={projects}
         isLoading={isProjectsLoading}
         isError={isProjectsError}
       />
-      <PromotionBanner />
       <div className="grid gap-4 lg:grid-cols-3">
         <HomeEngagementChart data={engagementChart} className="lg:col-span-2" />
         <TopEpisodesList episodes={topEpisodes} />

@@ -113,7 +113,7 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
       <div>
         <h1 className="font-semibold text-2xl">Tell us about yourself</h1>
         <p className="mt-2 text-muted-foreground text-sm">
-          Create your OrlAf Creator account
+          Create your Sable Creator account
         </p>
       </div>
 

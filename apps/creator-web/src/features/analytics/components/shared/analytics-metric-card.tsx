@@ -1,12 +1,17 @@
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import {
+  ArrowDownRight,
+  ArrowUpRight,
   Banknote,
   Clock,
   DollarSign,
   Eye,
+  Heart,
   LineChart,
+  Share2,
   TrendingUp,
+  UserPlus,
   Users,
 } from "lucide-react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
@@ -18,20 +23,55 @@ const ICON_MAP: Record<AnalyticsKpiIcon, typeof Eye> = {
   viewers: Users,
   watchTime: Clock,
   engagement: TrendingUp,
+  completion: LineChart,
+  likes: Heart,
+  shares: Share2,
+  subscribers: UserPlus,
   dollar: DollarSign,
   chart: LineChart,
   clock: Clock,
   creditCard: Banknote,
 }
 
+const VS_LAST_PERIOD_SUFFIX = " vs last period"
+
+function parseTrendFootnote(footnote: string) {
+  const cleaned = footnote.replace(/^↗\s*/, "").trim()
+  if (cleaned.endsWith(VS_LAST_PERIOD_SUFFIX)) {
+    return {
+      value: cleaned.slice(0, -VS_LAST_PERIOD_SUFFIX.length).trim(),
+      suffix: "vs last period",
+    }
+  }
+
+  return { value: cleaned, suffix: null }
+}
+
+function TrendFootnote({ footnote }: { footnote: string }) {
+  const { value, suffix } = parseTrendFootnote(footnote)
+  const isPositive = !value.trim().startsWith("-")
+  const Icon = isPositive ? ArrowUpRight : ArrowDownRight
+  const trendColor = isPositive ? "text-trend-positive" : "text-trend-negative"
+
+  return (
+    <p className="flex flex-wrap items-center gap-1 text-sm">
+      <Icon className={cn("size-4 shrink-0", trendColor)} aria-hidden />
+      <span className={cn("font-medium", trendColor)}>{value}</span>
+      {suffix ? <span className="text-muted-foreground">{suffix}</span> : null}
+    </p>
+  )
+}
+
 interface AnalyticsMetricCardProps {
   kpi: AnalyticsKpi
   className?: string
+  showTrend?: boolean
 }
 
 export function AnalyticsMetricCard({
   kpi,
   className,
+  showTrend = true,
 }: AnalyticsMetricCardProps) {
   const Icon = ICON_MAP[kpi.icon]
 
@@ -51,13 +91,12 @@ export function AnalyticsMetricCard({
           {kpi.value}
         </p>
 
-        {kpi.footnote ? (
-          <p className="font-medium text-sm text-trend-positive">
-            {kpi.footnote}
-          </p>
-        ) : kpi.changePercent !== undefined ? (
-          <TrendBadge changePercent={kpi.changePercent} variant="inline" />
-        ) : null}
+        {showTrend &&
+          (kpi.footnote ? (
+            <TrendFootnote footnote={kpi.footnote} />
+          ) : kpi.changePercent !== undefined ? (
+            <TrendBadge changePercent={kpi.changePercent} variant="inline" />
+          ) : null)}
       </CardContent>
     </Card>
   )

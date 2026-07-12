@@ -1,3 +1,5 @@
+import type { AnalyticsKpi, DeviceSegment } from "@/features/analytics/types"
+
 export type ProjectStatus =
   | "published"
   | "draft"
@@ -91,6 +93,31 @@ export interface WeeklyViewPoint {
   views: number
 }
 
+export interface ProjectViewershipPoint {
+  month: string
+  views: number
+  unique: number
+}
+
+export interface AudienceRetentionPoint {
+  label: string
+  retention: number
+}
+
+export interface TrafficSourceRow {
+  name: string
+  percent: number
+}
+
+export interface ProjectAnalytics {
+  kpis: AnalyticsKpi[]
+  engagementKpis: AnalyticsKpi[]
+  viewershipTrend: ProjectViewershipPoint[]
+  devices: DeviceSegment[]
+  audienceRetention: AudienceRetentionPoint[]
+  trafficSources: TrafficSourceRow[]
+}
+
 export interface ProjectDetail extends ProjectSummary {
   description: string
   totalViews: string
@@ -108,8 +135,12 @@ export interface ProjectDetail extends ProjectSummary {
     tippingEnabled: boolean
     seriesRevenue: string
   }
+  subtitleTracks: string[]
+  autoCaptionEnabled: boolean
+  access: "free" | "coins"
   overviewMetrics: ProjectMetric[]
   analyticsMetrics: ProjectMetric[]
+  analytics: ProjectAnalytics
   recentEpisodes: EpisodeSummary[]
   episodes: EpisodeSummary[]
   weeklyViews: WeeklyViewPoint[]

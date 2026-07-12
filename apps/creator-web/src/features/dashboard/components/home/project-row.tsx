@@ -13,11 +13,11 @@ const STATUS_STYLES: Record<
 > = {
   published: {
     label: "Published",
-    className: "border-transparent bg-emerald-500/15 text-emerald-600",
+    className: "border-[#2BBB7133] bg-[#2BBB7126] text-[#002C0F]",
   },
   in_review: {
     label: "In review",
-    className: "border-transparent bg-[#FFF0C5] text-[#4A2300]",
+    className: "border-transparent bg-[#FFF0C5] text-[#5C2C00]",
   },
   draft: {
     label: "Draft",

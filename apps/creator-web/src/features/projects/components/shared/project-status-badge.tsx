@@ -2,13 +2,15 @@ import { Badge } from "@workspace/ui/components/badge"
 import { cn } from "@workspace/ui/lib/utils"
 import type { ProjectStatus } from "../../types"
 
+const PUBLISHED_PILL_CLASS = "border-[#2BBB7133] bg-[#2BBB7126] text-[#002C0F]"
+
 const STATUS_STYLES: Record<
   ProjectStatus,
   { label: string; className: string }
 > = {
   published: {
     label: "Published",
-    className: "border-transparent bg-primary/90 text-white",
+    className: PUBLISHED_PILL_CLASS,
   },
   draft: {
     label: "Draft",
@@ -39,11 +41,11 @@ const TABLE_STATUS_STYLES: Record<
 > = {
   published: {
     label: "Published",
-    className: "border-transparent bg-emerald-500/15 text-emerald-600",
+    className: PUBLISHED_PILL_CLASS,
   },
   in_review: {
     label: "In review",
-    className: "border-transparent bg-[#FFF0C5] text-[#4A2300]",
+    className: "border-transparent bg-[#FFF0C5] text-[#5C2C00]",
   },
   draft: {
     label: "Draft",
@@ -63,13 +65,46 @@ const TABLE_STATUS_STYLES: Record<
   },
 }
 
+const OVERLAY_STATUS_STYLES: Record<
+  ProjectStatus,
+  { label: string; className: string }
+> = {
+  published: {
+    label: "Published",
+    className: `${PUBLISHED_PILL_CLASS} backdrop-blur-sm`,
+  },
+  draft: {
+    label: "Draft",
+    className:
+      "border-transparent bg-white/60 text-foreground backdrop-blur-sm",
+  },
+  in_review: {
+    label: "In review",
+    className:
+      "border-[#FCB4424D] bg-[#FCB44233] text-[#5C2C00] backdrop-blur-sm",
+  },
+  scheduled: {
+    label: "Scheduled",
+    className: "border-transparent bg-sky-200/70 text-sky-950 backdrop-blur-sm",
+  },
+  ongoing: {
+    label: "Ongoing",
+    className:
+      "border-transparent bg-emerald-200/70 text-emerald-950 backdrop-blur-sm",
+  },
+  completed: {
+    label: "Completed",
+    className: "border-transparent bg-primary/30 text-primary backdrop-blur-sm",
+  },
+}
+
 const LIST_STATUS_STYLES: Record<
   ProjectStatus,
   { label: string; className: string }
 > = {
   published: {
     label: "Published",
-    className: "border-transparent bg-primary/15 text-primary",
+    className: `${PUBLISHED_PILL_CLASS} uppercase tracking-wide`,
   },
   draft: {
     label: "Draft",
@@ -100,7 +135,7 @@ const LIST_STATUS_STYLES: Record<
 
 interface ProjectStatusBadgeProps {
   status: ProjectStatus
-  variant?: "default" | "list" | "table"
+  variant?: "default" | "list" | "table" | "overlay"
   className?: string
 }
 
@@ -114,7 +149,9 @@ export function ProjectStatusBadge({
       ? TABLE_STATUS_STYLES[status]
       : variant === "list"
         ? LIST_STATUS_STYLES[status]
-        : STATUS_STYLES[status]
+        : variant === "overlay"
+          ? OVERLAY_STATUS_STYLES[status]
+          : STATUS_STYLES[status]
 
   return (
     <Badge
@@ -126,6 +163,8 @@ export function ProjectStatusBadge({
         variant === "list" &&
           "px-3 py-1.5 font-semibold text-[11px] uppercase leading-none tracking-wide",
         variant === "table" && "px-2.5 py-1.5",
+        variant === "overlay" &&
+          "px-3 py-1.5 font-semibold text-xs leading-none",
         config.className,
         className
       )}

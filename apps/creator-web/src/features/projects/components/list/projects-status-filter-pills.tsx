@@ -13,7 +13,7 @@ export function ProjectsStatusFilterPills({
   onChange,
 }: ProjectsStatusFilterPillsProps) {
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="flex flex-nowrap items-center gap-1.5">
       {PROJECT_STATUS_FILTER_PILLS.map((pill) => {
         const isActive = value === pill.value
 

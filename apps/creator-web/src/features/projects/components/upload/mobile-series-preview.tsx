@@ -140,7 +140,7 @@ export function MobileSeriesPreview({
                 {displayTitle}
               </p>
               <div className="flex items-center gap-2 text-white/80 text-xs">
-                <span>OrlAf Creators</span>
+                <span>Sable Creators</span>
                 <span className="rounded-full bg-white/20 px-2 py-0.5 font-medium text-white">
                   {genre || "Drama"}
                 </span>

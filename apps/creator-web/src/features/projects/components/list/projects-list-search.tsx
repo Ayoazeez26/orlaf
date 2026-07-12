@@ -11,7 +11,7 @@ export function ProjectsListSearch({
   onChange,
 }: ProjectsListSearchProps) {
   return (
-    <div className="relative min-w-[200px] flex-1 sm:max-w-xs">
+    <div className="relative w-full min-w-[200px]">
       <Search
         className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
         aria-hidden

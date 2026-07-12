@@ -3,6 +3,7 @@ import type {
   CreateSeriesRequest,
   EpisodeStatus,
   ImageUploadUrlResponse,
+  PublicGenre,
   StudioEpisode,
   StudioSeries,
   TrailerStatusResponse,
@@ -179,4 +180,8 @@ export async function waitForEpisodeStatus(
   }
 
   throw new Error("Timed out waiting for episode processing")
+}
+
+export async function fetchPublicGenres(): Promise<PublicGenre[]> {
+  return apiRequest<PublicGenre[]>("/api/v1/studio/public/genres")
 }

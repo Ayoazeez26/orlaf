@@ -7,6 +7,8 @@ import {
 } from "@tanstack/react-router"
 import { Separator } from "@workspace/ui/components/separator"
 import { useState } from "react"
+import { AppLoadingScreen } from "@/components/app-loading-screen"
+import { SableBrandMark } from "@/components/sable-brand-mark"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { EmailSignInForm } from "@/features/auth/components/email-sign-in-form"
 import { GoogleSignInButton } from "@/features/auth/components/google-sign-in-button"
@@ -66,10 +68,7 @@ function LoginContent() {
       <div className="absolute top-4 right-4 left-4 z-10 flex justify-end sm:left-auto">
         <ThemeSwitcher compact />
       </div>
-      <p className="mb-6 font-semibold text-foreground text-lg">
-        <span className="font-bold">OrlAf</span>{" "}
-        <span className="text-muted-foreground">Creators</span>
-      </p>
+      <SableBrandMark className="mb-6" subtitle="Creators" />
       <div className="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-8">
         <div className="text-center">
           <h1 className="font-semibold text-xl sm:text-2xl">Welcome back</h1>
@@ -111,8 +110,10 @@ function LoginContent() {
 
 function LoginFallback() {
   return (
-    <div className="flex min-h-svh items-center justify-center bg-background">
-      <p className="text-muted-foreground text-sm">Loading…</p>
-    </div>
+    <AppLoadingScreen
+      mode="simulated"
+      title="Loading sign in"
+      message="Preparing your studio…"
+    />
   )
 }

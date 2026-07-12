@@ -297,7 +297,7 @@ function SelectField({
     <div className="space-y-2">
       <p className="font-medium text-foreground text-sm">{label}</p>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="h-10 w-full bg-input-bg">
+        <SelectTrigger className="h-10 w-full">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

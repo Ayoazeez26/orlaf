@@ -1,5 +1,6 @@
 import { ClientOnly, createFileRoute, redirect } from "@tanstack/react-router"
 import { z } from "zod"
+import { SableBrandMark } from "@/components/sable-brand-mark"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { getAuthReady } from "@/features/auth/lib/auth-bootstrap"
 import { OnboardingProvider } from "@/features/onboarding/onboarding-context"
@@ -50,10 +51,7 @@ function OnboardingFallback() {
       <div className="absolute top-4 right-4 left-4 z-10 flex justify-end sm:left-auto">
         <ThemeSwitcher compact />
       </div>
-      <p className="mb-6 font-semibold text-foreground text-lg">
-        <span className="font-bold">OrlAf</span>{" "}
-        <span className="text-muted-foreground">Creators</span>
-      </p>
+      <SableBrandMark className="mb-6" subtitle="Creators" />
       <div className="w-full max-w-lg animate-pulse rounded-2xl border border-border bg-card p-8 shadow-sm">
         <div className="mx-auto h-8 w-3/4 rounded-lg bg-muted" />
         <div className="mx-auto mt-3 h-4 w-1/2 rounded bg-muted" />
