@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkspaceRoleRouteRouteImport } from './routes/workspace/$role/route'
 import { Route as WorkspaceRoleIndexRouteImport } from './routes/workspace/$role/index'
@@ -36,6 +38,16 @@ import { Route as WorkspaceRoleOnboardingApplicationIdRouteImport } from './rout
 import { Route as WorkspaceRoleModerationReportIdRouteImport } from './routes/workspace/$role/moderation/$reportId'
 import { Route as WorkspaceRoleCreatorsCreatorIdRouteImport } from './routes/workspace/$role/creators/$creatorId'
 
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ChangePasswordRoute = ChangePasswordRouteImport.update({
+  id: '/change-password',
+  path: '/change-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -190,6 +202,8 @@ const WorkspaceRoleCreatorsCreatorIdRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/change-password': typeof ChangePasswordRoute
+  '/login': typeof LoginRoute
   '/workspace/$role': typeof WorkspaceRoleRouteRouteWithChildren
   '/workspace/$role/$': typeof WorkspaceRoleSplatRoute
   '/workspace/$role/analytics': typeof WorkspaceRoleAnalyticsRoute
@@ -218,6 +232,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/change-password': typeof ChangePasswordRoute
+  '/login': typeof LoginRoute
   '/workspace/$role/$': typeof WorkspaceRoleSplatRoute
   '/workspace/$role/analytics': typeof WorkspaceRoleAnalyticsRoute
   '/workspace/$role': typeof WorkspaceRoleIndexRoute
@@ -246,6 +262,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/change-password': typeof ChangePasswordRoute
+  '/login': typeof LoginRoute
   '/workspace/$role': typeof WorkspaceRoleRouteRouteWithChildren
   '/workspace/$role/$': typeof WorkspaceRoleSplatRoute
   '/workspace/$role/analytics': typeof WorkspaceRoleAnalyticsRoute
@@ -276,6 +294,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/change-password'
+    | '/login'
     | '/workspace/$role'
     | '/workspace/$role/$'
     | '/workspace/$role/analytics'
@@ -304,6 +324,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/change-password'
+    | '/login'
     | '/workspace/$role/$'
     | '/workspace/$role/analytics'
     | '/workspace/$role'
@@ -331,6 +353,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/change-password'
+    | '/login'
     | '/workspace/$role'
     | '/workspace/$role/$'
     | '/workspace/$role/analytics'
@@ -360,11 +384,27 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChangePasswordRoute: typeof ChangePasswordRoute
+  LoginRoute: typeof LoginRoute
   WorkspaceRoleRouteRoute: typeof WorkspaceRoleRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/change-password': {
+      id: '/change-password'
+      path: '/change-password'
+      fullPath: '/change-password'
+      preLoaderRoute: typeof ChangePasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -611,6 +651,8 @@ const WorkspaceRoleRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChangePasswordRoute: ChangePasswordRoute,
+  LoginRoute: LoginRoute,
   WorkspaceRoleRouteRoute: WorkspaceRoleRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport

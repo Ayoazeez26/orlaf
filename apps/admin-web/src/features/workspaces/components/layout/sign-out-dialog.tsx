@@ -69,8 +69,8 @@ export function SignOutDialog({
 
         <div className="space-y-3 px-6 py-5">
           <p className="text-muted-foreground text-sm">
-            You&apos;ll leave the {userName} workspace and return to the role
-            picker.
+            You&apos;ll leave the {userName} workspace and return to the sign-in
+            page.
           </p>
           <p className="text-muted-foreground text-sm">
             Any unsaved changes in open tabs will be lost.

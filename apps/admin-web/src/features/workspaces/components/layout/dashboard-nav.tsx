@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router"
 import { cn } from "@workspace/ui/lib/utils"
+import { getNavHref, getNavLinkTarget } from "../../lib/nav-routes"
 import type { NavGroup, WorkspaceRoleId } from "../../types"
 
 interface DashboardNavProps {
@@ -10,7 +11,6 @@ interface DashboardNavProps {
 
 export function DashboardNav({ role, groups, onNavigate }: DashboardNavProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
-  const basePath = `/workspace/${role}`
 
   return (
     <nav className="flex flex-col gap-6">
@@ -24,7 +24,8 @@ export function DashboardNav({ role, groups, onNavigate }: DashboardNavProps) {
           <div className="flex flex-col gap-0.5">
             {group.items.map((item) => {
               const isHome = item.key === "home"
-              const href = isHome ? basePath : `${basePath}/${item.key}`
+              const href = getNavHref(role, item.key)
+              const target = getNavLinkTarget(item.key)
               const isActive =
                 pathname === href ||
                 (!isHome && pathname.startsWith(`${href}/`))
@@ -37,23 +38,12 @@ export function DashboardNav({ role, groups, onNavigate }: DashboardNavProps) {
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )
 
-              return isHome ? (
+              return (
                 <Link
                   key={item.key}
-                  to="/workspace/$role"
-                  params={{ role }}
-                  activeOptions={{ exact: true }}
-                  onClick={onNavigate}
-                  className={sharedClassName}
-                >
-                  <Icon className="size-[18px] shrink-0" aria-hidden />
-                  {item.label}
-                </Link>
-              ) : (
-                <Link
-                  key={item.key}
-                  to="/workspace/$role/$"
-                  params={{ role, _splat: item.key }}
+                  to={target.to}
+                  params={target.params(role)}
+                  activeOptions={isHome ? { exact: true } : undefined}
                   onClick={onNavigate}
                   className={sharedClassName}
                 >

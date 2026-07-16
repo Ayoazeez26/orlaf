@@ -17,6 +17,7 @@ export const DEDICATED_NAV_ROUTES = {
   notifications: "/workspace/$role/notifications",
   "audit-log": "/workspace/$role/audit-log",
   support: "/workspace/$role/support",
+  settings: "/workspace/$role/settings",
 } as const
 
 export type DedicatedNavKey = keyof typeof DEDICATED_NAV_ROUTES

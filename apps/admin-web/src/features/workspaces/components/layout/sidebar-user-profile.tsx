@@ -1,18 +1,11 @@
-import { useNavigate } from "@tanstack/react-router"
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
 import { Button } from "@workspace/ui/components/button"
 import { Switch } from "@workspace/ui/components/switch"
 import { cn } from "@workspace/ui/lib/utils"
-import {
-  ArrowLeftRight,
-  Bell,
-  CircleHelp,
-  LogOut,
-  Moon,
-  User,
-} from "lucide-react"
+import { Bell, CircleHelp, LogOut, Moon, User } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
+import { useAuth } from "@/features/auth/auth-context"
 import type { WorkspaceRoleId, WorkspaceUser } from "../../types"
 import { SignOutDialog } from "./sign-out-dialog"
 
@@ -27,7 +20,7 @@ export function SidebarUserProfile({
   roleName,
   roleId,
 }: SidebarUserProfileProps) {
-  const navigate = useNavigate()
+  const { signOut } = useAuth()
   const { theme, setTheme } = useTheme()
   const [open, setOpen] = useState(false)
   const [signOutOpen, setSignOutOpen] = useState(false)
@@ -128,22 +121,7 @@ export function SidebarUserProfile({
                     />
                   ) : null}
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-foreground text-sm transition-colors hover:bg-muted/50"
-                  onClick={() => {
-                    setOpen(false)
-                    navigate({ to: "/" })
-                  }}
-                >
-                  <ArrowLeftRight
-                    className="size-4 text-muted-foreground"
-                    aria-hidden
-                  />
-                  Switch role
-                </button>
-              )}
+              ) : null}
             </div>
 
             <div className="border-border border-t py-1">
@@ -167,7 +145,7 @@ export function SidebarUserProfile({
         open={signOutOpen}
         onOpenChange={setSignOutOpen}
         userName={user.fullName}
-        onConfirm={() => navigate({ to: "/" })}
+        onConfirm={() => void signOut()}
       />
     </div>
   )
