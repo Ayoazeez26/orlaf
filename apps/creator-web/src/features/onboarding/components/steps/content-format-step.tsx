@@ -2,6 +2,7 @@ import { CONTENT_FORMATS } from "../../constants"
 import { useOnboardingPersist } from "../../hooks/use-onboarding-persist"
 import { useOnboarding } from "../../onboarding-context"
 import { FormatOption } from "../format-option"
+import { OnboardingErrorNotice } from "../onboarding-error-notice"
 import { OnboardingNav } from "../onboarding-nav"
 import { OnboardingShell } from "../onboarding-shell"
 
@@ -69,9 +70,11 @@ export function ContentFormatStep({
       </div>
 
       {error && (
-        <p className="mt-4 text-destructive text-sm" role="alert">
-          {error}
-        </p>
+        <OnboardingErrorNotice
+          message={error}
+          onRetry={handleNext}
+          retrying={isSaving}
+        />
       )}
 
       <div className="mt-8 flex flex-col gap-3">

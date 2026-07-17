@@ -11,6 +11,7 @@ import { useState } from "react"
 import { useOnboardingPersist } from "../../hooks/use-onboarding-persist"
 import { useOnboarding } from "../../onboarding-context"
 import type { GetStartedMode } from "../../types"
+import { OnboardingErrorNotice } from "../onboarding-error-notice"
 import { OnboardingNav } from "../onboarding-nav"
 import { OnboardingShell } from "../onboarding-shell"
 import { SelectionCard } from "../selection-card"
@@ -86,9 +87,11 @@ export function GetStartedStep({
       </div>
 
       {error && (
-        <p className="mt-4 text-destructive text-sm" role="alert">
-          {error}
-        </p>
+        <OnboardingErrorNotice
+          message={error}
+          onRetry={handleNext}
+          retrying={isSaving}
+        />
       )}
 
       {isSaving && (
