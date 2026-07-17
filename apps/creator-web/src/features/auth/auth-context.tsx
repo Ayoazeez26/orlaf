@@ -9,6 +9,7 @@ import {
 } from "react"
 import { AppLoadingScreen } from "@/components/app-loading-screen"
 import { getOnboardingStatus } from "@/features/onboarding/api/onboarding-api"
+import { clearOnboardingProgress } from "@/features/onboarding/onboarding-context"
 import {
   getAccessToken,
   setAccessToken,
@@ -258,6 +259,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       applyUnauthenticated()
       clearOnboardingComplete()
+      clearOnboardingProgress()
       clearAuthBootstrapCache()
       void getRouter().navigate({ to: "/onboarding", replace: true })
     }

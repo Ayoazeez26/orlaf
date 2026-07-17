@@ -16,9 +16,16 @@ import { StudioStep } from "./components/steps/studio-step"
 import { VerifyEmailStep } from "./components/steps/verify-email-step"
 import { WelcomeStep } from "./components/steps/welcome-step"
 import { useOnboardingPersist } from "./hooks/use-onboarding-persist"
-import { useOnboarding } from "./onboarding-context"
+import { clearOnboardingProgress, useOnboarding } from "./onboarding-context"
 import type { OnboardingStep } from "./types"
 import { useOnboardingNavigation } from "./use-onboarding-navigation"
+
+const AUTH_ONLY_STEPS: OnboardingStep[] = [
+  "creator-type",
+  "studio",
+  "content",
+  "get-started",
+]
 
 function parseInitialStep(step?: string): OnboardingStep {
   const valid: OnboardingStep[] = [
@@ -115,6 +122,7 @@ export function OnboardingFlow() {
 
     try {
       const result = await finishOnboarding()
+      clearOnboardingProgress()
       updateSession({ account_state: result.account_state })
       navigate({ to: result.redirect, replace: true })
     } catch {
@@ -129,6 +137,16 @@ export function OnboardingFlow() {
     navigateToStep
   )
   const { currentStep, progress, goNext, goBack, goTo } = navigation
+
+  // Never let an unauthenticated user sit on an auth-only step: a save there
+  // would fire without a token and fail. Send them back to the welcome step.
+  // (AuthProvider blocks render until auth is settled, so this can't misfire
+  // during bootstrap.)
+  useEffect(() => {
+    if (!isAuthenticated && AUTH_ONLY_STEPS.includes(currentStep)) {
+      navigateToStep("welcome")
+    }
+  }, [isAuthenticated, currentStep, navigateToStep])
 
   const stepContent = (() => {
     switch (currentStep) {

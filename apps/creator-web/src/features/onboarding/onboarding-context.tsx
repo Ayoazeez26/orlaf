@@ -4,6 +4,7 @@ import {
   type Dispatch,
   type ReactNode,
   useContext,
+  useEffect,
   useMemo,
   useReducer,
 } from "react"
@@ -18,6 +19,63 @@ import {
   type OnboardingStudio,
   type TeamSize,
 } from "./types"
+
+/**
+ * Onboarding selections are mirrored to sessionStorage so an accidental reload,
+ * tab discard, or a transient session drop (which wipes the in-memory access
+ * token) never discards the user's progress. Only non-sensitive selection
+ * fields are persisted — never credentials or verification codes.
+ */
+const STORAGE_KEY = "orlaf.onboarding.progress.v1"
+
+type PersistedOnboarding = Pick<
+  OnboardingData,
+  "creatorType" | "studio" | "contentFormats" | "getStartedMode"
+>
+
+function readPersisted(): Partial<OnboardingData> {
+  if (typeof window === "undefined") return {}
+  try {
+    const raw = window.sessionStorage.getItem(STORAGE_KEY)
+    if (!raw) return {}
+    const parsed = JSON.parse(raw) as PersistedOnboarding
+    return {
+      creatorType: parsed.creatorType ?? null,
+      studio: parsed.studio ?? initialOnboardingData.studio,
+      contentFormats: Array.isArray(parsed.contentFormats)
+        ? parsed.contentFormats
+        : [],
+      getStartedMode: parsed.getStartedMode ?? null,
+    }
+  } catch {
+    return {}
+  }
+}
+
+function writePersisted(data: OnboardingData) {
+  if (typeof window === "undefined") return
+  try {
+    const subset: PersistedOnboarding = {
+      creatorType: data.creatorType,
+      studio: data.studio,
+      contentFormats: data.contentFormats,
+      getStartedMode: data.getStartedMode,
+    }
+    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(subset))
+  } catch {
+    // sessionStorage may be unavailable (private mode / quota) — non-fatal.
+  }
+}
+
+/** Clears persisted onboarding progress (call on completion and sign-out). */
+export function clearOnboardingProgress() {
+  if (typeof window === "undefined") return
+  try {
+    window.sessionStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // non-fatal
+  }
+}
 
 type OnboardingAction =
   | { type: "SET_AUTH_METHOD"; payload: AuthMethod }
@@ -90,7 +148,16 @@ interface OnboardingContextValue {
 const OnboardingContext = createContext<OnboardingContextValue | null>(null)
 
 export function OnboardingProvider({ children }: { children: ReactNode }) {
-  const [data, dispatch] = useReducer(onboardingReducer, initialOnboardingData)
+  const [data, dispatch] = useReducer(
+    onboardingReducer,
+    initialOnboardingData,
+    (init) => ({ ...init, ...readPersisted() })
+  )
+
+  useEffect(() => {
+    writePersisted(data)
+  }, [data])
+
   const value = useMemo(() => ({ data, dispatch }), [data])
 
   return (

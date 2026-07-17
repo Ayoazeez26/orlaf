@@ -7,6 +7,7 @@ import { TEAM_SIZE_OPTIONS } from "../../constants"
 import { useOnboardingPersist } from "../../hooks/use-onboarding-persist"
 import { useOnboarding } from "../../onboarding-context"
 import type { TeamSize } from "../../types"
+import { OnboardingErrorNotice } from "../onboarding-error-notice"
 import { OnboardingNav } from "../onboarding-nav"
 import { OnboardingShell } from "../onboarding-shell"
 import { SegmentedControl } from "../segmented-control"
@@ -103,9 +104,11 @@ export function StudioStep({
       </div>
 
       {error && (
-        <p className="mt-4 text-destructive text-sm" role="alert">
-          {error}
-        </p>
+        <OnboardingErrorNotice
+          message={error}
+          onRetry={handleSubmit(onSubmit)}
+          retrying={isSaving}
+        />
       )}
 
       <form className="mt-8 space-y-6" onSubmit={(e) => e.preventDefault()}>

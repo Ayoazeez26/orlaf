@@ -1,5 +1,6 @@
 import type { CompleteOnboardingResponse } from "@sable/contracts"
 import { useCallback, useState } from "react"
+import { ApiError } from "@/lib/http-client"
 import { completeOnboarding, patchOnboarding } from "../api/onboarding-api"
 import {
   toContentPatch,
@@ -9,6 +10,27 @@ import {
 } from "../lib/onboarding-mappers"
 import { useOnboarding } from "../onboarding-context"
 import type { OnboardingData } from "../types"
+
+/**
+ * Maps low-level save errors to a friendly, actionable message. Progress is
+ * kept in context (and mirrored to sessionStorage), so a transient failure
+ * never discards the user's selections — they can simply retry.
+ */
+function toFriendlyMessage(err: unknown): string {
+  if (err instanceof ApiError) {
+    if (err.status === 401) {
+      return "Your session timed out. Please sign in again — your progress is saved."
+    }
+    if (err.status >= 500) {
+      return "Something went wrong on our end. Please try again."
+    }
+  }
+  // fetch() network failures surface as TypeError
+  if (err instanceof TypeError) {
+    return "We couldn't reach the server. Check your connection and try again."
+  }
+  return err instanceof Error ? err.message : "Unable to save. Please try again."
+}
 
 export function useOnboardingPersist() {
   const { data } = useOnboarding()
@@ -21,9 +43,7 @@ export function useOnboardingPersist() {
     try {
       await fn()
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Unable to save. Please try again."
-      setError(message)
+      setError(toFriendlyMessage(err))
       throw err
     } finally {
       setIsSaving(false)
@@ -77,11 +97,7 @@ export function useOnboardingPersist() {
       try {
         return await completeOnboarding()
       } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Unable to save. Please try again."
-        setError(message)
+        setError(toFriendlyMessage(err))
         throw err
       } finally {
         setIsSaving(false)
