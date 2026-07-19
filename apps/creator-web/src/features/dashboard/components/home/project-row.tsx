@@ -19,6 +19,10 @@ const STATUS_STYLES: Record<
     label: "In review",
     className: "border-transparent bg-[#FFF0C5] text-[#5C2C00]",
   },
+  rejected: {
+    label: "Rejected",
+    className: "border-transparent bg-[#FEE2E2] text-[#991B1B]",
+  },
   draft: {
     label: "Draft",
     className: "border-transparent bg-[#F0F2F7] text-[#5F636F]",

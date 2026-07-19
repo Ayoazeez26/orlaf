@@ -37,7 +37,7 @@ const buttonVariants = cva(
       {
         variant: "default",
         class:
-          "h-10 rounded-xl bg-primary-gradient px-6 hover:brightness-105 active:brightness-95",
+          "h-10 rounded-[16px] bg-[#7E55F0] px-4 hover:brightness-105 active:brightness-95",
       },
     ],
     defaultVariants: {

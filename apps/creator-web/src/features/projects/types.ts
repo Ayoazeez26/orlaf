@@ -4,6 +4,7 @@ export type ProjectStatus =
   | "published"
   | "draft"
   | "in_review"
+  | "rejected"
   | "scheduled"
   | "ongoing"
   | "completed"

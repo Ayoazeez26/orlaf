@@ -32,6 +32,10 @@ export interface OnboardingStudio {
 export interface OnboardingData {
   authMethod: AuthMethod | null
   profile: OnboardingProfile
+  inviteToken: string | null
+  inviteNote: string | null
+  inviteValidated: boolean
+  inviteError: string | null
   verificationId: string | null
   maskedEmail: string | null
   verificationCode: string
@@ -49,6 +53,10 @@ export const initialOnboardingData: OnboardingData = {
     email: "",
     password: "",
   },
+  inviteToken: null,
+  inviteNote: null,
+  inviteValidated: false,
+  inviteError: null,
   verificationId: null,
   maskedEmail: null,
   verificationCode: "",

@@ -6,9 +6,12 @@ import {
   Injectable,
   Logger,
 } from "@nestjs/common"
-import { ConfigService } from "@nestjs/config"
 import { AccountType, AdminRole } from "@sable/contracts"
-import { Account, AccountStatus } from "src/generated/prisma/client"
+import {
+  Account,
+  AccountStatus,
+  AdminRole as PrismaAdminRole,
+} from "src/generated/prisma/client"
 import { PrismaService } from "../prisma/prisma.service"
 
 // TODO(KAN-53): import Sentry once OTEL is wired
@@ -29,6 +32,8 @@ const USER_TRANSITIONS: Transition[] = [
 ]
 
 const CREATOR_TRANSITIONS: Transition[] = [
+  { from: ["email_unverified"], to: "onboarding" },
+  { from: ["onboarding"], to: "active" },
   { from: ["onboarding"], to: "pending_approval" },
   { from: ["pending_approval"], to: "active" },
   { from: ["pending_approval"], to: "rejected" },
@@ -60,6 +65,8 @@ export interface CreateAdminInput {
   email: string
   role: AdminRole
   display_name?: string
+  /** When omitted, a random temp password is generated. */
+  password?: string
 }
 
 export interface TransitionStatusInput {
@@ -71,10 +78,7 @@ export interface TransitionStatusInput {
 export class AccountService {
   private readonly logger = new Logger(AccountService.name)
 
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly config: ConfigService
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // ---------------------------------------------------------------------------
   // Create admin
@@ -86,7 +90,7 @@ export class AccountService {
    * Called by super-admin flows only (KAN super-admin story).
    */
   async createAdmin(input: CreateAdminInput): Promise<Account> {
-    const { email, display_name } = input
+    const { email, display_name, role } = input
     const emailNormalized = this.normalizeEmail(email)
 
     // Check uniqueness within admin type
@@ -103,9 +107,8 @@ export class AccountService {
       throw new ConflictException(`Admin account already exists for ${email}`)
     }
 
-    // Generate random temp password — 16 bytes hex = 32 chars
-    const tempPassword = randomBytes(16).toString("hex")
-    const passwordHash = await this.hashPassword(tempPassword)
+    const initialPassword = input.password ?? randomBytes(16).toString("hex")
+    const passwordHash = await this.hashPassword(initialPassword)
 
     try {
       const account = await this.prisma.account.create({
@@ -115,6 +118,7 @@ export class AccountService {
           emailNormalized,
           passwordHash,
           mustChangePassword: true,
+          adminRole: role as PrismaAdminRole,
           displayName: display_name ?? null,
           status: "active",
         },
@@ -124,7 +128,8 @@ export class AccountService {
         event: "admin_account_created",
         account_id: account.id,
         email,
-        // temp_password intentionally NOT logged
+        admin_role: role,
+        // initial_password intentionally NOT logged
       })
 
       // TODO: email the temp password via the notification service (separate story)
@@ -161,12 +166,11 @@ export class AccountService {
     const data: Partial<Account> = { status: to }
 
     if (to === "pending_deletion") {
-      ;(data as any).deletedAt = new Date()
+      data.deletedAt = new Date()
     }
 
     if (to === "active" && account.status === "pending_deletion") {
-      // Restoration — clear the deletion timestamp
-      ;(data as any).deletedAt = null
+      data.deletedAt = null
     }
 
     try {
@@ -214,9 +218,19 @@ export class AccountService {
 
   async findByProvider(
     accountType: AccountType,
-    provider: "google" | "apple",
-    providerSubjectId: string
+    provider: "google" | "apple" | "email",
+    providerSubjectId: string | null
   ): Promise<Account | null> {
+    if (providerSubjectId === null) {
+      return this.prisma.account.findFirst({
+        where: {
+          accountType,
+          provider,
+          providerSubjectId: null,
+        },
+      })
+    }
+
     return this.prisma.account.findUnique({
       where: {
         unique_provider_per_account_type: {

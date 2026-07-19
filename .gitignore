@@ -32,3 +32,10 @@ npm-debug.log*
 # Misc
 .DS_Store
 *.pem
+
+# Android build artifacts
+apps/mobile/android/app/build/
+apps/mobile/android/build/
+apps/mobile/android/.gradle/
+apps/mobile/android/app/build/
+apps/mobile/android/build/

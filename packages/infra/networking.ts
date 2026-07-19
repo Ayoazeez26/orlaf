@@ -47,7 +47,7 @@ export const appRunnerConnectorSg = new aws.ec2.SecurityGroup(
 
 export const rdsPostgresSg = new aws.ec2.SecurityGroup("rds-postgres-sg", {
     name: `sable-rds-postgres-${stackName}`,
-    description: "Security group for RDS Postgres — inbound from App Runner only",
+    description: "Security group for RDS Postgres - inbound from App Runner only",
     vpcId: defaultVpcId,
 
     ingress: [

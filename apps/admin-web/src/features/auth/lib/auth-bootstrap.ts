@@ -1,13 +1,12 @@
-import type { AdminSignInResponse } from "@sable/contracts"
 import { setAccessToken } from "@/lib/http-client"
 import { fetchAdminSession, refreshSession } from "../api/auth-api"
+import type { AdminSession } from "./admin-session"
 import {
   resetAuthBootstrapProgress,
   setAuthBootstrapProgress,
 } from "./auth-bootstrap-progress"
 import type { AuthSnapshot } from "./auth-snapshot"
 import { getAuthSnapshot, setAuthSnapshot } from "./auth-snapshot"
-import type { AdminSession } from "./admin-session"
 
 let readyPromise: Promise<AuthSnapshot> | null = null
 let clientInitialized = false

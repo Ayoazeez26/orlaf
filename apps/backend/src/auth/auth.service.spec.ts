@@ -102,12 +102,12 @@ describe("AuthService", () => {
       const token = authService.issueAccessToken({
         account_id: "admin_001",
         account_type: AccountType.ADMIN,
-        role: AdminRole.CLAN_ADMIN,
+        role: AdminRole.CONTENT_ADMIN,
       })
 
       const decoded = jwtService.decode(token) as Record<string, unknown>
 
-      expect(decoded.role).toBe(AdminRole.CLAN_ADMIN)
+      expect(decoded.role).toBe(AdminRole.CONTENT_ADMIN)
       expect(decoded.account_type).toBe(AccountType.ADMIN)
     })
 

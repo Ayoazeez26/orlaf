@@ -11,7 +11,9 @@ export const MOCK_CREATORS: Creator[] = [
     views: 12_400_000,
     earnings: 29_500,
     status: "active",
+    isVerified: true,
     isNew: false,
+    joinedAt: "2025-03-12T00:00:00.000Z",
   },
   {
     id: "mark-johnson",
@@ -23,7 +25,9 @@ export const MOCK_CREATORS: Creator[] = [
     views: 8_100_000,
     earnings: 18_200,
     status: "active",
+    isVerified: false,
     isNew: true,
+    joinedAt: "2026-07-02T00:00:00.000Z",
   },
   {
     id: "sarah-chen",
@@ -35,7 +39,9 @@ export const MOCK_CREATORS: Creator[] = [
     views: 320_000,
     earnings: 1_100,
     status: "active",
+    isVerified: false,
     isNew: true,
+    joinedAt: "2026-07-05T00:00:00.000Z",
   },
   {
     id: "chidi-eze",
@@ -47,6 +53,8 @@ export const MOCK_CREATORS: Creator[] = [
     views: 2_200_000,
     earnings: 5_400,
     status: "suspended",
+    isVerified: false,
     isNew: false,
+    joinedAt: "2025-11-20T00:00:00.000Z",
   },
 ]

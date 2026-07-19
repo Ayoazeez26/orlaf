@@ -15,7 +15,7 @@ const STATUS_MAP: Record<StudioSeries["status"], ProjectSummary["status"]> = {
   draft: "draft",
   in_review: "in_review",
   published: "published",
-  rejected: "draft",
+  rejected: "rejected",
   archived: "draft",
 }
 
@@ -25,6 +25,7 @@ const ICON_VARIANT_BY_STATUS: Record<
 > = {
   published: "purple",
   in_review: "pink",
+  rejected: "pink",
   scheduled: "pink",
   draft: "blue",
   ongoing: "purple",

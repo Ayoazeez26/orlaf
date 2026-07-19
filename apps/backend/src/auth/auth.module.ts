@@ -3,17 +3,24 @@ import { ConfigModule, ConfigService } from "@nestjs/config"
 import { JwtModule } from "@nestjs/jwt"
 import { PassportModule } from "@nestjs/passport"
 import { ScheduleModule } from "@nestjs/schedule"
+import { CreatorInvitesModule } from "../creator-invites/creator-invites.module"
+import { EmailModule } from "../email/email.module"
 import { AccountService } from "./account.service"
+import { AdminAuthGuard } from "./admin-auth.guard"
+import { AdminAuthService } from "./admin-auth.service"
 import { AuthController } from "./auth.controller"
 import { AuthService } from "./auth.service"
 import { ConsentGuard } from "./consent.guard"
 import { ConsentService } from "./consent.service"
 import { DeletionService } from "./deletion.service"
+import { EmailAuthService } from "./email-auth.service"
 import { JwksCacheService } from "./jwks-cache.service"
 import { JwtStrategy } from "./jwt.strategy"
 import { JwtAuthGuard } from "./jwt-auth.guard"
 import { ProviderTokenService } from "./provider-token.service"
 import { RefreshTokenService } from "./refresh-token.service"
+import { RolesGuard } from "./roles.guard"
+import { SecurityService } from "./security.service"
 import { SignInService } from "./sign-in.service"
 
 /**
@@ -45,6 +52,8 @@ import { SignInService } from "./sign-in.service"
 @Module({
   imports: [
     ConfigModule,
+    CreatorInvitesModule,
+    EmailModule,
     ScheduleModule.forRoot(),
     PassportModule.register({ defaultStrategy: "jwt" }),
     JwtModule.registerAsync({
@@ -55,16 +64,26 @@ import { SignInService } from "./sign-in.service"
           config.getOrThrow<string>("JWT_PRIVATE_KEY_BASE64"),
           "base64"
         ).toString("utf-8")
+        const publicKey = Buffer.from(
+          config.getOrThrow<string>("JWT_PUBLIC_KEY_BASE64"),
+          "base64"
+        ).toString("utf-8")
+        const issuer = config.getOrThrow<string>("JWT_ISSUER")
 
         return {
           privateKey,
+          publicKey,
           signOptions: {
             algorithm: "RS256",
             expiresIn: parseInt(
               config.getOrThrow<string>("JWT_ACCESS_EXPIRES_IN"),
               10
             ),
-            issuer: config.getOrThrow<string>("JWT_ISSUER"),
+            issuer,
+          },
+          verifyOptions: {
+            algorithms: ["RS256"],
+            issuer,
           },
         }
       },
@@ -81,19 +100,29 @@ import { SignInService } from "./sign-in.service"
     JwksCacheService,
     DeletionService,
     SignInService,
+    EmailAuthService,
     ConsentService,
     ConsentGuard,
+    AdminAuthService,
+    AdminAuthGuard,
+    RolesGuard,
+    SecurityService,
   ],
   exports: [
     AuthService,
     JwtAuthGuard,
+    AdminAuthGuard,
+    RolesGuard,
     RefreshTokenService,
     AccountService,
     ProviderTokenService,
     DeletionService,
     SignInService,
+    EmailAuthService,
+    AdminAuthService,
     ConsentService,
     ConsentGuard,
+    SecurityService,
     PassportModule,
   ],
 })

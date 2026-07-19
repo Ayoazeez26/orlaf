@@ -1,6 +1,6 @@
 /**
  * Shared HTTP client for admin-web.
- * Uses httpOnly refresh cookie (sable_rt) + in-memory access token.
+ * Uses httpOnly refresh cookie (sable_rt_admin) + in-memory access token.
  */
 
 import { getApiBaseUrl } from "./api-base-url"

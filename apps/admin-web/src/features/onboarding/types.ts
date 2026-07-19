@@ -1,6 +1,6 @@
 export type ApplicationStatus = "pending" | "approved" | "rejected"
 
-export type InviteStatus = "sent" | "accepted" | "expired" | "rejected"
+export type InviteStatus = "sent" | "accepted" | "expired" | "revoked"
 
 export interface OnboardingApplication {
   id: string

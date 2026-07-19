@@ -16,7 +16,9 @@ export interface Creator {
   views: number
   earnings: number
   status: CreatorStatus
+  isVerified: boolean
   isNew: boolean
+  joinedAt: string
 }
 
 export interface TopProject {

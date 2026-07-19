@@ -29,7 +29,9 @@ function toFriendlyMessage(err: unknown): string {
   if (err instanceof TypeError) {
     return "We couldn't reach the server. Check your connection and try again."
   }
-  return err instanceof Error ? err.message : "Unable to save. Please try again."
+  return err instanceof Error
+    ? err.message
+    : "Unable to save. Please try again."
 }
 
 export function useOnboardingPersist() {

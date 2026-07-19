@@ -12,7 +12,7 @@ export function ProjectsPageHeader() {
           Review and moderate platform content.
         </p>
       </div>
-      <Button type="button" className="shrink-0 gap-2">
+      <Button type="button" disabled className="shrink-0 gap-2">
         <Plus className="size-4" aria-hidden />
         New Project
       </Button>

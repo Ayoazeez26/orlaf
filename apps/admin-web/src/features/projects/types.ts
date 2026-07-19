@@ -9,9 +9,11 @@ export interface Project {
   language: string
   creatorName: string
   episodeCount: number
-  views: number
+  views: number | null
   publishStatus: ProjectPublishStatus
   reviewStatus: ProjectReviewStatus
+  /** Vertical 9:16 film poster URL from the creator upload. */
+  posterUrl: string | null
 }
 
 export interface ProjectEpisode {
@@ -20,7 +22,7 @@ export interface ProjectEpisode {
   title: string
   duration: string
   size: string
-  views: number
+  views: number | null
   status: "published" | "draft"
 }
 

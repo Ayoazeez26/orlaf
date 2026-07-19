@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto"
 import { UnauthorizedException } from "@nestjs/common"
-import { ConfigModule } from "@nestjs/config"
-import { Test, TestingModule } from "@nestjs/testing"
+import { ConfigService } from "@nestjs/config"
 import { RefreshTokenService } from "./refresh-token.service"
 
 // ---------------------------------------------------------------------------
@@ -18,7 +17,15 @@ const mockToken = {
   expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   revokedAt: null,
   lastUsedAt: null,
+  sessionRootId: "session_root_1",
+  surface: null,
+  browser: null,
+  os: null,
+  userAgent: null,
+  ipAddress: null,
+  location: null,
   deviceLabel: null,
+  account: { accountType: "creator", adminRole: null },
 }
 
 const mockPrisma = {
@@ -34,33 +41,13 @@ const mockPrisma = {
 
 describe("RefreshTokenService", () => {
   let service: RefreshTokenService
+  const mockConfig = {
+    get: jest.fn().mockReturnValue("2592000"),
+  } as unknown as ConfigService
 
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.clearAllMocks()
-
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({
-          ignoreEnvFile: true,
-          load: [() => ({ JWT_REFRESH_EXPIRES_IN: "2592000" })],
-        }),
-      ],
-      providers: [
-        RefreshTokenService,
-        { provide: "PrismaClient", useValue: mockPrisma },
-      ],
-    })
-      .overrideProvider(RefreshTokenService)
-      .useFactory({
-        factory: (config: any) =>
-          new RefreshTokenService(mockPrisma as any, config),
-        inject: ["ConfigService"],
-      })
-      .compile()
-
-    // Instantiate directly so we can inject the mock prisma cleanly
-    const config = module.get("ConfigService" as any)
-    service = new RefreshTokenService(mockPrisma as any, config)
+    service = new RefreshTokenService(mockPrisma as any, mockConfig)
   })
 
   // -------------------------------------------------------------------------
@@ -111,6 +98,7 @@ describe("RefreshTokenService", () => {
       expect(result.newRefreshToken).toMatch(/^[a-f0-9]{64}$/)
       expect(result.newRefreshToken).not.toBe(rawToken)
       expect(result.accountId).toBe("acc_abc")
+      expect(result.accountType).toBe("creator")
     })
 
     it("sets parentId on the new token to the old token id", async () => {
@@ -196,7 +184,7 @@ describe("RefreshTokenService", () => {
   // -------------------------------------------------------------------------
 
   describe("revokeByToken()", () => {
-    it("marks the token as revoked", async () => {
+    it("marks the token session as revoked", async () => {
       const rawToken = "e".repeat(64)
       const hash = createHash("sha256").update(rawToken).digest("hex")
 
@@ -204,13 +192,17 @@ describe("RefreshTokenService", () => {
         ...mockToken,
         tokenHash: hash,
       })
-      mockPrisma.refreshToken.update.mockResolvedValue({})
+      mockPrisma.refreshToken.updateMany.mockResolvedValue({ count: 1 })
 
       await service.revokeByToken(rawToken)
 
-      expect(mockPrisma.refreshToken.update).toHaveBeenCalledWith(
+      expect(mockPrisma.refreshToken.updateMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { id: mockToken.id },
+          where: expect.objectContaining({
+            accountId: mockToken.accountId,
+            sessionRootId: mockToken.sessionRootId,
+            revokedAt: null,
+          }),
           data: expect.objectContaining({ revokedAt: expect.any(Date) }),
         })
       )

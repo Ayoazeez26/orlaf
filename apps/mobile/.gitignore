@@ -10,7 +10,6 @@ web-build/
 expo-env.d.ts
 
 # Native
-.kotlin/
 *.orig.*
 *.jks
 *.p8
@@ -38,6 +37,11 @@ yarn-error.*
 
 app-example
 
-# generated native folders
-/ios
-/android
+# Android build artifacts
+android/app/build/
+android/build/
+
+apps/mobile/android/.gradle/
+apps/mobile/android/app/build/
+apps/mobile/android/build/
+android/

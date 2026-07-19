@@ -10,14 +10,14 @@ export const APPLICATION_FILTERS: { key: ApplicationFilter; label: string }[] =
     { key: "rejected", label: "Rejected" },
   ]
 
-export type InviteFilter = "all" | "sent" | "accepted" | "expired" | "rejected"
+export type InviteFilter = "all" | "sent" | "accepted" | "expired" | "revoked"
 
 export const INVITE_FILTERS: { key: InviteFilter; label: string }[] = [
   { key: "all", label: "All" },
   { key: "sent", label: "Sent" },
   { key: "accepted", label: "Accepted" },
   { key: "expired", label: "Expired" },
-  { key: "rejected", label: "Rejected" },
+  { key: "revoked", label: "Revoked" },
 ]
 
 export const APPLICATION_STATUS_BADGE_CLASS: Record<ApplicationStatus, string> =
@@ -31,5 +31,5 @@ export const INVITE_STATUS_BADGE_CLASS: Record<InviteStatus, string> = {
   sent: "bg-primary/10 text-primary",
   accepted: "bg-emerald-500/10 text-emerald-600",
   expired: "bg-muted text-muted-foreground",
-  rejected: "bg-red-500/10 text-red-600",
+  revoked: "bg-red-500/10 text-red-600",
 }

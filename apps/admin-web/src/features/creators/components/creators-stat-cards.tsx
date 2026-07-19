@@ -1,3 +1,4 @@
+import type { AdminCreatorStats } from "@sable/contracts"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import type { LucideIcon } from "lucide-react"
@@ -5,10 +6,9 @@ import { Star, UserCheck, Users, UserX } from "lucide-react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import { TONE_CHIP_CLASS } from "@/features/workspaces/lib/tones"
 import type { Tone } from "@/features/workspaces/types"
-import type { Creator } from "../types"
 
 interface CreatorsStatCardsProps {
-  creators: Creator[]
+  stats: AdminCreatorStats
 }
 
 interface Stat {
@@ -18,29 +18,29 @@ interface Stat {
   tone: Tone
 }
 
-export function CreatorsStatCards({ creators }: CreatorsStatCardsProps) {
-  const stats: Stat[] = [
+export function CreatorsStatCards({ stats }: CreatorsStatCardsProps) {
+  const cards: Stat[] = [
     {
       label: "Total creators",
-      value: creators.length,
+      value: stats.total,
       icon: Users,
       tone: "primary",
     },
     {
       label: "Active",
-      value: creators.filter((c) => c.status === "active").length,
+      value: stats.active,
       icon: UserCheck,
       tone: "positive",
     },
     {
       label: "Suspended",
-      value: creators.filter((c) => c.status === "suspended").length,
+      value: stats.suspended,
       icon: UserX,
       tone: "danger",
     },
     {
       label: "New this month",
-      value: creators.filter((c) => c.isNew).length,
+      value: stats.newThisMonth,
       icon: Star,
       tone: "warning",
     },
@@ -48,7 +48,7 @@ export function CreatorsStatCards({ creators }: CreatorsStatCardsProps) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {stats.map((stat) => {
+      {cards.map((stat) => {
         const Icon = stat.icon
 
         return (

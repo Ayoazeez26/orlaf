@@ -13,5 +13,10 @@ export class GoogleSignInDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()
-  device_label!: string
+  device_label?: string
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  user_agent?: string
 }

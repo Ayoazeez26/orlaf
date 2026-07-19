@@ -1,5 +1,11 @@
-import { ExecutionContext, Injectable, Logger } from "@nestjs/common"
+import {
+  ExecutionContext,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from "@nestjs/common"
 import { AuthGuard } from "@nestjs/passport"
+import type { AccessTokenClaims } from "@sable/contracts"
 import { Observable } from "rxjs"
 
 // TODO(KAN-53): propagate W3C tracecontext from incoming request headers here
@@ -28,7 +34,11 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
     return super.canActivate(context)
   }
 
-  handleRequest<TUser = any>(err: any, user: TUser, info: any): TUser {
+  handleRequest<TUser = AccessTokenClaims>(
+    err: Error | null,
+    user: TUser | false,
+    info?: { message?: string }
+  ): TUser {
     if (err || !user) {
       this.logger.warn({
         event: "jwt_auth_rejected",
@@ -36,7 +46,7 @@ export class JwtAuthGuard extends AuthGuard("jwt") {
       })
 
       // TODO(KAN-53): Sentry.captureException(err ?? new Error(info?.message));
-      throw err || new Error(info?.message ?? "Unauthorized")
+      throw err || new UnauthorizedException(info?.message ?? "Unauthorized")
     }
 
     return user

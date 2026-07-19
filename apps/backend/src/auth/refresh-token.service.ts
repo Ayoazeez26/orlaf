@@ -1,62 +1,73 @@
 import { createHash, randomBytes } from "node:crypto"
-import { Injectable, Logger, UnauthorizedException } from "@nestjs/common"
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
+import type { ActiveSession } from "@sable/contracts"
+import { CustomLogger } from "@sable/logger"
+import { AdminRole as PrismaAdminRole } from "src/generated/prisma/client"
 import { PrismaService } from "../prisma/prisma.service"
-
-// TODO(KAN-53): import Sentry once OTEL is wired
-// import * as Sentry from '@sentry/node';
+import {
+  formatSessionDeviceLabel,
+  type ParsedSessionMetadata,
+} from "./session-metadata.util"
 
 export interface IssueRefreshTokenInput {
   account_id: string
   device_label?: string
   /** Lifetime in seconds. Defaults to JWT_REFRESH_EXPIRES_IN env var. */
   ttl_seconds?: number
-}
-
-export interface RotateRefreshTokenResult {
-  access_token: string
-  refresh_token: string
-  /** True when the refresh token arrived via cookie (web client) */
-  is_web: boolean
+  session?: ParsedSessionMetadata
 }
 
 @Injectable()
 export class RefreshTokenService {
-  private readonly logger = new Logger(RefreshTokenService.name)
+  private readonly logger = new CustomLogger(RefreshTokenService.name)
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService
   ) {}
 
-  // ---------------------------------------------------------------------------
-  // Helpers
-  // ---------------------------------------------------------------------------
-
   private generateOpaqueToken(): string {
-    // 32 bytes = 256 bits of entropy, hex-encoded
     return randomBytes(32).toString("hex")
   }
 
-  private hashToken(token: string): string {
+  hashToken(token: string): string {
     return createHash("sha256").update(token).digest("hex")
   }
 
   private defaultTtlSeconds(): number {
-    const raw = this.config.get<string>("JWT_REFRESH_EXPIRES_IN", "2592000") // 30 days
+    const raw = this.config.get<string>("JWT_REFRESH_EXPIRES_IN", "2592000")
     return parseInt(raw, 10)
   }
 
-  // ---------------------------------------------------------------------------
-  // Issue (first token in a chain — no parent)
-  // ---------------------------------------------------------------------------
+  private sessionData(
+    sessionRootId: string,
+    session?: ParsedSessionMetadata,
+    device_label?: string
+  ) {
+    return {
+      sessionRootId,
+      surface: session?.surface ?? null,
+      browser: session?.browser ?? null,
+      os: session?.os ?? null,
+      userAgent: session?.userAgent ?? null,
+      ipAddress: session?.ipAddress ?? null,
+      location: session?.location ?? null,
+      deviceLabel: session?.deviceLabel ?? device_label ?? null,
+    }
+  }
 
   async issueRefreshToken(input: IssueRefreshTokenInput): Promise<string> {
-    const { account_id, device_label, ttl_seconds } = input
+    const { account_id, device_label, ttl_seconds, session } = input
     const ttl = ttl_seconds ?? this.defaultTtlSeconds()
     const token = this.generateOpaqueToken()
     const tokenHash = this.hashToken(token)
     const expiresAt = new Date(Date.now() + ttl * 1000)
+    const sessionRootId = randomBytes(16).toString("hex")
 
     try {
       await this.prisma.refreshToken.create({
@@ -64,13 +75,14 @@ export class RefreshTokenService {
           accountId: account_id,
           tokenHash,
           expiresAt,
-          deviceLabel: device_label ?? null,
+          ...this.sessionData(sessionRootId, session, device_label),
         },
       })
 
       this.logger.log({
         event: "refresh_token_issued",
         account_id,
+        session_root_id: sessionRootId,
         expires_at: expiresAt.toISOString(),
       })
 
@@ -81,52 +93,42 @@ export class RefreshTokenService {
         account_id,
         error: (err as Error).message,
       })
-      // TODO(KAN-53): Sentry.captureException(err);
       throw err
     }
   }
 
-  // ---------------------------------------------------------------------------
-  // Rotate — core of KAN-3
-  // ---------------------------------------------------------------------------
-
-  /**
-   * Validates the incoming refresh token, revokes it, and issues a fresh pair.
-   *
-   * Reuse detection: if the presented token is already revoked, the entire
-   * chain is revoked and a 401 is returned — indicating possible token theft.
-   *
-   * @returns new opaque refresh token string (caller decides delivery method)
-   */
-  async rotateRefreshToken(
-    incomingToken: string
-  ): Promise<{ newRefreshToken: string; accountId: string }> {
+  async rotateRefreshToken(incomingToken: string): Promise<{
+    newRefreshToken: string
+    accountId: string
+    accountType: string
+    adminRole: PrismaAdminRole | null
+  }> {
     const tokenHash = this.hashToken(incomingToken)
 
     const existing = await this.prisma.refreshToken.findUnique({
       where: { tokenHash },
+      include: {
+        account: {
+          select: { accountType: true, adminRole: true },
+        },
+      },
     })
 
-    // Unknown token
     if (!existing) {
       this.logger.warn({ event: "refresh_token_unknown", tokenHash })
-      // TODO(KAN-53): Sentry.captureMessage('Unknown refresh token presented', 'warning');
       throw new UnauthorizedException("Invalid refresh token")
     }
 
-    // Already revoked → reuse detected → revoke entire chain
     if (existing.revokedAt !== null) {
       this.logger.warn({
         event: "refresh_token_reuse_detected",
         account_id: existing.accountId,
         token_id: existing.id,
       })
-      // TODO(KAN-53): Sentry.captureMessage('Refresh token reuse detected — revoking chain', 'error');
       await this.revokeChain(existing.id)
       throw new UnauthorizedException("Refresh token reuse detected")
     }
 
-    // Expired
     if (existing.expiresAt < new Date()) {
       this.logger.warn({
         event: "refresh_token_expired",
@@ -137,26 +139,32 @@ export class RefreshTokenService {
       throw new UnauthorizedException("Refresh token expired")
     }
 
-    // Happy path — revoke old, issue new
     const newToken = this.generateOpaqueToken()
     const newTokenHash = this.hashToken(newToken)
     const ttl = this.defaultTtlSeconds()
     const expiresAt = new Date(Date.now() + ttl * 1000)
+    const now = new Date()
 
     await this.prisma.$transaction([
-      // Revoke the old token
       this.prisma.refreshToken.update({
         where: { id: existing.id },
-        data: { revokedAt: new Date(), lastUsedAt: new Date() },
+        data: { revokedAt: now, lastUsedAt: now },
       }),
-      // Issue new token as child of the old one
       this.prisma.refreshToken.create({
         data: {
           accountId: existing.accountId,
           tokenHash: newTokenHash,
           parentId: existing.id,
           expiresAt,
+          sessionRootId: existing.sessionRootId,
+          surface: existing.surface,
+          browser: existing.browser,
+          os: existing.os,
+          userAgent: existing.userAgent,
+          ipAddress: existing.ipAddress,
+          location: existing.location,
           deviceLabel: existing.deviceLabel,
+          lastUsedAt: now,
         },
       }),
     ])
@@ -167,12 +175,13 @@ export class RefreshTokenService {
       old_token_id: existing.id,
     })
 
-    return { newRefreshToken: newToken, accountId: existing.accountId }
+    return {
+      newRefreshToken: newToken,
+      accountId: existing.accountId,
+      accountType: existing.account.accountType,
+      adminRole: existing.account.adminRole,
+    }
   }
-
-  // ---------------------------------------------------------------------------
-  // Explicit revoke (logout endpoint)
-  // ---------------------------------------------------------------------------
 
   async revokeByToken(token: string): Promise<void> {
     const tokenHash = this.hashToken(token)
@@ -181,23 +190,116 @@ export class RefreshTokenService {
     })
 
     if (!record) {
-      // Treat as a no-op — already gone or never existed
       this.logger.warn({ event: "refresh_token_revoke_not_found", tokenHash })
       return
     }
 
-    await this.revokeSingle(record.id)
+    await this.revokeSession(record.accountId, record.sessionRootId)
 
     this.logger.log({
       event: "refresh_token_revoked",
       account_id: record.accountId,
-      token_id: record.id,
+      session_root_id: record.sessionRootId,
     })
   }
 
-  // ---------------------------------------------------------------------------
-  // Internal helpers
-  // ---------------------------------------------------------------------------
+  async listActiveSessions(
+    accountId: string,
+    currentRefreshToken?: string
+  ): Promise<ActiveSession[]> {
+    const now = new Date()
+    const currentHash = currentRefreshToken
+      ? this.hashToken(currentRefreshToken)
+      : null
+
+    const activeTokens = await this.prisma.refreshToken.findMany({
+      where: {
+        accountId,
+        revokedAt: null,
+        expiresAt: { gt: now },
+      },
+      orderBy: { issuedAt: "desc" },
+    })
+
+    const latestByRoot = new Map<string, (typeof activeTokens)[number]>()
+    for (const token of activeTokens) {
+      if (!latestByRoot.has(token.sessionRootId)) {
+        latestByRoot.set(token.sessionRootId, token)
+      }
+    }
+
+    const sessions: ActiveSession[] = []
+
+    for (const [sessionRootId, latest] of latestByRoot) {
+      const origin = await this.prisma.refreshToken.findFirst({
+        where: { sessionRootId, accountId },
+        orderBy: { issuedAt: "asc" },
+      })
+      if (!origin) continue
+
+      const device = formatSessionDeviceLabel({
+        deviceLabel: origin.deviceLabel,
+        os: origin.os,
+        browser: origin.browser,
+      })
+
+      const browserParts = [
+        origin.surface === "mobile" ? "Sable iOS" : origin.browser,
+        origin.location,
+      ].filter(Boolean)
+
+      sessions.push({
+        id: sessionRootId,
+        device,
+        location: origin.location ?? "Unknown",
+        browser: browserParts.join(" · "),
+        lastActiveAt: (latest.lastUsedAt ?? latest.issuedAt).toISOString(),
+        current: currentHash === latest.tokenHash,
+      })
+    }
+
+    return sessions.sort(
+      (a, b) =>
+        new Date(b.lastActiveAt).getTime() - new Date(a.lastActiveAt).getTime()
+    )
+  }
+
+  async revokeSession(accountId: string, sessionRootId: string): Promise<void> {
+    const result = await this.prisma.refreshToken.updateMany({
+      where: {
+        accountId,
+        sessionRootId,
+        revokedAt: null,
+      },
+      data: { revokedAt: new Date() },
+    })
+
+    if (result.count === 0) {
+      throw new NotFoundException("Session not found")
+    }
+
+    this.logger.log({
+      event: "session_revoked",
+      account_id: accountId,
+      session_root_id: sessionRootId,
+      revoked_count: result.count,
+    })
+  }
+
+  async revokeAllForAccount(accountId: string): Promise<number> {
+    const result = await this.prisma.refreshToken.updateMany({
+      where: { accountId, revokedAt: null },
+      data: { revokedAt: new Date() },
+    })
+
+    this.logger.log({
+      event: "refresh_tokens_all_revoked",
+      account_id: accountId,
+      revoked_count: result.count,
+    })
+
+    return result.count
+  }
 
   private async revokeSingle(id: string): Promise<void> {
     await this.prisma.refreshToken.update({
@@ -206,17 +308,11 @@ export class RefreshTokenService {
     })
   }
 
-  /**
-   * Revokes all tokens in the chain rooted at rootId (including descendants).
-   * Used on reuse detection to invalidate every token derived from the stolen one.
-   */
   private async revokeChain(rootId: string): Promise<void> {
-    // Walk the chain iteratively to avoid deep recursion on long chains
     const toRevoke: string[] = [rootId]
     const visited = new Set<string>()
 
     while (toRevoke.length > 0) {
-      // biome-ignore lint/style/noNonNullAssertion: fix types
       const currentId = toRevoke.pop()!
       if (visited.has(currentId)) continue
       visited.add(currentId)
@@ -239,23 +335,5 @@ export class RefreshTokenService {
       root_id: rootId,
       revoked_count: visited.size,
     })
-  }
-  /**
-   * Revokes every active refresh token for an account.
-   * Used by logout_all — terminates all sessions across all devices.
-   */
-  async revokeAllForAccount(accountId: string): Promise<number> {
-    const result = await this.prisma.refreshToken.updateMany({
-      where: { accountId, revokedAt: null },
-      data: { revokedAt: new Date() },
-    })
-
-    this.logger.log({
-      event: "refresh_tokens_all_revoked",
-      account_id: accountId,
-      revoked_count: result.count,
-    })
-
-    return result.count
   }
 }

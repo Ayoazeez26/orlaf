@@ -3,6 +3,7 @@ import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 import { Check, Clapperboard, X } from "lucide-react"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
+import { usePublishProject, useRejectProject } from "../api/projects-hooks"
 import { formatProjectViews } from "../data/project-details"
 import type { Project } from "../types"
 import { PublishStatusBadge, ReviewStatusBadge } from "./project-badges"
@@ -13,9 +14,14 @@ const HEAD_CLASS =
 interface ProjectsTableProps {
   projects: Project[]
   role: WorkspaceRoleId
+  isRefreshing?: boolean
 }
 
-export function ProjectsTable({ projects, role }: ProjectsTableProps) {
+export function ProjectsTable({
+  projects,
+  role,
+  isRefreshing = false,
+}: ProjectsTableProps) {
   const navigate = useNavigate()
 
   function openDetail(projectId: string) {
@@ -34,7 +40,12 @@ export function ProjectsTable({ projects, role }: ProjectsTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div
+      className={cn(
+        "overflow-x-auto",
+        isRefreshing && "opacity-70 transition-opacity"
+      )}
+    >
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-border border-b">
@@ -92,44 +103,62 @@ export function ProjectsTable({ projects, role }: ProjectsTableProps) {
                 className="px-4 py-3"
                 onMouseDown={(event) => event.stopPropagation()}
               >
-                {project.reviewStatus === "pending" ? (
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5 border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/5"
-                      onClick={() => openDetail(project.id)}
-                    >
-                      <Check className="size-3.5" aria-hidden />
-                      Approve
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="gap-1.5 border-red-500/30 text-red-600 hover:bg-red-500/5"
-                      onClick={() => openDetail(project.id)}
-                    >
-                      <X className="size-3.5" aria-hidden />
-                      Reject
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openDetail(project.id)}
-                  >
-                    Review
-                  </Button>
-                )}
+                <ProjectRowActions
+                  project={project}
+                  onOpenDetail={() => openDetail(project.id)}
+                />
               </td>
             </tr>
           ))}
         </tbody>
       </table>
     </div>
+  )
+}
+
+function ProjectRowActions({
+  project,
+  onOpenDetail,
+}: {
+  project: Project
+  onOpenDetail: () => void
+}) {
+  const publish = usePublishProject(project.id)
+  const reject = useRejectProject(project.id)
+  const isPending = publish.isPending || reject.isPending
+
+  if (project.reviewStatus === "pending") {
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={isPending}
+          className="gap-1.5 border-emerald-500/30 text-emerald-600 hover:bg-emerald-500/5"
+          onClick={() => publish.mutate(undefined)}
+        >
+          <Check className="size-3.5" aria-hidden />
+          Approve
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={isPending}
+          className="gap-1.5 border-red-500/30 text-red-600 hover:bg-red-500/5"
+          onClick={() => reject.mutate(undefined)}
+        >
+          <X className="size-3.5" aria-hidden />
+          Reject
+        </Button>
+      </div>
+    )
+  }
+
+  return (
+    <Button type="button" variant="outline" size="sm" onClick={onOpenDetail}>
+      Review
+    </Button>
   )
 }

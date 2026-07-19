@@ -1,12 +1,18 @@
 import { useNavigate, useSearch } from "@tanstack/react-router"
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { useAuth } from "@/features/auth/auth-context"
 import {
   onboardingStepFromApi,
   resolvePostSignInRoute,
 } from "@/features/auth/lib/post-sign-in-route"
+import { validateCreatorInvite } from "./api/invite-api"
 import { getOnboardingStatus } from "./api/onboarding-api"
+import {
+  InviteErrorStep,
+  InviteLandingStep,
+  InviteLoadingStep,
+} from "./components/invite-landing-step"
 import { ConsentStep } from "./components/steps/consent-step"
 import { ContentFormatStep } from "./components/steps/content-format-step"
 import { CreatorTypeStep } from "./components/steps/creator-type-step"
@@ -51,13 +57,86 @@ export function OnboardingFlow() {
   const { finishOnboarding } = useOnboardingPersist()
   const search = useSearch({ from: "/onboarding" })
   const hasHydratedRef = useRef(false)
+  const [inviteLoading, setInviteLoading] = useState(false)
+
+  const onboardingSearch = useCallback(
+    (step?: OnboardingStep) => ({
+      step,
+      invite: search.invite,
+    }),
+    [search.invite]
+  )
 
   const navigateToStep = useCallback(
     (step: OnboardingStep) => {
-      navigate({ to: "/onboarding", search: { step }, replace: true })
+      navigate({
+        to: "/onboarding",
+        search: onboardingSearch(step),
+        replace: true,
+      })
     },
-    [navigate]
+    [navigate, onboardingSearch]
   )
+
+  useEffect(() => {
+    const token = search.invite
+    if (!token || isAuthenticated) return
+    if (data.inviteToken === token && data.inviteValidated) return
+
+    let cancelled = false
+    setInviteLoading(true)
+
+    validateCreatorInvite(token)
+      .then((result) => {
+        if (cancelled) return
+
+        if (result.valid) {
+          dispatch({
+            type: "SET_INVITE",
+            payload: {
+              token,
+              email: result.email,
+              firstName: result.firstName,
+              lastName: result.lastName,
+              note: result.note,
+            },
+          })
+          dispatch({ type: "SET_AUTH_METHOD", payload: "email" })
+          if (!search.step) {
+            navigateToStep("signup")
+          }
+          return
+        }
+
+        dispatch({
+          type: "SET_INVITE_ERROR",
+          payload: result.message ?? "This invite link is no longer valid.",
+        })
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return
+        const message =
+          err instanceof Error
+            ? err.message
+            : "Unable to validate this invite. Please try again."
+        dispatch({ type: "SET_INVITE_ERROR", payload: message })
+      })
+      .finally(() => {
+        if (!cancelled) setInviteLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [
+    search.invite,
+    search.step,
+    isAuthenticated,
+    data.inviteToken,
+    data.inviteValidated,
+    dispatch,
+    navigateToStep,
+  ])
 
   useEffect(() => {
     if (!isAuthenticated || !session) return
@@ -147,6 +226,26 @@ export function OnboardingFlow() {
       navigateToStep("welcome")
     }
   }, [isAuthenticated, currentStep, navigateToStep])
+
+  if (search.invite && !isAuthenticated) {
+    if (inviteLoading || (!data.inviteValidated && !data.inviteError)) {
+      return <InviteLoadingStep />
+    }
+
+    if (data.inviteError) {
+      return <InviteErrorStep message={data.inviteError} />
+    }
+
+    if (data.inviteValidated && currentStep === "welcome") {
+      return (
+        <InviteLandingStep
+          note={data.inviteNote}
+          email={data.profile.email || undefined}
+          onContinue={() => goTo("signup")}
+        />
+      )
+    }
+  }
 
   const stepContent = (() => {
     switch (currentStep) {

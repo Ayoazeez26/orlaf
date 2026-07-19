@@ -4,7 +4,14 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger"
 
 import cookieParser = require("cookie-parser")
 
+import { CustomLogger } from "@sable/logger"
 import { AppModule } from "./app.module"
+
+CustomLogger.init({
+  // biome-ignore lint/style/noNonNullAssertion: <>
+  dsn: process.env.SENTRY_DSN!,
+  environment: process.env.NODE_ENV,
+})
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -55,7 +62,11 @@ async function bootstrap() {
     .build()
 
   const document = SwaggerModule.createDocument(app, config)
-  SwaggerModule.setup("api/docs", app, document)
+  SwaggerModule.setup("api/docs", app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  })
 
   const port = process.env.PORT ?? 3000
   await app.listen(port)
@@ -63,4 +74,8 @@ async function bootstrap() {
   logger.log(`📚 Swagger docs at http://localhost:${port}/api/docs`)
 }
 
-bootstrap()
+bootstrap().catch((err) => {
+  const logger = new CustomLogger("Bootstrap")
+  logger.error({ event: "bootstrap_failed" }, err)
+  process.exit(1)
+})

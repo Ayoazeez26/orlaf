@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
 import { Button } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
+import { ShieldCheck } from "lucide-react"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
 import {
   formatCreatorEarnings,
@@ -12,12 +14,17 @@ import { CreatorStatusBadge } from "./creator-badges"
 interface CreatorsTableProps {
   creators: Creator[]
   role: WorkspaceRoleId
+  isRefreshing?: boolean
 }
 
 const HEAD_CLASS =
   "px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wide"
 
-export function CreatorsTable({ creators, role }: CreatorsTableProps) {
+export function CreatorsTable({
+  creators,
+  role,
+  isRefreshing = false,
+}: CreatorsTableProps) {
   if (creators.length === 0) {
     return (
       <div className="flex min-h-40 items-center justify-center p-6 text-center text-muted-foreground text-sm">
@@ -27,7 +34,12 @@ export function CreatorsTable({ creators, role }: CreatorsTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div
+      className={cn(
+        "overflow-x-auto transition-opacity",
+        isRefreshing && "opacity-60"
+      )}
+    >
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-border border-b">
@@ -56,8 +68,14 @@ export function CreatorsTable({ creators, role }: CreatorsTableProps) {
                     </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0">
-                    <p className="font-medium text-foreground">
-                      {creator.name}
+                    <p className="flex items-center gap-1.5 font-medium text-foreground">
+                      <span className="truncate">{creator.name}</span>
+                      {creator.isVerified ? (
+                        <ShieldCheck
+                          className="size-4 shrink-0 text-primary"
+                          aria-label="Verified"
+                        />
+                      ) : null}
                     </p>
                     <p className="truncate text-muted-foreground text-xs">
                       {creator.email}
@@ -69,7 +87,7 @@ export function CreatorsTable({ creators, role }: CreatorsTableProps) {
                 {creator.username}
               </td>
               <td className="px-4 py-3 text-muted-foreground">
-                {creator.location}
+                {creator.location || "—"}
               </td>
               <td className="whitespace-nowrap px-4 py-3 font-medium text-foreground">
                 {formatCreatorViews(creator.views)}

@@ -37,13 +37,21 @@ export const commonTags = {
 // ─── Resources ───────────────────────────────────────────────────────────────
 
 export {
+    dbEndpoint,
+    dbInstance,
+    dbPort,
+    dbSecretArn,
+    dbSecretName,
+} from "./database"
+
+
+export {
     appRunnerConnectorSg,
     defaultVpcId,
     rdsPostgresSg,
 } from "./networking"
 
 // Future modules slot in here as tickets are completed:
-//   export * from "./database";     // RDS instance       (KAN-43)
 //   export * from "./apprunner";    // App Runner service  (KAN-44)
 //   export * from "./storage";      // S3 buckets
 //   export * from "./secrets";      // Secrets Manager

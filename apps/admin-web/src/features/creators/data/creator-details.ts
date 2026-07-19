@@ -137,7 +137,7 @@ const DETAIL_OVERRIDES: Partial<Record<string, Partial<CreatorDetail>>> = {
   },
 }
 
-function buildDetail(creator: Creator): CreatorDetail {
+export function buildDetail(creator: Creator): CreatorDetail {
   const override = DETAIL_OVERRIDES[creator.id] ?? {}
 
   return {

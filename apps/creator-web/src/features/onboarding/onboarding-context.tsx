@@ -90,6 +90,17 @@ type OnboardingAction =
   | { type: "SET_TEAM_SIZE"; payload: TeamSize }
   | { type: "TOGGLE_CONTENT_FORMAT"; payload: string }
   | { type: "SET_GET_STARTED_MODE"; payload: GetStartedMode }
+  | {
+      type: "SET_INVITE"
+      payload: {
+        token: string
+        email?: string
+        firstName?: string | null
+        lastName?: string | null
+        note?: string | null
+      }
+    }
+  | { type: "SET_INVITE_ERROR"; payload: string }
   | { type: "HYDRATE_FROM_API"; payload: OnboardingStatusResponse }
   | { type: "RESET" }
 
@@ -131,6 +142,26 @@ function onboardingReducer(
     }
     case "SET_GET_STARTED_MODE":
       return { ...state, getStartedMode: action.payload }
+    case "SET_INVITE":
+      return {
+        ...state,
+        inviteToken: action.payload.token,
+        inviteNote: action.payload.note ?? null,
+        inviteValidated: true,
+        inviteError: null,
+        profile: {
+          ...state.profile,
+          email: action.payload.email ?? state.profile.email,
+          firstName: action.payload.firstName ?? state.profile.firstName,
+          lastName: action.payload.lastName ?? state.profile.lastName,
+        },
+      }
+    case "SET_INVITE_ERROR":
+      return {
+        ...state,
+        inviteValidated: true,
+        inviteError: action.payload,
+      }
     case "HYDRATE_FROM_API":
       return { ...state, ...fromApiProfile(action.payload.profile) }
     case "RESET":

@@ -1,5 +1,5 @@
 import { createPublicKey, verify as cryptoVerify } from "node:crypto"
-import { Injectable, Logger } from "@nestjs/common"
+import { Injectable } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import {
   OAuthProvider,
@@ -8,6 +8,7 @@ import {
   ProviderTokenErrorCode,
   type VerifyProviderIdTokenInput,
 } from "@sable/contracts"
+import { CustomLogger } from "@sable/logger"
 import { JwksCacheService } from "./jwks-cache.service"
 
 // TODO(KAN-53): Sentry.captureException on verification failures
@@ -23,7 +24,7 @@ const APPLE_VALID_ISSUER = "https://appleid.apple.com"
 
 @Injectable()
 export class ProviderTokenService {
-  private readonly logger = new Logger(ProviderTokenService.name)
+  private readonly logger = new CustomLogger(ProviderTokenService.name)
 
   constructor(
     private readonly config: ConfigService,
@@ -80,10 +81,13 @@ export class ProviderTokenService {
     idToken: string,
     surface: "mobile" | "web"
   ): Promise<ProviderTokenClaims> {
-    const audience =
+    const expectedAudiences =
       surface === "mobile"
-        ? this.config.getOrThrow<string>("GOOGLE_CLIENT_ID_MOBILE")
-        : this.config.getOrThrow<string>("GOOGLE_CLIENT_ID_WEB")
+        ? [
+            this.config.getOrThrow<string>("GOOGLE_CLIENT_ID_MOBILE"),
+            this.config.getOrThrow<string>("GOOGLE_CLIENT_ID_WEB"),
+          ]
+        : [this.config.getOrThrow<string>("GOOGLE_CLIENT_ID_WEB")]
 
     const { header, payload } = this.decodeToken(idToken)
 
@@ -95,9 +99,11 @@ export class ProviderTokenService {
       )
     }
 
-    // Audience check
-    const audiences = Array.isArray(payload.aud) ? payload.aud : [payload.aud]
-    if (!audiences.includes(audience)) {
+    // Audience check — mobile SDK id tokens use the web client ID audience
+    const tokenAudiences = Array.isArray(payload.aud)
+      ? payload.aud
+      : [payload.aud]
+    if (!tokenAudiences.some((aud) => expectedAudiences.includes(aud))) {
       throw new ProviderTokenError(
         `Google token audience mismatch`,
         ProviderTokenErrorCode.WRONG_AUDIENCE

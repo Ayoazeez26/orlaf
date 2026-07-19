@@ -1,3 +1,4 @@
+import type { AdminSeriesStats } from "@sable/contracts"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import type { LucideIcon } from "lucide-react"
@@ -5,10 +6,9 @@ import { CheckCircle2, Clapperboard, Clock, XCircle } from "lucide-react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import { TONE_CHIP_CLASS } from "@/features/workspaces/lib/tones"
 import type { Tone } from "@/features/workspaces/types"
-import type { Project } from "../types"
 
 interface ProjectsStatCardsProps {
-  projects: Project[]
+  stats: AdminSeriesStats
 }
 
 interface Stat {
@@ -18,29 +18,29 @@ interface Stat {
   tone: Tone
 }
 
-export function ProjectsStatCards({ projects }: ProjectsStatCardsProps) {
-  const stats: Stat[] = [
+export function ProjectsStatCards({ stats }: ProjectsStatCardsProps) {
+  const cards: Stat[] = [
     {
       label: "Total series",
-      value: projects.length,
+      value: stats.total,
       icon: Clapperboard,
       tone: "primary",
     },
     {
       label: "Pending review",
-      value: projects.filter((p) => p.reviewStatus === "pending").length,
+      value: stats.pendingReview,
       icon: Clock,
       tone: "warning",
     },
     {
       label: "Approved",
-      value: projects.filter((p) => p.reviewStatus === "approved").length,
+      value: stats.approved,
       icon: CheckCircle2,
       tone: "positive",
     },
     {
       label: "Rejected",
-      value: projects.filter((p) => p.reviewStatus === "rejected").length,
+      value: stats.rejected,
       icon: XCircle,
       tone: "danger",
     },
@@ -48,7 +48,7 @@ export function ProjectsStatCards({ projects }: ProjectsStatCardsProps) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {stats.map((stat) => {
+      {cards.map((stat) => {
         const Icon = stat.icon
 
         return (

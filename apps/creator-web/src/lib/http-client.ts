@@ -1,6 +1,6 @@
 /**
  * Shared HTTP client for creator-web.
- * Uses httpOnly refresh cookie (sable_rt) + in-memory access token.
+ * Uses httpOnly refresh cookie (sable_rt_creator) + in-memory access token.
  */
 
 import { getApiBaseUrl } from "./api-base-url"
@@ -40,7 +40,7 @@ function isTokenExpiringSoon(token: string): boolean {
   return Date.now() / 1000 > exp - REFRESH_EXPIRY_BUFFER_SECONDS
 }
 
-/** Low-level fetch wrapper — always sends cookies (sable_rt). */
+/** Low-level fetch wrapper — always sends cookies (sable_rt_creator). */
 export function apiFetch(
   path: string,
   options: RequestInit = {}

@@ -1,7 +1,6 @@
 import { BadRequestException, ConflictException } from "@nestjs/common"
-import { ConfigModule } from "@nestjs/config"
-import { Test, TestingModule } from "@nestjs/testing"
 import { AdminRole } from "@sable/contracts"
+import type { PrismaService } from "../prisma/prisma.service"
 import { AccountService } from "./account.service"
 
 // ---------------------------------------------------------------------------
@@ -38,18 +37,9 @@ const mockPrisma = {
 describe("AccountService", () => {
   let service: AccountService
 
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.clearAllMocks()
-
-    const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({ ignoreEnvFile: true, load: [() => ({})] }),
-      ],
-      providers: [AccountService],
-    }).compile()
-
-    const config = module.get("ConfigService" as any)
-    service = new AccountService(mockPrisma as any, config)
+    service = new AccountService(mockPrisma as unknown as PrismaService)
   })
 
   // -------------------------------------------------------------------------
@@ -67,7 +57,7 @@ describe("AccountService", () => {
 
       const result = await service.createAdmin({
         email: "admin@example.com",
-        role: AdminRole.CLAN_ADMIN,
+        role: AdminRole.CONTENT_ADMIN,
       })
 
       expect(result.mustChangePassword).toBe(true)
@@ -75,6 +65,7 @@ describe("AccountService", () => {
         expect.objectContaining({
           data: expect.objectContaining({
             accountType: "admin",
+            adminRole: "content_admin",
             mustChangePassword: true,
             passwordHash: expect.any(String),
           }),
@@ -88,15 +79,16 @@ describe("AccountService", () => {
       await expect(
         service.createAdmin({
           email: "admin@example.com",
-          role: AdminRole.CLAN_ADMIN,
+          role: AdminRole.CONTENT_ADMIN,
         })
       ).rejects.toThrow(ConflictException)
     })
 
     it("stores a hashed password — not plaintext", async () => {
       mockPrisma.account.findUnique.mockResolvedValue(null)
-      mockPrisma.account.create.mockImplementation(({ data }: any) =>
-        Promise.resolve({ ...mockAccount, ...data })
+      mockPrisma.account.create.mockImplementation(
+        ({ data }: { data: Partial<typeof mockAccount> }) =>
+          Promise.resolve({ ...mockAccount, ...data })
       )
 
       await service.createAdmin({
@@ -107,6 +99,29 @@ describe("AccountService", () => {
       const { passwordHash } = mockPrisma.account.create.mock.calls[0][0].data
       expect(passwordHash).toContain(":") // salt:hash format
       expect(passwordHash).not.toBe("")
+    })
+
+    it("persists the requested admin role", async () => {
+      mockPrisma.account.findUnique.mockResolvedValue(null)
+      mockPrisma.account.create.mockResolvedValue({
+        ...mockAccount,
+        accountType: "admin",
+        adminRole: "super_admin",
+      })
+
+      await service.createAdmin({
+        email: "super@sable.tv",
+        role: AdminRole.SUPER_ADMIN,
+        password: "TempPass123!",
+      })
+
+      expect(mockPrisma.account.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            adminRole: "super_admin",
+          }),
+        })
+      )
     })
   })
 
@@ -185,6 +200,23 @@ describe("AccountService", () => {
 
   describe("creator status transitions", () => {
     const creator = { ...mockAccount, accountType: "creator" as const }
+
+    it("onboarding → active", async () => {
+      mockPrisma.account.findUniqueOrThrow.mockResolvedValue({
+        ...creator,
+        status: "onboarding",
+      })
+      mockPrisma.account.update.mockResolvedValue({
+        ...creator,
+        status: "active",
+      })
+
+      const result = await service.transitionStatus({
+        account_id: "acc_1",
+        to: "active",
+      })
+      expect(result.status).toBe("active")
+    })
 
     it("onboarding → pending_approval", async () => {
       mockPrisma.account.findUniqueOrThrow.mockResolvedValue({
@@ -271,14 +303,14 @@ describe("AccountService", () => {
       expect(result.status).toBe("pending_approval")
     })
 
-    it("rejects onboarding → active (must go through pending_approval)", async () => {
+    it("rejects invalid onboarding transitions", async () => {
       mockPrisma.account.findUniqueOrThrow.mockResolvedValue({
         ...creator,
         status: "onboarding",
       })
 
       await expect(
-        service.transitionStatus({ account_id: "acc_1", to: "active" })
+        service.transitionStatus({ account_id: "acc_1", to: "suspended" })
       ).rejects.toThrow(BadRequestException)
     })
   })
@@ -368,7 +400,7 @@ describe("AccountService", () => {
       await expect(
         service.createAdmin({
           email: "new@example.com",
-          role: AdminRole.CLAN_ADMIN,
+          role: AdminRole.CONTENT_ADMIN,
         })
       ).resolves.not.toThrow()
     })

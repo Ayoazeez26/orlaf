@@ -26,12 +26,16 @@ export function ProjectsListPage() {
     [projects, filters]
   )
 
+  const hasProjects = Boolean(projects && projects.length > 0)
   const showEmptyList = projects && projects.length === 0
-  const showEmptyResults =
-    projects && projects.length > 0 && filteredProjects.length === 0
+  const showEmptyResults = hasProjects && filteredProjects.length === 0
 
   function updateFilters(patch: Partial<typeof filters>) {
     setFilters((prev) => ({ ...prev, ...patch }))
+  }
+
+  function clearFilters() {
+    setFilters(DEFAULT_PROJECTS_LIST_FILTERS)
   }
 
   return (
@@ -63,14 +67,7 @@ export function ProjectsListPage() {
 
       {showEmptyList && <ProjectsEmptyState variant="no-projects" />}
 
-      {showEmptyResults && (
-        <ProjectsEmptyState
-          variant="no-results"
-          onClearFilters={() => setFilters(DEFAULT_PROJECTS_LIST_FILTERS)}
-        />
-      )}
-
-      {projects && filteredProjects.length > 0 && layout === "list" && (
+      {hasProjects && layout === "list" && (
         <div className={`overflow-hidden ${FROSTED_CARD_SURFACE_CLASS}`}>
           <ProjectsListCardToolbar
             layout={layout}
@@ -78,20 +75,28 @@ export function ProjectsListPage() {
             filters={filters}
             onFiltersChange={updateFilters}
           />
-          <div>
-            {filteredProjects.map((project, index) => (
-              <div
-                key={project.id}
-                className={index > 0 ? "border-border border-t" : undefined}
-              >
-                <ProjectListRow project={project} />
-              </div>
-            ))}
-          </div>
+          {showEmptyResults ? (
+            <ProjectsEmptyState
+              embedded
+              variant="no-results"
+              onClearFilters={clearFilters}
+            />
+          ) : (
+            <div>
+              {filteredProjects.map((project, index) => (
+                <div
+                  key={project.id}
+                  className={index > 0 ? "border-border border-t" : undefined}
+                >
+                  <ProjectListRow project={project} />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
-      {projects && filteredProjects.length > 0 && layout === "grid" && (
+      {hasProjects && layout === "grid" && (
         <div className="space-y-6">
           <div className={`overflow-hidden ${FROSTED_CARD_SURFACE_CLASS}`}>
             <ProjectsListCardToolbar
@@ -100,12 +105,21 @@ export function ProjectsListPage() {
               filters={filters}
               onFiltersChange={updateFilters}
             />
+            {showEmptyResults ? (
+              <ProjectsEmptyState
+                embedded
+                variant="no-results"
+                onClearFilters={clearFilters}
+              />
+            ) : null}
           </div>
-          <div className="grid grid-cols-1 gap-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
-            ))}
-          </div>
+          {!showEmptyResults ? (
+            <div className="grid grid-cols-1 gap-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {filteredProjects.map((project) => (
+                <ProjectCard key={project.id} project={project} />
+              ))}
+            </div>
+          ) : null}
         </div>
       )}
     </div>
