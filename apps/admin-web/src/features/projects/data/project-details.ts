@@ -147,7 +147,8 @@ export function getProjectDetail(id: string): ProjectDetail | undefined {
   return project ? buildDetail(project) : undefined
 }
 
-export function formatProjectViews(views: number): string {
+export function formatProjectViews(views: number | null): string {
+  if (views == null) return "—"
   if (views >= 1_000_000) {
     return `${(views / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`
   }

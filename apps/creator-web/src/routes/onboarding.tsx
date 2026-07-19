@@ -8,6 +8,7 @@ import { OnboardingFlow } from "@/features/onboarding/onboarding-flow"
 
 const onboardingSearchSchema = z.object({
   step: z.string().optional(),
+  invite: z.string().optional(),
 })
 
 export const Route = createFileRoute("/onboarding")({

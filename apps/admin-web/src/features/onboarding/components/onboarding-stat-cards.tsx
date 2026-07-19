@@ -1,3 +1,4 @@
+import type { AdminOnboardingStats } from "@sable/contracts"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import type { LucideIcon } from "lucide-react"
@@ -5,11 +6,9 @@ import { CheckCircle2, Clock, Mail, XCircle } from "lucide-react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import { TONE_CHIP_CLASS } from "@/features/workspaces/lib/tones"
 import type { Tone } from "@/features/workspaces/types"
-import type { OnboardingApplication, OnboardingInvite } from "../types"
 
 interface OnboardingStatCardsProps {
-  applications: OnboardingApplication[]
-  invites: OnboardingInvite[]
+  stats: AdminOnboardingStats
 }
 
 interface Stat {
@@ -19,32 +18,29 @@ interface Stat {
   tone: Tone
 }
 
-export function OnboardingStatCards({
-  applications,
-  invites,
-}: OnboardingStatCardsProps) {
-  const stats: Stat[] = [
+export function OnboardingStatCards({ stats }: OnboardingStatCardsProps) {
+  const cards: Stat[] = [
     {
       label: "Pending",
-      value: applications.filter((a) => a.status === "pending").length,
+      value: stats.pending,
       icon: Clock,
       tone: "warning",
     },
     {
       label: "Invited",
-      value: invites.filter((i) => i.status === "sent").length,
+      value: stats.invited,
       icon: Mail,
       tone: "primary",
     },
     {
       label: "Approved",
-      value: applications.filter((a) => a.status === "approved").length,
+      value: stats.approved,
       icon: CheckCircle2,
       tone: "positive",
     },
     {
       label: "Rejected",
-      value: applications.filter((a) => a.status === "rejected").length,
+      value: stats.rejected,
       icon: XCircle,
       tone: "danger",
     },
@@ -52,7 +48,7 @@ export function OnboardingStatCards({
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {stats.map((stat) => {
+      {cards.map((stat) => {
         const Icon = stat.icon
 
         return (

@@ -21,6 +21,7 @@ enum AccountStatus {
   active
   pending_deletion
   deleted
+  email_unverified
   onboarding
   pending_approval
   suspended
@@ -32,8 +33,28 @@ enum AccountStatus {
 enum OAuthProvider {
   google
   apple
+  email
 
   @@map("oauth_provider")
+}
+
+enum AdminRole {
+  super_admin
+  content_admin
+  marketing_admin
+  finance_admin
+  support_admin
+
+  @@map("admin_role")
+}
+
+enum InviteStatus {
+  sent
+  accepted
+  expired
+  revoked
+
+  @@map("invite_status")
 }
 
 model Account {
@@ -48,9 +69,24 @@ model Account {
 
   passwordHash       String?  @map("password_hash")
   mustChangePassword Boolean  @default(false) @map("must_change_password")
+  adminRole          AdminRole? @map("admin_role")
+
+  totpSecretEnc String?   @map("totp_secret_enc")
+  totpEnabledAt DateTime? @map("totp_enabled_at")
 
   displayName String? @map("display_name")
+  firstName   String? @map("first_name")
+  lastName    String? @map("last_name")
   avatarUrl   String? @map("avatar_url")
+
+  bio          String?                     
+  phone        String?           
+  instagramUrl String?   @map("instagram_url") 
+  twitterUrl   String?   @map("twitter_url") 
+  youtubeUrl   String?   @map("youtube_url") 
+  tiktokUrl    String?   @map("tiktok_url")
+
+  emailVerifiedAt DateTime? @map("email_verified_at")
 
   status       AccountStatus @default(active)
   needsConsent Boolean       @default(false) @map("needs_consent")
@@ -58,12 +94,29 @@ model Account {
   deletedAt    DateTime? @map("deleted_at")
   anonymizedAt DateTime? @map("anonymized_at")
 
+  suspendedAt    DateTime? @map("suspended_at")
+  suspendedUntil DateTime? @map("suspended_until")
+  suspendReason  String?   @map("suspend_reason")
+  suspendedById  String?   @map("suspended_by_id")
+
+  onboardingReviewedAt   DateTime? @map("onboarding_reviewed_at")
+  onboardingReviewedById String?   @map("onboarding_reviewed_by_id")
+  onboardingReviewNote   String?   @map("onboarding_review_note")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  refreshTokens  RefreshToken[]
-  deletionJob    DeletionJob?
-  consentRecords ConsentRecord[]
+  refreshTokens        RefreshToken[]
+  deletionJob          DeletionJob?
+  consentRecords       ConsentRecord[]
+  emailVerifications   EmailVerification[]
+  creatorProfile       CreatorProfile?
+  watchlistEntries     WatchlistEntry[]
+  adminInvitesSent     AdminInvite[] @relation("AdminInvitesSent")
+  creatorInvitesSent   CreatorInvite[] @relation("CreatorInvitesSent")
+  adminSeriesActions   Series[]      @relation("SeriesAdminActions")
+
+  series Series[]
 
   @@unique([accountType, emailNormalized], name: "unique_email_per_account_type")
   @@unique([accountType, provider, providerSubjectId], name: "unique_provider_per_account_type")
@@ -100,11 +153,88 @@ model DeletionJob {
   @@map("deletion_jobs")
 }
 
+model EmailVerification {
+  id        String @id @default(cuid())
+  accountId String @map("account_id")
+
+  codeHash   String   @map("code_hash")
+  expiresAt  DateTime @map("expires_at")
+  attempts   Int      @default(0)
+  consumedAt DateTime? @map("consumed_at")
+  lastSentAt DateTime @default(now()) @map("last_sent_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, consumedAt])
+  @@map("email_verifications")
+}
+
+model CreatorProfile {
+  accountId String @id @map("account_id")
+
+  creatorType    String?  @map("creator_type")
+  studioName     String?  @map("studio_name")
+  handle         String?   @unique                
+  description    String?                      
+  logoUrl        String?   @map("logo_url")   
+  plan           String    @default("free") 
+  teamSize       String?  @map("team_size")
+  studioWebsite  String?  @map("studio_website")
+  contentFormats String[] @default([]) @map("content_formats")
+  getStartedMode String?  @map("get_started_mode")
+  onboardingStep String?  @map("onboarding_step")
+  completedAt    DateTime? @map("completed_at")
+
+  isVerified   Boolean   @default(false) @map("is_verified")
+  verifiedAt   DateTime? @map("verified_at")
+  verifiedById String?   @map("verified_by_id")
+
+  defaultContentLanguage      String  @default("English") @map("default_content_language")
+  defaultVisibility           String  @default("public") @map("default_visibility")
+  commentsEnabledByDefault    Boolean @default(true) @map("comments_enabled_by_default")
+  autoPublishAfterProcessing  Boolean @default(false) @map("auto_publish_after_processing")
+  tippingEnabledByDefault     Boolean @default(false) @map("tipping_enabled_by_default")
+  dashboardLanguage           String  @default("English") @map("dashboard_language")
+  timezone                    String  @default("Africa/Lagos") @map("timezone")
+  colorScheme                 String  @default("system") @map("color_scheme")
+  reducedMotion               Boolean @default(false) @map("reduced_motion")
+
+  notifyEmailEnabled          Boolean @default(true) @map("notify_email_enabled")
+  notifyPushEnabled           Boolean @default(false) @map("notify_push_enabled")
+  notifyInAppEnabled          Boolean @default(true) @map("notify_in_app_enabled")
+  notifyEpisodePublished      Boolean @default(true) @map("notify_episode_published")
+  notifyNewComments           Boolean @default(true) @map("notify_new_comments")
+  notifyContentFlagged        Boolean @default(true) @map("notify_content_flagged")
+  notifyPayoutProcessed       Boolean @default(true) @map("notify_payout_processed")
+  notifyCoinPurchases         Boolean @default(false) @map("notify_coin_purchases")
+  notifyRevenueMilestone      Boolean @default(true) @map("notify_revenue_milestone")
+  notifySubscriberMilestone   Boolean @default(true) @map("notify_subscriber_milestone")
+  notifyWeeklyDigest          Boolean @default(true) @map("notify_weekly_digest")
+  notifySeriesTrending        Boolean @default(true) @map("notify_series_trending")
+  notifyTeamMemberJoined      Boolean @default(true) @map("notify_team_member_joined")
+  notifyPermissionChanged     Boolean @default(true) @map("notify_permission_changed")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("creator_profiles")
+}
+
 model RefreshToken {
   id          String    @id @default(cuid())
   accountId   String    @map("account_id")
   tokenHash   String    @unique @map("token_hash")
   parentId    String?   @map("parent_id")
+  sessionRootId String  @map("session_root_id")
+  surface     String?   @map("surface")
+  browser     String?   @map("browser")
+  os          String?   @map("os")
+  userAgent   String?   @map("user_agent")
+  ipAddress   String?   @map("ip_address")
+  location    String?   @map("location")
   issuedAt    DateTime  @default(now()) @map("issued_at")
   expiresAt   DateTime  @map("expires_at")
   revokedAt   DateTime? @map("revoked_at")
@@ -117,5 +247,214 @@ model RefreshToken {
 
   @@index([accountId])
   @@index([tokenHash])
+  @@index([sessionRootId])
   @@map("refresh_tokens")
+}
+
+model AdminInvite {
+  id              String       @id @default(cuid())
+  email           String
+  emailNormalized String       @map("email_normalized")
+  role            AdminRole
+  token           String       @unique
+  status          InviteStatus @default(sent)
+  invitedById     String       @map("invited_by_id")
+  acceptedAt      DateTime?    @map("accepted_at")
+  expiresAt       DateTime     @map("expires_at")
+  createdAt       DateTime     @default(now()) @map("created_at")
+
+  invitedBy Account @relation("AdminInvitesSent", fields: [invitedById], references: [id])
+
+  @@index([emailNormalized])
+  @@map("admin_invites")
+}
+
+model CreatorInvite {
+  id              String       @id @default(cuid())
+  email           String
+  emailNormalized String       @map("email_normalized")
+  firstName       String?      @map("first_name")
+  lastName        String?      @map("last_name")
+  note            String?
+  token           String       @unique
+  status          InviteStatus @default(sent)
+  invitedById     String       @map("invited_by_id")
+  acceptedAt      DateTime?    @map("accepted_at")
+  expiresAt       DateTime     @map("expires_at")
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  invitedBy Account @relation("CreatorInvitesSent", fields: [invitedById], references: [id])
+
+  @@index([emailNormalized])
+  @@map("creator_invites")
+}
+
+
+enum SeriesType {
+  short_series
+  short_film
+  @@map("series_type")
+}
+
+enum SeriesStatus {
+  draft
+  in_review
+  published
+  rejected
+  archived
+  @@map("series_status")
+}
+
+enum AccessType {
+  free
+  coin_gated
+  premium
+  @@map("access_type")
+}
+
+enum EpisodeStatus {
+  pending
+  uploading
+  processing
+  ready
+  failed
+  @@map("episode_status")
+}
+
+
+model Series {
+  id        String       @id @default(cuid())
+  creatorId String       @map("creator_id")
+  title     String
+  synopsis  String?
+  type      SeriesType   @default(short_series)
+  status    SeriesStatus @default(draft)
+
+  language          String   @default("English")
+  tags              String[] @default([])
+  subtitleLanguages String[] @default([]) @map("subtitle_languages")
+
+  posterUrl  String? @map("poster_url")
+  trailerUrl String? @map("trailer_url")
+
+  isPublic        Boolean @default(true)  @map("is_public")
+  listedInSearch  Boolean @default(true)  @map("listed_in_search")
+  commentsEnabled Boolean @default(true)  @map("comments_enabled")
+
+  tippingEnabled Boolean @default(false) @map("tipping_enabled")
+
+  cast Json @default("[]")
+  crew Json @default("[]")
+
+  aiVerticalConversion Boolean @default(true) @map("ai_vertical_conversion")
+  autoCaptions         Boolean @default(true) @map("auto_captions")
+
+  publishedAt DateTime? @map("published_at")
+  archivedAt  DateTime? @map("archived_at")
+  statusBeforeArchive SeriesStatus? @map("status_before_archive")
+
+  adminActionById String?   @map("admin_action_by_id")
+  adminActionAt   DateTime? @map("admin_action_at")
+  adminActionNote String?   @map("admin_action_note")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  creator  Account   @relation(fields: [creatorId], references: [id])
+  adminActionBy Account? @relation("SeriesAdminActions", fields: [adminActionById], references: [id])
+  episodes Episode[]
+  watchlistEntries WatchlistEntry[]
+  seriesGenres SeriesGenre[]
+
+  defaultAccessType AccessType @default(free) @map("default_access_type")
+  autoReframeTo916  Boolean    @default(true) @map("auto_reframe_to_916")
+
+  @@index([creatorId])
+  @@index([status])
+  @@map("series")
+}
+
+model Genre {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  sortOrder Int      @default(0) @map("sort_order")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  series SeriesGenre[]
+
+  @@map("genres")
+}
+
+model SeriesGenre {
+  seriesId String @map("series_id")
+  genreId  String @map("genre_id")
+
+  series Series @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  genre  Genre  @relation(fields: [genreId], references: [id], onDelete: Restrict)
+
+  @@id([seriesId, genreId])
+  @@index([genreId])
+  @@map("series_genres")
+}
+
+
+model Episode {
+  id       String @id @default(cuid())
+  seriesId String @map("series_id")
+  order    Int    @default(0)
+  title    String
+  synopsis String?
+
+  // Video hosting (Cloudflare Stream or other provider)
+  videoHostingId String? @map("video_hosting_id")
+  hlsUrl         String? @map("hls_url")
+  dashUrl        String? @map("dash_url")
+  thumbnailUrl   String? @map("thumbnail_url")
+  previewUrl     String? @map("preview_url")
+
+  durationSeconds Float?  @map("duration_seconds")
+  fileSizeBytes   BigInt? @map("file_size_bytes")
+  width           Int?
+  height          Int?
+
+  status     EpisodeStatus @default(pending)
+  accessType AccessType    @default(free) @map("access_type")
+  coinPrice  Int?          @map("coin_price")
+
+  subtitleTracks Json @default("[]") @map("subtitle_tracks")
+
+  aiVerticalConversion Boolean @default(true) @map("ai_vertical_conversion")
+
+  publishedAt DateTime? @map("published_at")
+  archivedAt  DateTime? @map("archived_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  series Series @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  autoReframeTo916   Boolean  @default(true)  @map("auto_reframe_to_916")
+  autoCaptionEnabled Boolean  @default(true)  @map("auto_caption_enabled")
+  season             Int      @default(1)
+  subtitleUrl        String?  @map("subtitle_url")
+
+  @@index([seriesId, order])
+  @@map("episodes")
+}
+
+model WatchlistEntry {
+  id        String   @id @default(cuid())
+  accountId String   @map("account_id")
+  seriesId  String   @map("series_id")
+  savedAt   DateTime @default(now()) @map("saved_at")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  series  Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, seriesId])
+  @@index([accountId, savedAt])
+  @@map("watchlist_entries")
 }

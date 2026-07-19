@@ -133,11 +133,23 @@ export function ProjectReviewView({ project, role }: ProjectReviewViewProps) {
                 <ReviewStatusBadge status="pending" />
               </div>
 
-              <div className="flex aspect-video items-center justify-center rounded-xl border border-border bg-muted/40">
-                <ImageIcon
-                  className="size-10 text-muted-foreground/50"
-                  aria-hidden
-                />
+              <div className="flex justify-center">
+                <div className="relative aspect-[9/16] w-full max-w-[240px] overflow-hidden rounded-xl border border-border bg-muted/40">
+                  {project.posterUrl ? (
+                    <img
+                      src={project.posterUrl}
+                      alt={`Poster for ${project.title}`}
+                      className="absolute inset-0 size-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex size-full items-center justify-center">
+                      <ImageIcon
+                        className="size-10 text-muted-foreground/50"
+                        aria-hidden
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <Button

@@ -64,7 +64,8 @@ interface AuthContextValue {
   ) => Promise<SignUpEmailResult>
   verifyEmailAndSignIn: (
     verificationId: string,
-    code: string
+    code: string,
+    options?: { inviteToken?: string }
   ) => Promise<VerifyEmailResult>
   signInWithEmail: (
     input: Parameters<typeof signInWithEmailApi>[0]
@@ -212,11 +213,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   )
 
   const verifyEmailAndSignIn = useCallback(
-    async (verificationId: string, code: string) => {
+    async (
+      verificationId: string,
+      code: string,
+      options?: { inviteToken?: string }
+    ) => {
       const result = await verifyEmailApi({
         verification_id: verificationId,
         code,
         surface: "creator-web",
+        ...(options?.inviteToken ? { invite_token: options.inviteToken } : {}),
       })
 
       if (result.outcome === "requires_2fa") {

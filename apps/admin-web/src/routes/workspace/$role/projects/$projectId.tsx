@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { ArrowLeft } from "lucide-react"
+import { useProjectQuery } from "@/features/projects/api/projects-hooks"
 import { ProjectDetailPage } from "@/features/projects/components/detail/project-detail-page"
-import { getProjectDetail } from "@/features/projects/data/project-details"
+import { mapDetailToProject } from "@/features/projects/lib/map-project"
 import { WorkspaceSectionGate } from "@/features/workspaces/components/workspace-section-gate"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
 
@@ -27,9 +28,17 @@ function ProjectDetailContent({
   role: WorkspaceRoleId
   projectId: string
 }) {
-  const project = getProjectDetail(projectId)
+  const { data, isPending, isError } = useProjectQuery(projectId)
 
-  if (!project) {
+  if (isPending) {
+    return (
+      <div className="flex min-h-40 items-center justify-center p-4 text-muted-foreground text-sm sm:p-6 lg:p-8">
+        Loading project…
+      </div>
+    )
+  }
+
+  if (isError || !data) {
     return (
       <div className="space-y-4 p-4 sm:p-6 lg:p-8">
         <Link
@@ -46,6 +55,8 @@ function ProjectDetailContent({
       </div>
     )
   }
+
+  const project = mapDetailToProject(data)
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">

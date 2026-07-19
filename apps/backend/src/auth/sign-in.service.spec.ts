@@ -75,6 +75,12 @@ const mockProviderTokenService = {
   verifyProviderIdToken: jest.fn(),
 }
 
+const mockSecurityService = {
+  requiresMfa: jest.fn().mockReturnValue(false),
+  issueMfaToken: jest.fn().mockReturnValue("mock-mfa-token"),
+  verifyMfaCode: jest.fn(),
+}
+
 // ---------------------------------------------------------------------------
 // Suite
 // ---------------------------------------------------------------------------
@@ -90,7 +96,8 @@ describe("SignInService", () => {
       mockAuthService as any,
       mockRefreshTokenService as any,
       mockDeletionService as any,
-      mockProviderTokenService as any
+      mockProviderTokenService as any,
+      mockSecurityService as any
     )
   })
 

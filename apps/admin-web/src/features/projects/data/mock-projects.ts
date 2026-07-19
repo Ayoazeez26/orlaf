@@ -11,6 +11,7 @@ export const MOCK_PROJECTS: Project[] = [
     views: 850_000,
     publishStatus: "published",
     reviewStatus: "approved",
+    posterUrl: null,
   },
   {
     id: "the-returnees",
@@ -22,6 +23,7 @@ export const MOCK_PROJECTS: Project[] = [
     views: 1_200_000,
     publishStatus: "draft",
     reviewStatus: "pending",
+    posterUrl: null,
   },
   {
     id: "jollof-wars",
@@ -33,6 +35,7 @@ export const MOCK_PROJECTS: Project[] = [
     views: 320_000,
     publishStatus: "published",
     reviewStatus: "approved",
+    posterUrl: null,
   },
   {
     id: "palmwine-days",
@@ -44,6 +47,7 @@ export const MOCK_PROJECTS: Project[] = [
     views: 150_000,
     publishStatus: "draft",
     reviewStatus: "pending",
+    posterUrl: null,
   },
   {
     id: "the-next-chapter",
@@ -55,6 +59,7 @@ export const MOCK_PROJECTS: Project[] = [
     views: 640_000,
     publishStatus: "published",
     reviewStatus: "approved",
+    posterUrl: null,
   },
   {
     id: "urban-tales",
@@ -66,5 +71,6 @@ export const MOCK_PROJECTS: Project[] = [
     views: 120_000,
     publishStatus: "draft",
     reviewStatus: "pending",
+    posterUrl: null,
   },
 ]

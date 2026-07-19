@@ -3,6 +3,7 @@ import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
 import appCss from "@workspace/ui/globals.css?url"
 import { QueryProvider } from "@/components/query-provider"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/toaster"
 import { AuthProvider } from "@/features/auth/auth-context"
 
 export const Route = createRootRoute({
@@ -53,7 +54,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body suppressHydrationWarning>
         <QueryProvider>
           <AuthProvider>
-            <ThemeProvider>{children}</ThemeProvider>
+            <ThemeProvider>
+              {children}
+              <Toaster position="top-right" richColors closeButton />
+            </ThemeProvider>
           </AuthProvider>
         </QueryProvider>
         <Scripts />

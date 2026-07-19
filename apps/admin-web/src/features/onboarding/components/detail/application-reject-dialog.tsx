@@ -15,7 +15,7 @@ interface ApplicationRejectDialogProps {
   applicantName: string
   applicantEmail: string
   applicantUsername: string
-  onConfirm?: () => void
+  onConfirm?: (note: string) => void
 }
 
 export function ApplicationRejectDialog({
@@ -37,7 +37,7 @@ export function ApplicationRejectDialog({
   if (!open) return null
 
   function handleConfirm() {
-    onConfirm?.()
+    onConfirm?.(note.trim())
     onOpenChange(false)
   }
 

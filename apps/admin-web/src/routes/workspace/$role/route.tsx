@@ -4,10 +4,8 @@ import { useMemo } from "react"
 import { useAuth } from "@/features/auth/auth-context"
 import { getAuthReady } from "@/features/auth/lib/auth-bootstrap"
 import { DashboardLayout } from "@/features/workspaces/components/layout/dashboard-layout"
-import {
-  adminSessionToWorkspaceUser,
-} from "@/features/workspaces/data/shared"
 import { getWorkspace, isWorkspaceRole } from "@/features/workspaces/data/roles"
+import { adminSessionToWorkspaceUser } from "@/features/workspaces/data/shared"
 
 export const Route = createFileRoute("/workspace/$role")({
   ssr: false,

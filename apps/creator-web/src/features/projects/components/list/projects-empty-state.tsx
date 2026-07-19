@@ -6,12 +6,14 @@ import { FROSTED_CARD_SURFACE_CLASS } from "../../constants/frosted-card"
 
 interface ProjectsEmptyStateProps {
   variant: "no-projects" | "no-results"
+  embedded?: boolean
   onClearFilters?: () => void
   className?: string
 }
 
 export function ProjectsEmptyState({
   variant,
+  embedded = false,
   onClearFilters,
   className,
 }: ProjectsEmptyStateProps) {
@@ -22,7 +24,8 @@ export function ProjectsEmptyState({
     <div
       className={cn(
         "flex flex-col items-center px-6 py-16 text-center sm:py-20",
-        FROSTED_CARD_SURFACE_CLASS,
+        !embedded && FROSTED_CARD_SURFACE_CLASS,
+        embedded && "border-border border-t bg-transparent",
         className
       )}
     >

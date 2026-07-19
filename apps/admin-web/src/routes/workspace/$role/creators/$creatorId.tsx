@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { ArrowLeft } from "lucide-react"
+import { useCreatorQuery } from "@/features/creators/api/creators-hooks"
 import { CreatorDetailPage } from "@/features/creators/components/detail/creator-detail-page"
-import { getCreatorDetail } from "@/features/creators/data/creator-details"
+import { toCreatorDetail } from "@/features/creators/data/map-creator-detail"
 import { WorkspaceSectionGate } from "@/features/workspaces/components/workspace-section-gate"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
 
@@ -27,9 +28,17 @@ function CreatorDetailContent({
   role: WorkspaceRoleId
   creatorId: string
 }) {
-  const creator = getCreatorDetail(creatorId)
+  const { data, isPending, isError, error } = useCreatorQuery(creatorId)
 
-  if (!creator) {
+  if (isPending) {
+    return (
+      <div className="p-4 text-muted-foreground text-sm sm:p-6 lg:p-8">
+        Loading creator…
+      </div>
+    )
+  }
+
+  if (isError || !data) {
     return (
       <div className="space-y-4 p-4 sm:p-6 lg:p-8">
         <Link
@@ -41,7 +50,9 @@ function CreatorDetailContent({
           Back to Creators
         </Link>
         <p className="text-muted-foreground text-sm">
-          We couldn&apos;t find that creator.
+          {error instanceof Error
+            ? error.message
+            : "We couldn't find that creator."}
         </p>
       </div>
     )
@@ -49,7 +60,7 @@ function CreatorDetailContent({
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <CreatorDetailPage creator={creator} role={role} />
+      <CreatorDetailPage creator={toCreatorDetail(data)} role={role} />
     </div>
   )
 }

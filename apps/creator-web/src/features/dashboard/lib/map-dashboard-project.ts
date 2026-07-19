@@ -14,6 +14,9 @@ function toDashboardStatus(
   if (status === "in_review" || status === "scheduled") {
     return "in_review"
   }
+  if (status === "rejected") {
+    return "rejected"
+  }
   return "draft"
 }
 

@@ -1,13 +1,14 @@
-import { Injectable, Logger } from "@nestjs/common"
+import { Injectable } from "@nestjs/common"
 import { JwtService } from "@nestjs/jwt"
 import type { AccessTokenClaims, IssueAccessTokenInput } from "@sable/contracts"
+import { CustomLogger } from "@sable/logger"
 
 // TODO(KAN-53): import Sentry for exception capture once OTEL is wired
 // import * as Sentry from '@sentry/node';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name)
+  private readonly logger = new CustomLogger(AuthService.name)
 
   constructor(private readonly jwtService: JwtService) {}
 

@@ -12,7 +12,7 @@ interface ProjectRejectDialogProps {
   projectTitle: string
   creatorName: string
   creatorUsername: string
-  onConfirm?: () => void
+  onConfirm?: (reason?: string) => void
 }
 
 export function ProjectRejectDialog({
@@ -34,7 +34,7 @@ export function ProjectRejectDialog({
   if (!open) return null
 
   function handleConfirm() {
-    onConfirm?.()
+    onConfirm?.(reason.trim() || undefined)
     onOpenChange(false)
   }
 

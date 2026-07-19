@@ -4,6 +4,9 @@ import type { ProjectStatus } from "../../types"
 
 const PUBLISHED_PILL_CLASS = "border-[#2BBB7133] bg-[#2BBB7126] text-[#002C0F]"
 
+const REJECTED_PILL_CLASS =
+  "border-transparent bg-red-500/15 text-red-700 dark:text-red-400"
+
 const STATUS_STYLES: Record<
   ProjectStatus,
   { label: string; className: string }
@@ -19,6 +22,10 @@ const STATUS_STYLES: Record<
   in_review: {
     label: "In review",
     className: "border-transparent bg-amber-500/15 text-amber-700",
+  },
+  rejected: {
+    label: "Rejected",
+    className: REJECTED_PILL_CLASS,
   },
   scheduled: {
     label: "Scheduled",
@@ -46,6 +53,10 @@ const TABLE_STATUS_STYLES: Record<
   in_review: {
     label: "In review",
     className: "border-transparent bg-[#FFF0C5] text-[#5C2C00]",
+  },
+  rejected: {
+    label: "Rejected",
+    className: "border-transparent bg-[#FEE2E2] text-[#991B1B]",
   },
   draft: {
     label: "Draft",
@@ -83,6 +94,10 @@ const OVERLAY_STATUS_STYLES: Record<
     className:
       "border-[#FCB4424D] bg-[#FCB44233] text-[#5C2C00] backdrop-blur-sm",
   },
+  rejected: {
+    label: "Rejected",
+    className: "border-transparent bg-red-500/20 text-red-950 backdrop-blur-sm",
+  },
   scheduled: {
     label: "Scheduled",
     className: "border-transparent bg-sky-200/70 text-sky-950 backdrop-blur-sm",
@@ -115,6 +130,11 @@ const LIST_STATUS_STYLES: Record<
     label: "In review",
     className:
       "border-transparent bg-amber-500/15 text-amber-700 uppercase tracking-wide",
+  },
+  rejected: {
+    label: "Rejected",
+    className:
+      "border-transparent bg-red-500/15 text-red-700 uppercase tracking-wide",
   },
   scheduled: {
     label: "Scheduled",

@@ -1,6 +1,6 @@
 import {
-  adminRoleToWorkspaceId,
   type AdminSessionResponse,
+  adminRoleToWorkspaceId,
 } from "@sable/contracts"
 
 export type PostSignInDestination = {

@@ -21,9 +21,9 @@ import {
   signInAdmin as signInAdminApi,
 } from "./api/auth-api"
 import { useAuthBootstrapProgress } from "./hooks/use-auth-bootstrap-progress"
-import { clearAuthBootstrapCache, getAuthReady } from "./lib/auth-bootstrap"
 import type { AdminSession } from "./lib/admin-session"
 import { toAdminSession } from "./lib/admin-session"
+import { clearAuthBootstrapCache, getAuthReady } from "./lib/auth-bootstrap"
 import { getAuthSnapshot, setAuthSnapshot } from "./lib/auth-snapshot"
 import { resolvePostSignInRoute } from "./lib/post-sign-in-route"
 
@@ -178,14 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       updateSession,
       signOut,
     }),
-    [
-      status,
-      session,
-      signInWithEmail,
-      changePassword,
-      updateSession,
-      signOut,
-    ]
+    [status, session, signInWithEmail, changePassword, updateSession, signOut]
   )
 
   if (status === "loading") {

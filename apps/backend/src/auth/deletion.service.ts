@@ -1,7 +1,8 @@
-import { BadRequestException, Injectable, Logger } from "@nestjs/common"
+import { BadRequestException, Injectable } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { Cron, CronExpression } from "@nestjs/schedule"
 import { AccountType } from "@sable/contracts"
+import { CustomLogger } from "@sable/logger"
 import { Account } from "src/generated/prisma/client"
 import { PrismaService } from "../prisma/prisma.service"
 import { RefreshTokenService } from "./refresh-token.service"
@@ -13,12 +14,12 @@ const GRACE_PERIOD_DAYS = 30
 
 @Injectable()
 export class DeletionService {
-  private readonly logger = new Logger(DeletionService.name)
+  private readonly logger = new CustomLogger(DeletionService.name)
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly refreshTokenService: RefreshTokenService,
-    private readonly config: ConfigService
+    readonly _config: ConfigService
   ) {}
 
   // ---------------------------------------------------------------------------
@@ -122,7 +123,7 @@ export class DeletionService {
       where: { id: accountId },
     })
 
-    if (!account || account.status !== "pending_deletion") {
+    if (account?.status !== "pending_deletion") {
       return { restored: false }
     }
 

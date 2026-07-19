@@ -1,4 +1,5 @@
-import { BadRequestException, Injectable, Logger } from "@nestjs/common"
+import { BadRequestException, Injectable } from "@nestjs/common"
+import { CustomLogger } from "@sable/logger"
 import { PrismaService } from "../prisma/prisma.service"
 import { CURRENT_POLICY_VERSIONS, type PolicyVersions } from "./policies.config"
 
@@ -14,7 +15,7 @@ export interface RecordConsentInput {
 
 @Injectable()
 export class ConsentService {
-  private readonly logger = new Logger(ConsentService.name)
+  private readonly logger = new CustomLogger(ConsentService.name)
 
   constructor(private readonly prisma: PrismaService) {}
 

@@ -147,7 +147,7 @@ describe("ConsentGuard", () => {
   let guard: ConsentGuard
   let consentService: ConsentService
 
-  function mockContext(user: any, handlerMeta = false) {
+  function mockContext(user: any, _handlerMeta = false) {
     return {
       switchToHttp: () => ({ getRequest: () => ({ user }) }),
       getHandler: () => ({}),

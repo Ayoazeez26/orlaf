@@ -1,4 +1,7 @@
-import type { AdminSessionResponse, AdminSignInResponse } from "@sable/contracts"
+import type {
+  AdminSessionResponse,
+  AdminSignInResponse,
+} from "@sable/contracts"
 
 /** In-memory admin session (tokens may be partial after cookie refresh bootstrap). */
 export type AdminSession = AdminSessionResponse & {

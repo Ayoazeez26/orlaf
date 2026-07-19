@@ -31,6 +31,7 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
   const { signUpWithEmail } = useAuth()
   const [apiError, setApiError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const emailLocked = Boolean(data.inviteToken)
 
   const {
     register,
@@ -57,6 +58,7 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
       lastName: values.lastName,
       email: values.email,
       password: values.password,
+      ...(data.inviteToken ? { invite_token: data.inviteToken } : {}),
     })
 
     setIsSubmitting(false)
@@ -159,7 +161,9 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
             id="email"
             type="email"
             placeholder="you@example.com"
+            readOnly={emailLocked}
             aria-invalid={!!errors.email}
+            className={emailLocked ? "bg-muted" : undefined}
             {...register("email")}
           />
           {errors.email && (

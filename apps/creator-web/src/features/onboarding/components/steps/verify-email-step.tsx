@@ -35,7 +35,9 @@ export function VerifyEmailStep({ progress, onBack }: VerifyEmailStepProps) {
     setIsVerifying(true)
     setError(null)
 
-    const result = await verifyEmailAndSignIn(data.verificationId, code)
+    const result = await verifyEmailAndSignIn(data.verificationId, code, {
+      inviteToken: data.inviteToken ?? undefined,
+    })
 
     setIsVerifying(false)
 

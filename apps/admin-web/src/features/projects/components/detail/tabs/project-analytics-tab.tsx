@@ -28,6 +28,19 @@ interface ProjectAnalyticsTabProps {
 }
 
 export function ProjectAnalyticsTab({ analytics }: ProjectAnalyticsTabProps) {
+  const hasData =
+    analytics.totalViews > 0 ||
+    analytics.viewsThisWeek.length > 0 ||
+    analytics.topEpisodes.length > 0
+
+  if (!hasData) {
+    return (
+      <div className="flex min-h-40 items-center justify-center rounded-[16px] border bg-surface-frosted p-6 text-center text-muted-foreground text-sm backdrop-blur-[24px]">
+        Analytics data is not available yet.
+      </div>
+    )
+  }
+
   const metrics: MetricDef[] = [
     {
       label: "Total Views",

@@ -1,9 +1,13 @@
-import { HttpStatus } from "@nestjs/common"
 import { Test, TestingModule } from "@nestjs/testing"
-import { AccountType, AdminRole } from "@sable/contracts"
+import { type AccessTokenClaims, AccountType } from "@sable/contracts"
+import type { Request, Response } from "express"
 import { AuthController } from "./auth.controller"
 import { AuthService } from "./auth.service"
+import { ConsentService } from "./consent.service"
+import { DeletionService } from "./deletion.service"
+import { EmailAuthService } from "./email-auth.service"
 import { RefreshTokenService } from "./refresh-token.service"
+import { SignInService } from "./sign-in.service"
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -19,11 +23,20 @@ const mockAuthService = {
   issueAccessToken: jest.fn().mockReturnValue("mock.access.token"),
 }
 
-const mockJwtAuthGuard = { canActivate: jest.fn().mockReturnValue(true) }
+const mockDeletionService = {}
+const mockSignInService = {
+  refreshCookieName: "sable_rt_creator",
+  buildRefreshCookieOptions: jest.fn(),
+}
+const mockConsentService = {}
+const mockEmailAuthService = {}
 
 function mockReq(
-  overrides: Partial<Request> & { user?: any; cookies?: any } = {}
-) {
+  overrides: Partial<Request> & {
+    user?: AccessTokenClaims
+    cookies?: Record<string, string | undefined>
+  } = {}
+): Request {
   return {
     user: {
       sub: "acc_123",
@@ -35,14 +48,14 @@ function mockReq(
     },
     cookies: {},
     ...overrides,
-  } as any
+  } as Request
 }
 
-function mockRes() {
+function mockRes(): Response {
   return {
     clearCookie: jest.fn(),
     cookie: jest.fn(),
-  } as any
+  } as unknown as Response
 }
 
 // ---------------------------------------------------------------------------
@@ -60,6 +73,10 @@ describe("AuthController — logout", () => {
       providers: [
         { provide: RefreshTokenService, useValue: mockRefreshTokenService },
         { provide: AuthService, useValue: mockAuthService },
+        { provide: DeletionService, useValue: mockDeletionService },
+        { provide: SignInService, useValue: mockSignInService },
+        { provide: ConsentService, useValue: mockConsentService },
+        { provide: EmailAuthService, useValue: mockEmailAuthService },
       ],
     }).compile()
 
@@ -90,7 +107,14 @@ describe("AuthController — logout", () => {
       mockRefreshTokenService.revokeByToken.mockResolvedValue(undefined)
       const res = mockRes()
 
-      await controller.logout({ refresh_token: "abc123" }, mockReq(), res)
+      await controller.logout(
+        {
+          refresh_token: "abc123",
+          logout_all: false,
+        },
+        mockReq(),
+        res
+      )
 
       expect(res.clearCookie).not.toHaveBeenCalled()
     })
@@ -106,16 +130,32 @@ describe("AuthController — logout", () => {
       const res = mockRes()
 
       await controller.logout(
-        {},
-        mockReq({ cookies: { sable_rt: "cookie-token-xyz" } }),
+        {
+          refresh_token: "",
+          logout_all: false,
+        },
+        mockReq({
+          cookies: { sable_rt_creator: "cookie-token-xyz" },
+          user: {
+            sub: "acc_123",
+            account_type: AccountType.CREATOR,
+            role: null,
+            iat: 0,
+            exp: 0,
+            iss: "test",
+          },
+        }),
         res
       )
 
       expect(mockRefreshTokenService.revokeByToken).toHaveBeenCalledWith(
         "cookie-token-xyz"
       )
+      expect(res.clearCookie).toHaveBeenCalledWith("sable_rt_creator", {
+        path: "/",
+      })
       expect(res.clearCookie).toHaveBeenCalledWith("sable_rt", {
-        path: "/api/v1/auth",
+        path: "/",
       })
     })
   })
@@ -129,7 +169,14 @@ describe("AuthController — logout", () => {
       mockRefreshTokenService.revokeAllForAccount.mockResolvedValue(3)
       const res = mockRes()
 
-      await controller.logout({ logout_all: true }, mockReq(), res)
+      await controller.logout(
+        {
+          logout_all: true,
+          refresh_token: "",
+        },
+        mockReq(),
+        res
+      )
 
       expect(mockRefreshTokenService.revokeAllForAccount).toHaveBeenCalledWith(
         "acc_123"
@@ -163,7 +210,10 @@ describe("AuthController — logout", () => {
 
       await expect(
         controller.logout(
-          { refresh_token: "already-revoked-token" },
+          {
+            refresh_token: "already-revoked-token",
+            logout_all: false,
+          },
           mockReq(),
           mockRes()
         )
@@ -172,7 +222,10 @@ describe("AuthController — logout", () => {
       // Called twice — both succeed
       await expect(
         controller.logout(
-          { refresh_token: "already-revoked-token" },
+          {
+            refresh_token: "already-revoked-token",
+            logout_all: false,
+          },
           mockReq(),
           mockRes()
         )
@@ -187,7 +240,14 @@ describe("AuthController — logout", () => {
   describe("no token", () => {
     it("succeeds silently when no token is presented", async () => {
       await expect(
-        controller.logout({}, mockReq(), mockRes())
+        controller.logout(
+          {
+            refresh_token: "",
+            logout_all: false,
+          },
+          mockReq(),
+          mockRes()
+        )
       ).resolves.not.toThrow()
 
       expect(mockRefreshTokenService.revokeByToken).not.toHaveBeenCalled()

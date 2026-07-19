@@ -1,10 +1,19 @@
+import type { AdminOnboardingStats } from "@sable/contracts"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import { useMemo, useState } from "react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
+import { toast, toastMutationError } from "@/lib/toast"
+import {
+  useApplicationsQuery,
+  useCreateInvite,
+  useInvitesQuery,
+  useResendInvite,
+} from "../api/onboarding-hooks"
 import type { ApplicationFilter, InviteFilter } from "../constants"
-import { MOCK_APPLICATIONS, MOCK_INVITES } from "../data/mock-onboarding"
+import { toApplication, toInvite } from "../data/map-onboarding"
+import type { OnboardingInvite } from "../types"
 import { ApplicationsTable } from "./applications-table"
 import { ApplicationsToolbar } from "./applications-toolbar"
 import { OnboardCreatorDialog } from "./detail/onboard-creator-dialog"
@@ -18,20 +27,48 @@ import {
 } from "./onboarding-view-toggle"
 import { ResendInviteDialog } from "./resend-invite-dialog"
 
-function matchesApplicationFilter(
-  application: (typeof MOCK_APPLICATIONS)[number],
-  filter: ApplicationFilter
-) {
-  if (filter === "all") return true
-  return application.status === filter
+const EMPTY_STATS: AdminOnboardingStats = {
+  pending: 0,
+  invited: 0,
+  approved: 0,
+  rejected: 0,
 }
 
-function matchesInviteFilter(
-  invite: (typeof MOCK_INVITES)[number],
-  filter: InviteFilter
-) {
-  if (filter === "all") return true
-  return invite.status === filter
+function StateMessage({
+  isPending,
+  isError,
+  error,
+  onRetry,
+  emptyLabel,
+}: {
+  isPending: boolean
+  isError: boolean
+  error: unknown
+  onRetry: () => void
+  emptyLabel: string
+}) {
+  if (isError) {
+    return (
+      <div className="flex min-h-40 flex-col items-center justify-center gap-3 p-6 text-center">
+        <p className="text-muted-foreground text-sm">
+          {error instanceof Error ? error.message : emptyLabel}
+        </p>
+        <button
+          type="button"
+          onClick={onRetry}
+          className="text-primary text-sm underline underline-offset-4"
+        >
+          Try again
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex min-h-40 items-center justify-center p-6 text-center text-muted-foreground text-sm">
+      {isPending ? "Loading…" : emptyLabel}
+    </div>
+  )
 }
 
 export function OnboardingPage({ role }: { role: WorkspaceRoleId }) {
@@ -42,49 +79,46 @@ export function OnboardingPage({ role }: { role: WorkspaceRoleId }) {
   const [applicationSearch, setApplicationSearch] = useState("")
   const [inviteSearch, setInviteSearch] = useState("")
   const [onboardOpen, setOnboardOpen] = useState(false)
-  const [resendInvite, setResendInvite] = useState<
-    (typeof MOCK_INVITES)[number] | null
-  >(null)
+  const [resendTarget, setResendTarget] = useState<OnboardingInvite | null>(
+    null
+  )
 
-  const filteredApplications = useMemo(() => {
-    const query = applicationSearch.trim().toLowerCase()
+  const applicationsQuery = useApplicationsQuery({
+    filter: applicationFilter,
+    q: applicationSearch,
+  })
+  const invitesQuery = useInvitesQuery({
+    filter: inviteFilter,
+    q: inviteSearch,
+  })
+  const createInvite = useCreateInvite()
+  const resendInvite = useResendInvite()
 
-    return MOCK_APPLICATIONS.filter((application) => {
-      if (!matchesApplicationFilter(application, applicationFilter))
-        return false
-      if (!query) return true
+  const applications = useMemo(
+    () => (applicationsQuery.data?.items ?? []).map(toApplication),
+    [applicationsQuery.data]
+  )
+  const invites = useMemo(
+    () => (invitesQuery.data?.items ?? []).map(toInvite),
+    [invitesQuery.data]
+  )
 
-      const haystack =
-        `${application.name} ${application.email} ${application.username} ${application.location}`.toLowerCase()
+  const stats =
+    applicationsQuery.data?.stats ?? invitesQuery.data?.stats ?? EMPTY_STATS
 
-      return haystack.includes(query)
-    })
-  }, [applicationFilter, applicationSearch])
-
-  const filteredInvites = useMemo(() => {
-    const query = inviteSearch.trim().toLowerCase()
-
-    return MOCK_INVITES.filter((invite) => {
-      if (!matchesInviteFilter(invite, inviteFilter)) return false
-      if (!query) return true
-      return invite.email.toLowerCase().includes(query)
-    })
-  }, [inviteFilter, inviteSearch])
+  const showApplications = activeView === "applications"
 
   return (
     <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
       <OnboardingPageHeader onOnboardCreator={() => setOnboardOpen(true)} />
 
-      <OnboardingStatCards
-        applications={MOCK_APPLICATIONS}
-        invites={MOCK_INVITES}
-      />
+      <OnboardingStatCards stats={stats} />
 
       <OnboardingViewToggle active={activeView} onChange={setActiveView} />
 
       <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6")}>
         <CardContent className="flex flex-col gap-5 px-4 sm:px-6">
-          {activeView === "applications" ? (
+          {showApplications ? (
             <>
               <ApplicationsToolbar
                 activeFilter={applicationFilter}
@@ -92,10 +126,17 @@ export function OnboardingPage({ role }: { role: WorkspaceRoleId }) {
                 search={applicationSearch}
                 onSearchChange={setApplicationSearch}
               />
-              <ApplicationsTable
-                applications={filteredApplications}
-                role={role}
-              />
+              {applications.length > 0 ? (
+                <ApplicationsTable applications={applications} role={role} />
+              ) : (
+                <StateMessage
+                  isPending={applicationsQuery.isPending}
+                  isError={applicationsQuery.isError}
+                  error={applicationsQuery.error}
+                  onRetry={() => applicationsQuery.refetch()}
+                  emptyLabel="No applications match your filters."
+                />
+              )}
             </>
           ) : (
             <>
@@ -105,28 +146,59 @@ export function OnboardingPage({ role }: { role: WorkspaceRoleId }) {
                 search={inviteSearch}
                 onSearchChange={setInviteSearch}
               />
-              <InvitesTable
-                invites={filteredInvites}
-                onResend={setResendInvite}
-              />
+              {invites.length > 0 ? (
+                <InvitesTable invites={invites} onResend={setResendTarget} />
+              ) : (
+                <StateMessage
+                  isPending={invitesQuery.isPending}
+                  isError={invitesQuery.isError}
+                  error={invitesQuery.error}
+                  onRetry={() => invitesQuery.refetch()}
+                  emptyLabel="No invites match your filters."
+                />
+              )}
             </>
           )}
         </CardContent>
       </Card>
 
-      <OnboardCreatorDialog open={onboardOpen} onOpenChange={setOnboardOpen} />
+      <OnboardCreatorDialog
+        open={onboardOpen}
+        onOpenChange={setOnboardOpen}
+        onConfirm={async (payload) => {
+          try {
+            await createInvite.mutateAsync({
+              email: payload.email,
+              firstName: payload.firstName || undefined,
+              lastName: payload.lastName || undefined,
+              note: payload.note || undefined,
+            })
+            setActiveView("invites")
+            toast.success("Invite successfully sent.")
+          } catch (error) {
+            toastMutationError(error, "Failed to send invite.")
+            throw error
+          }
+        }}
+      />
 
       <ResendInviteDialog
-        open={resendInvite !== null}
+        open={resendTarget !== null}
         onOpenChange={(open) => {
-          if (!open) setResendInvite(null)
+          if (!open) setResendTarget(null)
         }}
-        inviteEmail={resendInvite?.email ?? ""}
-        displayName={
-          resendInvite?.email === "fola@futurefilms.co"
-            ? "Fola Adeyemi"
-            : undefined
-        }
+        inviteEmail={resendTarget?.email ?? ""}
+        onConfirm={() => {
+          if (!resendTarget) return
+          resendInvite.mutate(resendTarget.id, {
+            onSuccess: () => {
+              toast.success("Invite successfully resent.")
+            },
+            onError: (error) => {
+              toastMutationError(error, "Failed to resend invite.")
+            },
+          })
+        }}
       />
     </div>
   )

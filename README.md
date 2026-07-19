@@ -147,7 +147,7 @@ pnpm add -D -w some-tool
 ```bash
 # After editing prisma/schema.prisma:
 pnpm db:migrate       # create + apply migration (prompts for a name)
-pnpm db:generate      # regenerate client (usually done automatically by migrate)
+pnpm db:generate      # regenerate clients (usually done automatically by migrate)
 
 # Useful during development
 pnpm db:studio        # visual DB editor at http://localhost:5555

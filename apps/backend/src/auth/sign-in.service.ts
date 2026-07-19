@@ -1,7 +1,6 @@
 import {
   ConflictException,
   Injectable,
-  Logger,
   UnauthorizedException,
 } from "@nestjs/common"
 import {
@@ -14,31 +13,35 @@ import {
   SignInResponse,
   SignInSurface,
 } from "@sable/contracts"
+import { CustomLogger } from "@sable/logger"
 import { Account } from "src/generated/prisma/client"
 import { PrismaService } from "../prisma/prisma.service"
 import { AuthService } from "./auth.service"
 import {
   buildRefreshCookieOptions as getRefreshCookieOptions,
   REFRESH_COOKIE_MAX_AGE_MS,
-  REFRESH_COOKIE_NAME,
+  REFRESH_COOKIE_NAME_CREATOR,
 } from "./auth-cookie.constants"
 import { DeletionService } from "./deletion.service"
 import { ProviderTokenService } from "./provider-token.service"
 import { RefreshTokenService } from "./refresh-token.service"
+import { SecurityService } from "./security.service"
+import type { ParsedSessionMetadata } from "./session-metadata.util"
 
 // TODO(KAN-53): import Sentry once OTEL is wired
 // import * as Sentry from '@sentry/node';
 
 @Injectable()
 export class SignInService {
-  private readonly logger = new Logger(SignInService.name)
+  private readonly logger = new CustomLogger(SignInService.name)
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
     private readonly refreshTokenService: RefreshTokenService,
     private readonly deletionService: DeletionService,
-    private readonly providerTokenService: ProviderTokenService
+    private readonly providerTokenService: ProviderTokenService,
+    private readonly securityService: SecurityService
   ) {}
 
   // ---------------------------------------------------------------------------
@@ -49,8 +52,9 @@ export class SignInService {
     id_token: string
     surface: SignInSurface
     device_label?: string
+    session?: ParsedSessionMetadata
   }): Promise<{ response: SignInResponse; refreshToken: string }> {
-    const { id_token, surface, device_label } = input
+    const { id_token, surface, device_label, session } = input
 
     let claims: ProviderTokenClaims
     try {
@@ -68,6 +72,7 @@ export class SignInService {
       claims: claims!,
       surface,
       device_label,
+      session,
     })
   }
 
@@ -97,7 +102,7 @@ export class SignInService {
 
     // Apple only sends name on first sign-in — use client-provided name if
     // claims don't have it (can happen when client sends it separately)
-    if (!claims!.name && name) {
+    if (!claims?.name && name) {
       const parts = [name.given_name, name.family_name].filter(Boolean)
       if (parts.length > 0) claims!.name = parts.join(" ")
     }
@@ -119,8 +124,9 @@ export class SignInService {
     claims: ProviderTokenClaims
     surface: SignInSurface
     device_label?: string
+    session?: ParsedSessionMetadata
   }): Promise<{ response: SignInResponse; refreshToken: string }> {
-    const { provider, claims, surface, device_label } = input
+    const { provider, claims, surface, device_label, session } = input
     const accountType = this.surfaceToAccountType(surface)
     const emailNormalized = claims.email.trim().toLowerCase().normalize("NFC")
 
@@ -198,42 +204,149 @@ export class SignInService {
     }
 
     // ------------------------------------------------------------------
-    // 4. Issue tokens
+    // 4. Issue tokens (or defer for 2FA)
     // ------------------------------------------------------------------
+
+    return this.issueSessionForAccount({
+      account,
+      surface,
+      device_label,
+      session,
+      accountRestored,
+      isNewAccount,
+      provider,
+    })
+  }
+
+  async completeMfaSignIn(input: {
+    mfa_token: string
+    code: string
+    surface: SignInSurface
+    device_label?: string
+    session?: ParsedSessionMetadata
+  }): Promise<{ response: SignInResponse; refreshToken: string }> {
+    const accountId = await this.securityService.verifyMfaCode(
+      input.mfa_token,
+      input.code
+    )
+
+    const account = await this.prisma.account.findUniqueOrThrow({
+      where: { id: accountId },
+    })
+
+    return this.issueSessionForAccount({
+      account,
+      surface: input.surface,
+      device_label: input.device_label,
+      session: input.session,
+      accountRestored: false,
+      isNewAccount: false,
+      mfaVerified: true,
+    })
+  }
+
+  async issueSessionForAccount(input: {
+    account: Account
+    surface: SignInSurface
+    device_label?: string
+    session?: ParsedSessionMetadata
+    accountRestored?: boolean
+    isNewAccount?: boolean
+    provider?: OAuthProvider
+    mfaVerified?: boolean
+  }): Promise<{ response: SignInResponse; refreshToken: string }> {
+    const {
+      account,
+      surface,
+      device_label,
+      session,
+      accountRestored = false,
+      isNewAccount = false,
+      provider,
+      mfaVerified = false,
+    } = input
+    const accountType = account.accountType as AccountType
+
+    if (!mfaVerified && this.securityService.requiresMfa(account)) {
+      const response: SignInResponse = {
+        access_token: "",
+        requires_2fa: true,
+        mfa_token: this.securityService.issueMfaToken(account.id),
+        account_type: "creator",
+        account_state: this.toAccountState(account.status),
+        display_name: account.displayName,
+        needs_consent: account.needsConsent,
+        account_restored: accountRestored,
+        email: account.email,
+      }
+
+      return { response, refreshToken: "" }
+    }
 
     const accessToken = this.authService.issueAccessToken({
       account_id: account.id,
       account_type: accountType,
-      role: null, // users and creators carry no role
+      role: null,
     })
 
     const refreshToken = await this.refreshTokenService.issueRefreshToken({
       account_id: account.id,
       device_label,
+      session: {
+        ...session,
+        surface: session?.surface ?? surface,
+      },
       ttl_seconds: surface === "mobile" ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60,
     })
 
-    this.logger.log({
-      event: "sign_in_success",
-      account_id: account.id,
-      account_type: accountType,
-      provider,
-      surface,
-      is_new: isNewAccount,
-      restored: accountRestored,
-    })
+    if (provider) {
+      this.logger.log({
+        event: "sign_in_success",
+        account_id: account.id,
+        account_type: accountType,
+        provider,
+        surface,
+        is_new: isNewAccount,
+        restored: accountRestored,
+      })
+    }
 
     const response: SignInResponse = {
       access_token: accessToken,
-      account_type: accountType as any,
+      account_type: accountType as "user" | "creator",
       account_state: this.toAccountState(account.status),
       display_name: account.displayName,
-      needs_consent: (account as any).needsConsent ?? isNewAccount,
+      needs_consent: account.needsConsent ?? isNewAccount,
       account_restored: accountRestored,
       email: account.email,
     }
 
     return { response, refreshToken }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Session metadata — for client bootstrap after token refresh
+  // ---------------------------------------------------------------------------
+
+  async getSessionMetadata(
+    accountId: string
+  ): Promise<Omit<SignInResponse, "access_token" | "refresh_token">> {
+    const account = await this.prisma.account.findUnique({
+      where: { id: accountId },
+    })
+
+    if (!account) {
+      throw new UnauthorizedException("Account not found")
+    }
+
+    return {
+      account_type: account.accountType as "user" | "creator",
+      account_state: this.toAccountState(account.status),
+      display_name: account.displayName,
+      needs_consent: account.needsConsent,
+      account_restored: false,
+      email: account.email,
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -276,7 +389,7 @@ export class SignInService {
   }
 
   get refreshCookieName() {
-    return REFRESH_COOKIE_NAME
+    return REFRESH_COOKIE_NAME_CREATOR
   }
 
   // ---------------------------------------------------------------------------
@@ -290,6 +403,7 @@ export class SignInService {
   private toAccountState(status: string): AccountState {
     const valid: AccountState[] = [
       "active",
+      "onboarding",
       "pending_approval",
       "suspended",
       "rejected",

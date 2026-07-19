@@ -1,5 +1,6 @@
-import { Injectable, Logger } from "@nestjs/common"
+import { Injectable } from "@nestjs/common"
 import { ProviderTokenError, ProviderTokenErrorCode } from "@sable/contracts"
+import { CustomLogger } from "@sable/logger"
 
 // TODO(KAN-53): propagate W3C tracecontext on outbound JWKS fetch requests
 
@@ -22,7 +23,7 @@ interface CacheEntry {
 
 @Injectable()
 export class JwksCacheService {
-  private readonly logger = new Logger(JwksCacheService.name)
+  private readonly logger = new CustomLogger(JwksCacheService.name)
   private readonly cache = new Map<string, CacheEntry>()
 
   /**

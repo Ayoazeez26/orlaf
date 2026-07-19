@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { ArrowLeft } from "lucide-react"
+import { useApplicationQuery } from "@/features/onboarding/api/onboarding-hooks"
 import { ApplicationDetailPage } from "@/features/onboarding/components/detail/application-detail-page"
-import { getApplicationDetail } from "@/features/onboarding/data/application-details"
+import { toApplicationDetail } from "@/features/onboarding/data/map-onboarding"
 import { WorkspaceSectionGate } from "@/features/workspaces/components/workspace-section-gate"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
 
@@ -32,9 +33,17 @@ function ApplicationDetailContent({
   role: WorkspaceRoleId
   applicationId: string
 }) {
-  const application = getApplicationDetail(applicationId)
+  const { data, isPending, isError, error } = useApplicationQuery(applicationId)
 
-  if (!application) {
+  if (isPending) {
+    return (
+      <div className="p-4 text-muted-foreground text-sm sm:p-6 lg:p-8">
+        Loading application…
+      </div>
+    )
+  }
+
+  if (isError || !data) {
     return (
       <div className="space-y-4 p-4 sm:p-6 lg:p-8">
         <Link
@@ -46,7 +55,9 @@ function ApplicationDetailContent({
           Back to Onboarding
         </Link>
         <p className="text-muted-foreground text-sm">
-          We couldn&apos;t find that application.
+          {error instanceof Error
+            ? error.message
+            : "We couldn't find that application."}
         </p>
       </div>
     )
@@ -54,7 +65,10 @@ function ApplicationDetailContent({
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <ApplicationDetailPage application={application} role={role} />
+      <ApplicationDetailPage
+        application={toApplicationDetail(data)}
+        role={role}
+      />
     </div>
   )
 }

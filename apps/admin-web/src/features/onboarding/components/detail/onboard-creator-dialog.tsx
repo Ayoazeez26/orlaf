@@ -9,13 +9,20 @@ import { useModalShell } from "./use-modal-shell"
 const DEFAULT_NOTE =
   "We loved your work and would love to have you on Sable TV."
 
+export interface OnboardCreatorPayload {
+  firstName: string
+  lastName: string
+  email: string
+  note: string
+}
+
 interface OnboardCreatorDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   defaultFirstName?: string
   defaultLastName?: string
   defaultEmail?: string
-  onConfirm?: () => void
+  onConfirm?: (payload: OnboardCreatorPayload) => void | Promise<void>
 }
 
 export function OnboardCreatorDialog({
@@ -30,6 +37,8 @@ export function OnboardCreatorDialog({
   const [lastName, setLastName] = useState(defaultLastName)
   const [email, setEmail] = useState(defaultEmail)
   const [note, setNote] = useState(DEFAULT_NOTE)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -37,15 +46,35 @@ export function OnboardCreatorDialog({
     setLastName(defaultLastName)
     setEmail(defaultEmail)
     setNote(DEFAULT_NOTE)
+    setSubmitting(false)
+    setError(null)
   }, [open, defaultFirstName, defaultLastName, defaultEmail])
 
   useModalShell(open, onOpenChange)
 
   if (!open) return null
 
-  function handleConfirm() {
-    onConfirm?.()
-    onOpenChange(false)
+  async function handleConfirm() {
+    if (!email.trim()) {
+      setError("Email is required.")
+      return
+    }
+
+    setSubmitting(true)
+    setError(null)
+    try {
+      await onConfirm?.({
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim(),
+        note: note.trim(),
+      })
+      onOpenChange(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send invite.")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -129,6 +158,12 @@ export function OnboardCreatorDialog({
               rows={4}
             />
           </div>
+
+          {error ? (
+            <p className="text-destructive text-sm" role="alert">
+              {error}
+            </p>
+          ) : null}
         </div>
 
         <div className="flex items-center justify-end gap-3 border-border border-t px-6 py-4">
@@ -136,12 +171,18 @@ export function OnboardCreatorDialog({
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
+            disabled={submitting}
           >
             Cancel
           </Button>
-          <Button type="button" className="gap-2" onClick={handleConfirm}>
+          <Button
+            type="button"
+            className="gap-2"
+            onClick={handleConfirm}
+            disabled={submitting}
+          >
             <Send className="size-4" aria-hidden />
-            Send invite
+            {submitting ? "Sending…" : "Send invite"}
           </Button>
         </div>
       </div>

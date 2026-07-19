@@ -1,7 +1,11 @@
 import type { LucideIcon } from "lucide-react"
 import type { AnalyticsKpi, TopEpisodeRow } from "@/features/analytics/types"
 
-export type DashboardProjectStatus = "published" | "draft" | "in_review"
+export type DashboardProjectStatus =
+  | "published"
+  | "draft"
+  | "in_review"
+  | "rejected"
 
 export type DashboardProjectIconVariant = "purple" | "pink" | "blue"
 
