@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "installCommand": "cd ../.. && pnpm install --filter @orlaf/creator-web...",
-  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@orlaf/creator-web"
+  "buildCommand": "cd ../.. && pnpm turbo run build --filter=@orlaf/creator-web",
+  "outputDirectory": ".vercel/output"
 }

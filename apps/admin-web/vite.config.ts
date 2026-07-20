@@ -5,11 +5,30 @@ import viteTsConfigPaths from "vite-tsconfig-paths"
 import tailwindcss from "@tailwindcss/vite"
 import { nitro } from "nitro/vite"
 
+function resolveBackendUrl(mode: string, env: Record<string, string>) {
+  const backendUrl = (
+    env.VITE_API_BASE_URL ??
+    process.env.VITE_API_BASE_URL ??
+    "http://localhost:3000"
+  ).replace(/\/+$/, "")
+
+  const isProductionBuild = mode === "production" || process.env.VERCEL === "1"
+  if (
+    isProductionBuild &&
+    (backendUrl.includes("localhost") || backendUrl.includes("127.0.0.1"))
+  ) {
+    throw new Error(
+      "VITE_API_BASE_URL must be set to your deployed backend URL for production builds. " +
+        "On Vercel, add it under Project Settings → Environment Variables, then redeploy."
+    )
+  }
+
+  return backendUrl
+}
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "")
-  const backendUrl = (
-    env.VITE_API_BASE_URL ?? "http://localhost:3000"
-  ).replace(/\/+$/, "")
+  const backendUrl = resolveBackendUrl(mode, env)
 
   return {
     plugins: [
