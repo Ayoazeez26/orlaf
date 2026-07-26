@@ -2,9 +2,12 @@ export const ANALYTICS_DATE_RANGE_OPTIONS = [
   "Last 7 days",
   "Last 30 days",
   "Last 90 days",
-] as const
+] as const satisfies ReadonlyArray<
+  import("./types").AnalyticsDateRangeLabel
+>
 
-export const DEFAULT_ANALYTICS_DATE_RANGE = "Last 30 days"
+export const DEFAULT_ANALYTICS_DATE_RANGE =
+  "Last 30 days" as import("./types").AnalyticsDateRangeLabel
 
 /** Avoid full-width period selects on mobile; use on page headers and cards */
 export const DATE_RANGE_SELECT_TRIGGER_CLASS =

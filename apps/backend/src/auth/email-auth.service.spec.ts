@@ -94,6 +94,7 @@ describe("EmailAuthService", () => {
       lastName: "Doe",
       email: "jane@example.com",
       password: "secret12",
+      surface: "creator-web",
     })
 
     expect(result.verification_id).toBe("ev_1")
@@ -101,9 +102,41 @@ describe("EmailAuthService", () => {
     expect(mockPrisma.account.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({
+          accountType: "creator",
           status: "email_unverified",
           provider: "email",
           needsConsent: true,
+        }),
+      })
+    )
+  })
+
+  it("creates an unverified user account for mobile sign-up", async () => {
+    mockAccountService.findByEmail.mockResolvedValue(null)
+    mockPrisma.account.create.mockResolvedValue({
+      id: "acc_user",
+      email: "viewer@example.com",
+    })
+    mockPrisma.emailVerification.create.mockResolvedValue({ id: "ev_user" })
+
+    const result = await service.signUp({
+      firstName: "Ada",
+      lastName: "Viewer",
+      email: "viewer@example.com",
+      password: "secret12",
+      surface: "mobile",
+    })
+
+    expect(result.verification_id).toBe("ev_user")
+    expect(mockAccountService.findByEmail).toHaveBeenCalledWith(
+      "user",
+      "viewer@example.com"
+    )
+    expect(mockPrisma.account.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          accountType: "user",
+          status: "email_unverified",
         }),
       })
     )
@@ -132,6 +165,28 @@ describe("EmailAuthService", () => {
         verification_id: "ev_1",
       }),
     })
+  })
+
+  it("looks up user accounts for mobile surface", async () => {
+    mockAccountService.findByEmail.mockResolvedValue({
+      id: "acc_user",
+      provider: "email",
+      passwordHash: "salt:hash",
+      emailVerifiedAt: new Date(),
+      status: "active",
+    })
+    mockAccountService.verifyPassword.mockResolvedValue(true)
+
+    await service.signIn({
+      email: "viewer@example.com",
+      password: "secret12",
+      surface: "mobile",
+    })
+
+    expect(mockAccountService.findByEmail).toHaveBeenCalledWith(
+      "user",
+      "viewer@example.com"
+    )
   })
 
   it("rejects sign-in with invalid credentials", async () => {

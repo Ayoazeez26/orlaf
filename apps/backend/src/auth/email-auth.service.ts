@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   GoneException,
@@ -42,7 +43,16 @@ export class EmailAuthService {
   ) {}
 
   async signUp(input: EmailSignUpBody): Promise<EmailSignUpResponse> {
+    const surface = input.surface ?? "creator-web"
+    const accountType =
+      surface === "mobile" ? AccountType.USER : AccountType.CREATOR
+
     if (input.invite_token) {
+      if (accountType !== AccountType.CREATOR) {
+        throw new BadRequestException({
+          message: "Invite tokens are only valid for creator sign-up.",
+        })
+      }
       await this.creatorInvitesService.assertValidForSignup(
         input.invite_token,
         input.email
@@ -54,7 +64,7 @@ export class EmailAuthService {
       `${input.firstName.trim()} ${input.lastName.trim()}`.trim()
 
     const existing = await this.accountService.findByEmail(
-      AccountType.CREATOR,
+      accountType,
       input.email
     )
 
@@ -98,7 +108,7 @@ export class EmailAuthService {
     const passwordHash = await this.accountService.hashPassword(input.password)
     const account = await this.prisma.account.create({
       data: {
-        accountType: AccountType.CREATOR,
+        accountType,
         email: input.email.trim(),
         emailNormalized,
         provider: OAuthProvider.EMAIL,
@@ -115,6 +125,8 @@ export class EmailAuthService {
     this.logger.log({
       event: "email_sign_up_created",
       account_id: account.id,
+      account_type: accountType,
+      surface,
     })
 
     const verification = await this.createAndSendVerification(account)
@@ -170,6 +182,11 @@ export class EmailAuthService {
     }
 
     const now = new Date()
+    const verifiedStatus =
+      verification.account.accountType === AccountType.USER
+        ? "active"
+        : "onboarding"
+
     await this.prisma.$transaction([
       this.prisma.emailVerification.update({
         where: { id: verification.id },
@@ -179,7 +196,7 @@ export class EmailAuthService {
         where: { id: verification.accountId },
         data: {
           emailVerifiedAt: now,
-          status: "onboarding",
+          status: verifiedStatus,
         },
       }),
     ])
@@ -282,8 +299,11 @@ export class EmailAuthService {
   async signIn(
     input: EmailSignInBody & { session?: ParsedSessionMetadata }
   ): Promise<{ response: SignInResponse; refreshToken: string }> {
+    const accountType =
+      input.surface === "mobile" ? AccountType.USER : AccountType.CREATOR
+
     const account = await this.accountService.findByEmail(
-      AccountType.CREATOR,
+      accountType,
       input.email
     )
 

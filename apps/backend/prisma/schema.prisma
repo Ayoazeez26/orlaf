@@ -112,6 +112,12 @@ model Account {
   emailVerifications   EmailVerification[]
   creatorProfile       CreatorProfile?
   watchlistEntries     WatchlistEntry[]
+  downloadEntries      DownloadEntry[]
+  seriesLikes          SeriesLike[]
+  comments             Comment[]
+  commentLikes         CommentLike[]
+  shareEvents          ShareEvent[]
+  playbackSessions     PlaybackSession[]
   adminInvitesSent     AdminInvite[] @relation("AdminInvitesSent")
   creatorInvitesSent   CreatorInvite[] @relation("CreatorInvitesSent")
   adminSeriesActions   Series[]      @relation("SeriesAdminActions")
@@ -365,6 +371,11 @@ model Series {
   adminActionBy Account? @relation("SeriesAdminActions", fields: [adminActionById], references: [id])
   episodes Episode[]
   watchlistEntries WatchlistEntry[]
+  downloadEntries  DownloadEntry[]
+  seriesLikes SeriesLike[]
+  comments Comment[]
+  shareEvents ShareEvent[]
+  playbackSessions PlaybackSession[]
   seriesGenres SeriesGenre[]
 
   defaultAccessType AccessType @default(free) @map("default_access_type")
@@ -435,6 +446,8 @@ model Episode {
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
   series Series @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  playbackSessions PlaybackSession[]
+  downloadEntries  DownloadEntry[]
 
   autoReframeTo916   Boolean  @default(true)  @map("auto_reframe_to_916")
   autoCaptionEnabled Boolean  @default(true)  @map("auto_caption_enabled")
@@ -457,4 +470,148 @@ model WatchlistEntry {
   @@unique([accountId, seriesId])
   @@index([accountId, savedAt])
   @@map("watchlist_entries")
+}
+
+enum DownloadStatus {
+  queued
+  downloading
+  ready
+  failed
+
+  @@map("download_status")
+}
+
+enum DownloadQuality {
+  standard
+  high
+  full_hd
+
+  @@map("download_quality")
+}
+
+/**
+ * Per-user download tracking. Quality is a preference for when multi-rendition
+ * offline packs exist; today inventory is adaptive HLS only.
+ */
+model DownloadEntry {
+  id               String          @id @default(cuid())
+  accountId        String          @map("account_id")
+  seriesId         String          @map("series_id")
+  episodeId        String          @map("episode_id")
+  quality          DownloadQuality @default(full_hd)
+  status           DownloadStatus  @default(queued)
+  progress         Int             @default(0)
+  estimatedBytes   BigInt?         @map("estimated_bytes")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+  completedAt      DateTime?       @map("completed_at")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  series  Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, episodeId, quality])
+  @@index([accountId, createdAt])
+  @@index([seriesId])
+  @@map("download_entries")
+}
+
+model SeriesLike {
+  id        String   @id @default(cuid())
+  accountId String   @map("account_id")
+  seriesId  String   @map("series_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  series  Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, seriesId])
+  @@index([seriesId])
+  @@index([accountId, createdAt])
+  @@map("series_likes")
+}
+
+model Comment {
+  id        String    @id @default(cuid())
+  seriesId  String    @map("series_id")
+  accountId String    @map("account_id")
+  parentId  String?   @map("parent_id")
+  body      String
+  pinnedAt  DateTime? @map("pinned_at")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  series  Series        @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  account Account       @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  parent  Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[]     @relation("CommentReplies")
+  likes   CommentLike[]
+
+  @@index([seriesId, parentId, createdAt])
+  @@index([accountId])
+  @@map("comments")
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  accountId String   @map("account_id")
+  commentId String   @map("comment_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, commentId])
+  @@index([commentId])
+  @@map("comment_likes")
+}
+
+model ShareEvent {
+  id        String   @id @default(cuid())
+  seriesId  String   @map("series_id")
+  accountId String?  @map("account_id")
+  channel   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  series  Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  account Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+
+  @@index([seriesId, createdAt])
+  @@index([channel])
+  @@map("share_events")
+}
+
+/// One mutable row per watch attempt. Heartbeats UPDATE watchedSeconds /
+/// maxPositionSeconds / lastHeartbeatAt — do not index those columns.
+model PlaybackSession {
+  id                 String    @id @default(cuid())
+  episodeId          String    @map("episode_id")
+  seriesId           String    @map("series_id")
+  creatorId          String    @map("creator_id")
+  accountId          String?   @map("account_id")
+  anonId             String?   @map("anon_id")
+  deviceType         String    @map("device_type")
+  platform           String?
+  appVersion         String?   @map("app_version")
+  source             String?
+  startedAt          DateTime  @default(now()) @map("started_at")
+  lastHeartbeatAt    DateTime  @default(now()) @map("last_heartbeat_at")
+  endedAt            DateTime? @map("ended_at")
+  watchedSeconds     Int       @default(0) @map("watched_seconds")
+  maxPositionSeconds Int       @default(0) @map("max_position_seconds")
+  durationSeconds    Int?      @map("duration_seconds")
+  completed          Boolean   @default(false)
+  countedAsView      Boolean   @default(false) @map("counted_as_view")
+
+  episode Episode  @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  series  Series   @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+  account Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+
+  @@index([creatorId, startedAt])
+  @@index([episodeId, startedAt])
+  @@index([seriesId, startedAt])
+  @@index([accountId, startedAt])
+  @@index([anonId, startedAt])
+  @@map("playback_sessions")
 }

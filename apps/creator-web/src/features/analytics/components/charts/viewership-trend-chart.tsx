@@ -1,5 +1,3 @@
-import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
-import { cn } from "@workspace/ui/lib/utils"
 import {
   Area,
   AreaChart,
@@ -10,6 +8,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
+import { cn } from "@workspace/ui/lib/utils"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
 import {
   ANALYTICS_CHART_AXIS_LINE,
@@ -38,7 +38,7 @@ export function ViewershipTrendChart({
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={ANALYTICS_CHART_MARGIN}>
             <defs>
-              <linearGradient id="mobileTrendFill" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="viewsTrendFill" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="0%"
                   stopColor={DEVICE_CHART_COLORS.mobile}
@@ -50,7 +50,7 @@ export function ViewershipTrendChart({
                   stopOpacity={0}
                 />
               </linearGradient>
-              <linearGradient id="desktopTrendFill" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="uniqueTrendFill" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="0%"
                   stopColor={DEVICE_CHART_COLORS.desktop}
@@ -69,7 +69,7 @@ export function ViewershipTrendChart({
               className="stroke-border"
             />
             <XAxis
-              dataKey="month"
+              dataKey="label"
               axisLine={ANALYTICS_CHART_AXIS_LINE}
               tickLine={ANALYTICS_CHART_AXIS_LINE}
               tick={ANALYTICS_CHART_TICK}
@@ -98,19 +98,19 @@ export function ViewershipTrendChart({
             />
             <Area
               type="monotone"
-              dataKey="mobile"
-              name="Mobile"
+              dataKey="views"
+              name="Views"
               stroke={DEVICE_CHART_COLORS.mobile}
               strokeWidth={2}
-              fill="url(#mobileTrendFill)"
+              fill="url(#viewsTrendFill)"
             />
             <Area
               type="monotone"
-              dataKey="desktop"
-              name="Desktop"
+              dataKey="unique"
+              name="Unique"
               stroke={DEVICE_CHART_COLORS.desktop}
               strokeWidth={2}
-              fill="url(#desktopTrendFill)"
+              fill="url(#uniqueTrendFill)"
             />
           </AreaChart>
         </ResponsiveContainer>

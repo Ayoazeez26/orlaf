@@ -25,6 +25,11 @@ export class EmailSignUpDto {
   @MinLength(6)
   password!: string
 
+  @ApiProperty({ enum: ["mobile", "creator-web"], required: false })
+  @IsEnum(["mobile", "creator-web"])
+  @IsOptional()
+  surface?: "mobile" | "creator-web"
+
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()

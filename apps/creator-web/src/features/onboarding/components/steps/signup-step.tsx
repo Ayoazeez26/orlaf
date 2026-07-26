@@ -58,6 +58,7 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
       lastName: values.lastName,
       email: values.email,
       password: values.password,
+      surface: "creator-web",
       ...(data.inviteToken ? { invite_token: data.inviteToken } : {}),
     })
 

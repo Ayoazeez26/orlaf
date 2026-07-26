@@ -2,7 +2,7 @@ import { cn } from "@workspace/ui/lib/utils"
 import { ArrowDownRight, ArrowUpRight } from "lucide-react"
 
 interface TrendBadgeProps {
-  changePercent: number
+  changePercent: number | null | undefined
   variant?: "default" | "compact" | "inline"
   className?: string
 }
@@ -12,6 +12,10 @@ export function TrendBadge({
   variant = "default",
   className,
 }: TrendBadgeProps) {
+  if (changePercent == null || Number.isNaN(changePercent)) {
+    return null
+  }
+
   const isPositive = changePercent >= 0
   const Icon = isPositive ? ArrowUpRight : ArrowDownRight
   const absValue = Math.abs(changePercent).toFixed(1)

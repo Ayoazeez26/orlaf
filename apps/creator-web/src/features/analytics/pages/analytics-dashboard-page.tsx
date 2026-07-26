@@ -1,18 +1,24 @@
+import { useState } from "react"
 import { AnalyticsPageHeader } from "../components/analytics-page-header"
 import { AnalyticsPageSkeleton } from "../components/analytics-page-skeleton"
 import { DevicesDonutChart } from "../components/charts/devices-donut-chart"
-import { EngagementByDeviceChart } from "../components/charts/engagement-by-device-chart"
+import { EngagementChart } from "../components/charts/engagement-chart"
 import { ViewershipTrendChart } from "../components/charts/viewership-trend-chart"
 import { AnalyticsMetricCard } from "../components/shared/analytics-metric-card"
 import { TopEpisodesList } from "../components/top-episodes-list"
+import { DEFAULT_ANALYTICS_DATE_RANGE } from "../constants"
 import { useAnalyticsDashboard } from "../hooks/use-analytics-dashboard"
+import type { AnalyticsDateRangeLabel } from "../types"
 
 export function AnalyticsDashboardPage() {
-  const { data, isLoading, isError } = useAnalyticsDashboard()
+  const [period, setPeriod] = useState<AnalyticsDateRangeLabel>(
+    DEFAULT_ANALYTICS_DATE_RANGE
+  )
+  const { data, isLoading, isError } = useAnalyticsDashboard(period)
 
   return (
     <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
-      <AnalyticsPageHeader />
+      <AnalyticsPageHeader period={period} onPeriodChange={setPeriod} />
 
       {isLoading && <AnalyticsPageSkeleton />}
 
@@ -39,8 +45,8 @@ export function AnalyticsDashboardPage() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            <EngagementByDeviceChart
-              data={data.engagementByDevice}
+            <EngagementChart
+              data={data.engagement}
               className="lg:col-span-2"
             />
             <TopEpisodesList episodes={data.topEpisodes} />

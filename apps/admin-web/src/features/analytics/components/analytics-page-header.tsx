@@ -1,7 +1,25 @@
-import { Button } from "@workspace/ui/components/button"
-import { ChevronDown } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select"
+import {
+  ANALYTICS_DATE_RANGE_OPTIONS,
+  DATE_RANGE_SELECT_TRIGGER_HEADER_CLASS,
+} from "../constants"
+import type { AnalyticsDateRangeLabel } from "../types"
 
-export function AnalyticsPageHeader() {
+interface AnalyticsPageHeaderProps {
+  period: AnalyticsDateRangeLabel
+  onPeriodChange: (period: AnalyticsDateRangeLabel) => void
+}
+
+export function AnalyticsPageHeader({
+  period,
+  onPeriodChange,
+}: AnalyticsPageHeaderProps) {
   return (
     <div className="flex flex-wrap items-start justify-between gap-4">
       <div>
@@ -12,10 +30,27 @@ export function AnalyticsPageHeader() {
           Revenue, growth, retention and content performance at a glance.
         </p>
       </div>
-      <Button type="button" variant="outline" className="shrink-0 gap-2">
-        Last 30 days
-        <ChevronDown className="size-4" aria-hidden />
-      </Button>
+      <Select
+        value={period}
+        onValueChange={(value) =>
+          onPeriodChange(value as AnalyticsDateRangeLabel)
+        }
+      >
+        <SelectTrigger
+          size="sm"
+          aria-label="Date range"
+          className={DATE_RANGE_SELECT_TRIGGER_HEADER_CLASS}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {ANALYTICS_DATE_RANGE_OPTIONS.map((opt) => (
+            <SelectItem key={opt} value={opt}>
+              {opt}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   )
 }

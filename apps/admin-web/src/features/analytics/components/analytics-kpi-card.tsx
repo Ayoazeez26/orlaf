@@ -10,7 +10,8 @@ interface AnalyticsKpiCardProps {
 
 export function AnalyticsKpiCard({ kpi }: AnalyticsKpiCardProps) {
   const Icon = kpi.icon
-  const isPositive = kpi.changePercent >= 0
+  const hasChange = kpi.changePercent != null && !Number.isNaN(kpi.changePercent)
+  const isPositive = (kpi.changePercent ?? 0) >= 0
   const TrendIcon = isPositive ? ArrowUpRight : ArrowDownRight
   const trendColor = isPositive ? "text-trend-positive" : "text-trend-negative"
 
@@ -30,17 +31,21 @@ export function AnalyticsKpiCard({ kpi }: AnalyticsKpiCardProps) {
           {kpi.value}
         </p>
 
-        <p className="flex flex-wrap items-center gap-1 text-sm">
-          <TrendIcon
-            className={cn("size-4 shrink-0", trendColor)}
-            aria-hidden
-          />
-          <span className={cn("font-medium", trendColor)}>
-            {isPositive ? "+" : "-"}
-            {Math.abs(kpi.changePercent).toFixed(1)}%
-          </span>
-          <span className="text-muted-foreground">vs last period</span>
-        </p>
+        {hasChange ? (
+          <p className="flex flex-wrap items-center gap-1 text-sm">
+            <TrendIcon
+              className={cn("size-4 shrink-0", trendColor)}
+              aria-hidden
+            />
+            <span className={cn("font-medium", trendColor)}>
+              {isPositive ? "+" : "-"}
+              {Math.abs(kpi.changePercent!).toFixed(1)}%
+            </span>
+            <span className="text-muted-foreground">vs last period</span>
+          </p>
+        ) : (
+          <p className="text-muted-foreground text-sm">No prior period</p>
+        )}
       </CardContent>
     </Card>
   )

@@ -1,9 +1,15 @@
 import type { LucideIcon } from "lucide-react"
 
+export type AnalyticsDateRangeLabel =
+  | "Last 7 days"
+  | "Last 30 days"
+  | "Last 90 days"
+
 export interface AnalyticsKpi {
   label: string
   value: string
-  changePercent: number
+  /** Null when there is no prior period to compare against. */
+  changePercent: number | null
   icon: LucideIcon
 }
 

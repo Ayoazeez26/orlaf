@@ -3,6 +3,7 @@ import { VIDEO_HOSTING_PROVIDER } from "@sable/contracts"
 import { CloudflareStreamProvider } from "src/providers/cloudflare-stream.provider"
 import { R2StorageProvider } from "src/providers/r2-storage.provider"
 import { EpisodeService } from "./episode.service"
+import { AnalyticsService } from "./analytics.service"
 import { SeriesService } from "./series.service"
 import { StudioController } from "./studio.controller"
 import { StudioPublicController } from "./studio-public.controller"
@@ -29,6 +30,7 @@ import { StudioPublicController } from "./studio-public.controller"
   providers: [
     SeriesService,
     EpisodeService,
+    AnalyticsService,
     R2StorageProvider,
     {
       provide: VIDEO_HOSTING_PROVIDER,

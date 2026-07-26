@@ -182,7 +182,7 @@ export class AuthController {
   @ApiOperation({
     summary: "Sign up with email",
     description:
-      "Creates an unverified creator account and sends a 6-digit OTP via email.",
+      "Creates an unverified account and sends a 6-digit OTP. Use `surface=mobile` for viewer accounts, or omit / `creator-web` for creators.",
   })
   @ApiResponse({ status: 201, description: "Verification email sent" })
   @ApiResponse({ status: 409, description: "Email already registered" })
@@ -263,7 +263,7 @@ export class AuthController {
   @ApiOperation({
     summary: "Sign in with email and password",
     description:
-      "Creator email sign-in. Unverified accounts receive 403 with verification_id.",
+      "Email/password sign-in. `surface=mobile` looks up viewer (user) accounts; `surface=creator-web` looks up creator accounts. Unverified accounts receive 403 with verification_id.",
   })
   @ApiResponse({ status: 200, description: "Sign-in successful" })
   @ApiResponse({ status: 401, description: "Invalid credentials" })

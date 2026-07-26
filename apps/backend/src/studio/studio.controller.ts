@@ -30,7 +30,9 @@ import {
   UpdateSeriesDto,
   UpdateSeriesSettingsDto,
 } from "./dto/studio.dto"
+import { AnalyticsOverviewQueryDto } from "./dto/analytics.dto"
 import { GetImageUploadUrlDto, GetVideoUploadUrlDto } from "./dto/upload.dto"
+import { AnalyticsService } from "./analytics.service"
 import { EpisodeService } from "./episode.service"
 import { SeriesService } from "./series.service"
 
@@ -41,8 +43,32 @@ import { SeriesService } from "./series.service"
 export class StudioController {
   constructor(
     private readonly seriesService: SeriesService,
-    private readonly episodeService: EpisodeService
+    private readonly episodeService: EpisodeService,
+    private readonly analyticsService: AnalyticsService
   ) {}
+
+  // ---------------------------------------------------------------------------
+  // Creator analytics
+  // ---------------------------------------------------------------------------
+
+  @Get("analytics/overview")
+  @ApiOperation({
+    summary: "Creator analytics overview for the Analytics dashboard",
+  })
+  @ApiQuery({
+    name: "range",
+    required: false,
+    enum: ["7d", "30d", "90d"],
+  })
+  async getAnalyticsOverview(
+    @Req() req: Request & { user: AccessTokenClaims },
+    @Query() query: AnalyticsOverviewQueryDto
+  ) {
+    return this.analyticsService.getOverview(
+      req.user.sub,
+      query.range ?? "30d"
+    )
+  }
 
   // ---------------------------------------------------------------------------
   // General uploads (no series required — wizard create flow)

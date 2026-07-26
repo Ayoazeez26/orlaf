@@ -1,3 +1,4 @@
+import { useState } from "react"
 import {
   Select,
   SelectContent,
@@ -5,16 +6,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select"
-import { useState } from "react"
 import {
   ANALYTICS_DATE_RANGE_OPTIONS,
   DATE_RANGE_SELECT_TRIGGER_HEADER_CLASS,
   DEFAULT_ANALYTICS_DATE_RANGE,
 } from "../constants"
+import type { AnalyticsDateRangeLabel } from "../types"
 
-export function AnalyticsPageHeader() {
-  const [period, setPeriod] = useState(DEFAULT_ANALYTICS_DATE_RANGE)
+interface AnalyticsPageHeaderProps {
+  period: AnalyticsDateRangeLabel
+  onPeriodChange: (period: AnalyticsDateRangeLabel) => void
+}
 
+export function AnalyticsPageHeader({
+  period,
+  onPeriodChange,
+}: AnalyticsPageHeaderProps) {
   return (
     <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-start sm:justify-between">
       <div>
@@ -23,7 +30,12 @@ export function AnalyticsPageHeader() {
           Track performance across all your series
         </p>
       </div>
-      <Select value={period} onValueChange={setPeriod}>
+      <Select
+        value={period}
+        onValueChange={(value) =>
+          onPeriodChange(value as AnalyticsDateRangeLabel)
+        }
+      >
         <SelectTrigger
           size="sm"
           aria-label="Date range"
@@ -41,4 +53,11 @@ export function AnalyticsPageHeader() {
       </Select>
     </div>
   )
+}
+
+/** Convenience wrapper if a page wants local period state */
+export function useAnalyticsPeriodState(
+  initial: AnalyticsDateRangeLabel = DEFAULT_ANALYTICS_DATE_RANGE
+) {
+  return useState<AnalyticsDateRangeLabel>(initial)
 }

@@ -140,6 +140,8 @@ export interface CatalogFeedItem {
   id: string
   seriesId: string
   seriesTitle: string
+  /** Studio / creator display name when available */
+  creatorName: string | null
   title: string
   synopsis: string | null
   thumbnailUrl: string | null
@@ -159,6 +161,49 @@ export interface CatalogEpisodeDetail {
   durationSeconds: number | null
   accessType: EpisodeAccessType
   trailerUrl: string | null
+}
+
+/**
+ * Home tab collections. Ranked tabs use engagement; editorial tabs filter
+ * `Series.tags` (creators/admins should set these tags on publish).
+ *
+ * Tag conventions:
+ * - old-nollywood → `old-nollywood` | `nollywood`
+ * - ai-films → `ai-films` | `ai`
+ * - sable-originals → `sable-originals` | `sable-original`
+ */
+export const CATALOG_COLLECTION_KEYS = [
+  "featured",
+  "trending",
+  "new",
+  "popular",
+  "old-nollywood",
+  "ai-films",
+  "sable-originals",
+] as const
+
+export type CatalogCollectionKey = (typeof CATALOG_COLLECTION_KEYS)[number]
+
+export interface CatalogCollectionSeries {
+  id: string
+  title: string
+  synopsis: string | null
+  type: SeriesType
+  genres: string[]
+  tags: string[]
+  posterUrl: string | null
+  publishedAt: string | null
+  episodeCount: number
+  creatorName: string | null
+  /** Windowed view count when the collection is engagement-ranked. */
+  viewCount: number | null
+}
+
+export interface CatalogCollectionResponse {
+  key: CatalogCollectionKey
+  title: string
+  description: string
+  items: CatalogCollectionSeries[]
 }
 
 /** Seed list for the genres table — runtime catalog reads from the database. */

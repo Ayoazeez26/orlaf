@@ -15,15 +15,16 @@ export type AnalyticsKpiIcon =
 export interface AnalyticsKpi {
   label: string
   value: string
-  changePercent?: number
+  changePercent?: number | null
   footnote?: string
   icon: AnalyticsKpiIcon
 }
 
 export interface ViewershipTrendPoint {
-  month: string
-  mobile: number
-  desktop: number
+  bucket: string
+  label: string
+  views: number
+  unique: number
 }
 
 export interface DeviceSegment {
@@ -32,11 +33,12 @@ export interface DeviceSegment {
   percent: number
 }
 
-export interface EngagementByDevicePoint {
-  month: string
-  mobile: number
-  desktop: number
-  tablet: number
+export interface EngagementPoint {
+  bucket: string
+  label: string
+  views: number
+  likes: number
+  shares: number
 }
 
 export interface TopEpisodeRow {
@@ -46,13 +48,20 @@ export interface TopEpisodeRow {
   projectId: string
   seriesTitle: string
   views: string
-  changePercent: number
+  changePercent: number | null
 }
+
+export type AnalyticsDateRangeLabel =
+  | "Last 7 days"
+  | "Last 30 days"
+  | "Last 90 days"
+
+export type AnalyticsRangeKey = "7d" | "30d" | "90d"
 
 export interface AnalyticsDashboardData {
   kpis: AnalyticsKpi[]
   viewershipTrend: ViewershipTrendPoint[]
   devices: DeviceSegment[]
-  engagementByDevice: EngagementByDevicePoint[]
+  engagement: EngagementPoint[]
   topEpisodes: TopEpisodeRow[]
 }

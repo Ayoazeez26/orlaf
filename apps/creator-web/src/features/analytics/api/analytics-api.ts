@@ -1,14 +1,13 @@
-import { MOCK_ANALYTICS_DASHBOARD } from "../data/mock-analytics"
+import type { AnalyticsRangeKey, CreatorAnalyticsOverview } from "@sable/contracts"
+import { apiRequest } from "@/lib/http-client"
+import { mapAnalyticsOverview } from "../lib/map-analytics-overview"
 import type { AnalyticsDashboardData } from "../types"
 
-const MOCK_DELAY_MS = 200
-
-function delay<T>(value: T): Promise<T> {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(value), MOCK_DELAY_MS)
-  })
-}
-
-export async function fetchAnalyticsDashboard(): Promise<AnalyticsDashboardData> {
-  return delay({ ...MOCK_ANALYTICS_DASHBOARD })
+export async function fetchAnalyticsDashboard(
+  range: AnalyticsRangeKey = "30d"
+): Promise<AnalyticsDashboardData> {
+  const overview = await apiRequest<CreatorAnalyticsOverview>(
+    `/api/v1/studio/analytics/overview?range=${range}`
+  )
+  return mapAnalyticsOverview(overview)
 }

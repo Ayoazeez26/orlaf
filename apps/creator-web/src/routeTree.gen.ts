@@ -9,51 +9,46 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
-import { Route as DashboardSupportRouteImport } from './routes/dashboard/support'
-import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
-import { Route as DashboardRevenueRouteImport } from './routes/dashboard/revenue'
-import { Route as DashboardPromotionsRouteImport } from './routes/dashboard/promotions'
-import { Route as DashboardProjectsRouteImport } from './routes/dashboard/projects'
-import { Route as DashboardNotificationsRouteImport } from './routes/dashboard/notifications'
-import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard/analytics'
-import { Route as AuthSuspendedRouteImport } from './routes/auth/suspended'
-import { Route as AuthRejectedRouteImport } from './routes/auth/rejected'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as AuthPendingApprovalRouteImport } from './routes/auth/pending-approval'
-import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
-import { Route as DashboardRevenueIndexRouteImport } from './routes/dashboard/revenue/index'
-import { Route as DashboardPromotionsIndexRouteImport } from './routes/dashboard/promotions/index'
+import { Route as AuthRejectedRouteImport } from './routes/auth/rejected'
+import { Route as AuthSuspendedRouteImport } from './routes/auth/suspended'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardAnalyticsRouteImport } from './routes/dashboard/analytics'
+import { Route as DashboardNotificationsRouteImport } from './routes/dashboard/notifications'
+import { Route as DashboardProjectsRouteImport } from './routes/dashboard/projects'
+import { Route as DashboardPromotionsRouteImport } from './routes/dashboard/promotions'
+import { Route as DashboardRevenueRouteImport } from './routes/dashboard/revenue'
+import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
+import { Route as DashboardSupportRouteImport } from './routes/dashboard/support'
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard/projects/index'
-import { Route as DashboardSettingsTeamRouteImport } from './routes/dashboard/settings/team'
-import { Route as DashboardSettingsStudioRouteImport } from './routes/dashboard/settings/studio'
-import { Route as DashboardSettingsSecurityRouteImport } from './routes/dashboard/settings/security'
-import { Route as DashboardSettingsPreferencesRouteImport } from './routes/dashboard/settings/preferences'
-import { Route as DashboardSettingsNotificationsRouteImport } from './routes/dashboard/settings/notifications'
-import { Route as DashboardSettingsEarningsRouteImport } from './routes/dashboard/settings/earnings'
-import { Route as DashboardSettingsArchiveRouteImport } from './routes/dashboard/settings/archive'
-import { Route as DashboardRevenueSettingsRouteImport } from './routes/dashboard/revenue/settings'
-import { Route as DashboardRevenuePayoutsRouteImport } from './routes/dashboard/revenue/payouts'
-import { Route as DashboardRevenueAnalyticsRouteImport } from './routes/dashboard/revenue/analytics'
-import { Route as DashboardPromotionsPromotionIdRouteImport } from './routes/dashboard/promotions.$promotionId'
-import { Route as DashboardProjectsNewRouteImport } from './routes/dashboard/projects.new'
 import { Route as DashboardProjectsProjectIdRouteImport } from './routes/dashboard/projects.$projectId'
+import { Route as DashboardProjectsNewRouteImport } from './routes/dashboard/projects.new'
+import { Route as DashboardPromotionsIndexRouteImport } from './routes/dashboard/promotions/index'
+import { Route as DashboardPromotionsPromotionIdRouteImport } from './routes/dashboard/promotions.$promotionId'
+import { Route as DashboardRevenueIndexRouteImport } from './routes/dashboard/revenue/index'
+import { Route as DashboardRevenueAnalyticsRouteImport } from './routes/dashboard/revenue/analytics'
+import { Route as DashboardRevenuePayoutsRouteImport } from './routes/dashboard/revenue/payouts'
+import { Route as DashboardRevenueSettingsRouteImport } from './routes/dashboard/revenue/settings'
+import { Route as DashboardSettingsIndexRouteImport } from './routes/dashboard/settings/index'
+import { Route as DashboardSettingsArchiveRouteImport } from './routes/dashboard/settings/archive'
+import { Route as DashboardSettingsEarningsRouteImport } from './routes/dashboard/settings/earnings'
+import { Route as DashboardSettingsNotificationsRouteImport } from './routes/dashboard/settings/notifications'
+import { Route as DashboardSettingsPreferencesRouteImport } from './routes/dashboard/settings/preferences'
+import { Route as DashboardSettingsSecurityRouteImport } from './routes/dashboard/settings/security'
+import { Route as DashboardSettingsStudioRouteImport } from './routes/dashboard/settings/studio'
+import { Route as DashboardSettingsTeamRouteImport } from './routes/dashboard/settings/team'
 import { Route as DashboardProjectsProjectIdIndexRouteImport } from './routes/dashboard/projects.$projectId/index'
-import { Route as DashboardProjectsProjectIdSettingsRouteImport } from './routes/dashboard/projects.$projectId/settings'
-import { Route as DashboardProjectsProjectIdEpisodesRouteImport } from './routes/dashboard/projects.$projectId/episodes'
 import { Route as DashboardProjectsProjectIdAnalyticsRouteImport } from './routes/dashboard/projects.$projectId/analytics'
+import { Route as DashboardProjectsProjectIdEpisodesRouteImport } from './routes/dashboard/projects.$projectId/episodes'
+import { Route as DashboardProjectsProjectIdSettingsRouteImport } from './routes/dashboard/projects.$projectId/settings'
 
-const OnboardingRoute = OnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
@@ -61,59 +56,14 @@ const DashboardRouteRoute = DashboardRouteRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardSupportRoute = DashboardSupportRouteImport.update({
-  id: '/support',
-  path: '/support',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardRevenueRoute = DashboardRevenueRouteImport.update({
-  id: '/revenue',
-  path: '/revenue',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardPromotionsRoute = DashboardPromotionsRouteImport.update({
-  id: '/promotions',
-  path: '/promotions',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardProjectsRoute = DashboardProjectsRouteImport.update({
-  id: '/projects',
-  path: '/projects',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardNotificationsRoute = DashboardNotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
-  id: '/analytics',
-  path: '/analytics',
-  getParentRoute: () => DashboardRouteRoute,
-} as any)
-const AuthSuspendedRoute = AuthSuspendedRouteImport.update({
-  id: '/auth/suspended',
-  path: '/auth/suspended',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRejectedRoute = AuthRejectedRouteImport.update({
-  id: '/auth/rejected',
-  path: '/auth/rejected',
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthPendingApprovalRoute = AuthPendingApprovalRouteImport.update({
@@ -121,93 +71,59 @@ const AuthPendingApprovalRoute = AuthPendingApprovalRouteImport.update({
   path: '/auth/pending-approval',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
+const AuthRejectedRoute = AuthRejectedRouteImport.update({
+  id: '/auth/rejected',
+  path: '/auth/rejected',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthSuspendedRoute = AuthSuspendedRouteImport.update({
+  id: '/auth/suspended',
+  path: '/auth/suspended',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => DashboardSettingsRoute,
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardRevenueIndexRoute = DashboardRevenueIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardRevenueRoute,
+const DashboardAnalyticsRoute = DashboardAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
-const DashboardPromotionsIndexRoute =
-  DashboardPromotionsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => DashboardPromotionsRoute,
-  } as any)
+const DashboardNotificationsRoute = DashboardNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardProjectsRoute = DashboardProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardPromotionsRoute = DashboardPromotionsRouteImport.update({
+  id: '/promotions',
+  path: '/promotions',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardRevenueRoute = DashboardRevenueRouteImport.update({
+  id: '/revenue',
+  path: '/revenue',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardSupportRoute = DashboardSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardProjectsIndexRoute = DashboardProjectsIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => DashboardProjectsRoute,
-} as any)
-const DashboardSettingsTeamRoute = DashboardSettingsTeamRouteImport.update({
-  id: '/team',
-  path: '/team',
-  getParentRoute: () => DashboardSettingsRoute,
-} as any)
-const DashboardSettingsStudioRoute = DashboardSettingsStudioRouteImport.update({
-  id: '/studio',
-  path: '/studio',
-  getParentRoute: () => DashboardSettingsRoute,
-} as any)
-const DashboardSettingsSecurityRoute =
-  DashboardSettingsSecurityRouteImport.update({
-    id: '/security',
-    path: '/security',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsPreferencesRoute =
-  DashboardSettingsPreferencesRouteImport.update({
-    id: '/preferences',
-    path: '/preferences',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsNotificationsRoute =
-  DashboardSettingsNotificationsRouteImport.update({
-    id: '/notifications',
-    path: '/notifications',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsEarningsRoute =
-  DashboardSettingsEarningsRouteImport.update({
-    id: '/earnings',
-    path: '/earnings',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardSettingsArchiveRoute =
-  DashboardSettingsArchiveRouteImport.update({
-    id: '/archive',
-    path: '/archive',
-    getParentRoute: () => DashboardSettingsRoute,
-  } as any)
-const DashboardRevenueSettingsRoute =
-  DashboardRevenueSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => DashboardRevenueRoute,
-  } as any)
-const DashboardRevenuePayoutsRoute = DashboardRevenuePayoutsRouteImport.update({
-  id: '/payouts',
-  path: '/payouts',
-  getParentRoute: () => DashboardRevenueRoute,
-} as any)
-const DashboardRevenueAnalyticsRoute =
-  DashboardRevenueAnalyticsRouteImport.update({
-    id: '/analytics',
-    path: '/analytics',
-    getParentRoute: () => DashboardRevenueRoute,
-  } as any)
-const DashboardPromotionsPromotionIdRoute =
-  DashboardPromotionsPromotionIdRouteImport.update({
-    id: '/$promotionId',
-    path: '/$promotionId',
-    getParentRoute: () => DashboardPromotionsRoute,
-  } as any)
-const DashboardProjectsNewRoute = DashboardProjectsNewRouteImport.update({
-  id: '/new',
-  path: '/new',
   getParentRoute: () => DashboardProjectsRoute,
 } as any)
 const DashboardProjectsProjectIdRoute =
@@ -216,16 +132,100 @@ const DashboardProjectsProjectIdRoute =
     path: '/$projectId',
     getParentRoute: () => DashboardProjectsRoute,
   } as any)
+const DashboardProjectsNewRoute = DashboardProjectsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => DashboardProjectsRoute,
+} as any)
+const DashboardPromotionsIndexRoute =
+  DashboardPromotionsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => DashboardPromotionsRoute,
+  } as any)
+const DashboardPromotionsPromotionIdRoute =
+  DashboardPromotionsPromotionIdRouteImport.update({
+    id: '/$promotionId',
+    path: '/$promotionId',
+    getParentRoute: () => DashboardPromotionsRoute,
+  } as any)
+const DashboardRevenueIndexRoute = DashboardRevenueIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRevenueRoute,
+} as any)
+const DashboardRevenueAnalyticsRoute =
+  DashboardRevenueAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
+    getParentRoute: () => DashboardRevenueRoute,
+  } as any)
+const DashboardRevenuePayoutsRoute = DashboardRevenuePayoutsRouteImport.update({
+  id: '/payouts',
+  path: '/payouts',
+  getParentRoute: () => DashboardRevenueRoute,
+} as any)
+const DashboardRevenueSettingsRoute =
+  DashboardRevenueSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => DashboardRevenueRoute,
+  } as any)
+const DashboardSettingsIndexRoute = DashboardSettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardSettingsRoute,
+} as any)
+const DashboardSettingsArchiveRoute =
+  DashboardSettingsArchiveRouteImport.update({
+    id: '/archive',
+    path: '/archive',
+    getParentRoute: () => DashboardSettingsRoute,
+  } as any)
+const DashboardSettingsEarningsRoute =
+  DashboardSettingsEarningsRouteImport.update({
+    id: '/earnings',
+    path: '/earnings',
+    getParentRoute: () => DashboardSettingsRoute,
+  } as any)
+const DashboardSettingsNotificationsRoute =
+  DashboardSettingsNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => DashboardSettingsRoute,
+  } as any)
+const DashboardSettingsPreferencesRoute =
+  DashboardSettingsPreferencesRouteImport.update({
+    id: '/preferences',
+    path: '/preferences',
+    getParentRoute: () => DashboardSettingsRoute,
+  } as any)
+const DashboardSettingsSecurityRoute =
+  DashboardSettingsSecurityRouteImport.update({
+    id: '/security',
+    path: '/security',
+    getParentRoute: () => DashboardSettingsRoute,
+  } as any)
+const DashboardSettingsStudioRoute = DashboardSettingsStudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
+  getParentRoute: () => DashboardSettingsRoute,
+} as any)
+const DashboardSettingsTeamRoute = DashboardSettingsTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => DashboardSettingsRoute,
+} as any)
 const DashboardProjectsProjectIdIndexRoute =
   DashboardProjectsProjectIdIndexRouteImport.update({
     id: '/',
     path: '/',
     getParentRoute: () => DashboardProjectsProjectIdRoute,
   } as any)
-const DashboardProjectsProjectIdSettingsRoute =
-  DashboardProjectsProjectIdSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
+const DashboardProjectsProjectIdAnalyticsRoute =
+  DashboardProjectsProjectIdAnalyticsRouteImport.update({
+    id: '/analytics',
+    path: '/analytics',
     getParentRoute: () => DashboardProjectsProjectIdRoute,
   } as any)
 const DashboardProjectsProjectIdEpisodesRoute =
@@ -234,10 +234,10 @@ const DashboardProjectsProjectIdEpisodesRoute =
     path: '/episodes',
     getParentRoute: () => DashboardProjectsProjectIdRoute,
   } as any)
-const DashboardProjectsProjectIdAnalyticsRoute =
-  DashboardProjectsProjectIdAnalyticsRouteImport.update({
-    id: '/analytics',
-    path: '/analytics',
+const DashboardProjectsProjectIdSettingsRoute =
+  DashboardProjectsProjectIdSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
     getParentRoute: () => DashboardProjectsProjectIdRoute,
   } as any)
 
@@ -473,18 +473,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -494,81 +487,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/': {
-      id: '/dashboard/'
-      path: '/'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/support': {
-      id: '/dashboard/support'
-      path: '/support'
-      fullPath: '/dashboard/support'
-      preLoaderRoute: typeof DashboardSupportRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/settings': {
-      id: '/dashboard/settings'
-      path: '/settings'
-      fullPath: '/dashboard/settings'
-      preLoaderRoute: typeof DashboardSettingsRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/revenue': {
-      id: '/dashboard/revenue'
-      path: '/revenue'
-      fullPath: '/dashboard/revenue'
-      preLoaderRoute: typeof DashboardRevenueRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/promotions': {
-      id: '/dashboard/promotions'
-      path: '/promotions'
-      fullPath: '/dashboard/promotions'
-      preLoaderRoute: typeof DashboardPromotionsRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/projects': {
-      id: '/dashboard/projects'
-      path: '/projects'
-      fullPath: '/dashboard/projects'
-      preLoaderRoute: typeof DashboardProjectsRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/notifications': {
-      id: '/dashboard/notifications'
-      path: '/notifications'
-      fullPath: '/dashboard/notifications'
-      preLoaderRoute: typeof DashboardNotificationsRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/dashboard/analytics': {
-      id: '/dashboard/analytics'
-      path: '/analytics'
-      fullPath: '/dashboard/analytics'
-      preLoaderRoute: typeof DashboardAnalyticsRouteImport
-      parentRoute: typeof DashboardRouteRoute
-    }
-    '/auth/suspended': {
-      id: '/auth/suspended'
-      path: '/auth/suspended'
-      fullPath: '/auth/suspended'
-      preLoaderRoute: typeof AuthSuspendedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth/rejected': {
-      id: '/auth/rejected'
-      path: '/auth/rejected'
-      fullPath: '/auth/rejected'
-      preLoaderRoute: typeof AuthRejectedRouteImport
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/pending-approval': {
@@ -578,116 +508,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthPendingApprovalRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/settings/': {
-      id: '/dashboard/settings/'
-      path: '/'
-      fullPath: '/dashboard/settings/'
-      preLoaderRoute: typeof DashboardSettingsIndexRouteImport
-      parentRoute: typeof DashboardSettingsRoute
+    '/auth/rejected': {
+      id: '/auth/rejected'
+      path: '/auth/rejected'
+      fullPath: '/auth/rejected'
+      preLoaderRoute: typeof AuthRejectedRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/dashboard/revenue/': {
-      id: '/dashboard/revenue/'
-      path: '/'
-      fullPath: '/dashboard/revenue/'
-      preLoaderRoute: typeof DashboardRevenueIndexRouteImport
-      parentRoute: typeof DashboardRevenueRoute
+    '/auth/suspended': {
+      id: '/auth/suspended'
+      path: '/auth/suspended'
+      fullPath: '/auth/suspended'
+      preLoaderRoute: typeof AuthSuspendedRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/dashboard/promotions/': {
-      id: '/dashboard/promotions/'
+    '/dashboard/': {
+      id: '/dashboard/'
       path: '/'
-      fullPath: '/dashboard/promotions/'
-      preLoaderRoute: typeof DashboardPromotionsIndexRouteImport
-      parentRoute: typeof DashboardPromotionsRoute
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/analytics': {
+      id: '/dashboard/analytics'
+      path: '/analytics'
+      fullPath: '/dashboard/analytics'
+      preLoaderRoute: typeof DashboardAnalyticsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/notifications': {
+      id: '/dashboard/notifications'
+      path: '/notifications'
+      fullPath: '/dashboard/notifications'
+      preLoaderRoute: typeof DashboardNotificationsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/projects': {
+      id: '/dashboard/projects'
+      path: '/projects'
+      fullPath: '/dashboard/projects'
+      preLoaderRoute: typeof DashboardProjectsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/promotions': {
+      id: '/dashboard/promotions'
+      path: '/promotions'
+      fullPath: '/dashboard/promotions'
+      preLoaderRoute: typeof DashboardPromotionsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/revenue': {
+      id: '/dashboard/revenue'
+      path: '/revenue'
+      fullPath: '/dashboard/revenue'
+      preLoaderRoute: typeof DashboardRevenueRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/settings': {
+      id: '/dashboard/settings'
+      path: '/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof DashboardSettingsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/support': {
+      id: '/dashboard/support'
+      path: '/support'
+      fullPath: '/dashboard/support'
+      preLoaderRoute: typeof DashboardSupportRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/projects/': {
       id: '/dashboard/projects/'
       path: '/'
       fullPath: '/dashboard/projects/'
       preLoaderRoute: typeof DashboardProjectsIndexRouteImport
-      parentRoute: typeof DashboardProjectsRoute
-    }
-    '/dashboard/settings/team': {
-      id: '/dashboard/settings/team'
-      path: '/team'
-      fullPath: '/dashboard/settings/team'
-      preLoaderRoute: typeof DashboardSettingsTeamRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/studio': {
-      id: '/dashboard/settings/studio'
-      path: '/studio'
-      fullPath: '/dashboard/settings/studio'
-      preLoaderRoute: typeof DashboardSettingsStudioRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/security': {
-      id: '/dashboard/settings/security'
-      path: '/security'
-      fullPath: '/dashboard/settings/security'
-      preLoaderRoute: typeof DashboardSettingsSecurityRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/preferences': {
-      id: '/dashboard/settings/preferences'
-      path: '/preferences'
-      fullPath: '/dashboard/settings/preferences'
-      preLoaderRoute: typeof DashboardSettingsPreferencesRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/notifications': {
-      id: '/dashboard/settings/notifications'
-      path: '/notifications'
-      fullPath: '/dashboard/settings/notifications'
-      preLoaderRoute: typeof DashboardSettingsNotificationsRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/earnings': {
-      id: '/dashboard/settings/earnings'
-      path: '/earnings'
-      fullPath: '/dashboard/settings/earnings'
-      preLoaderRoute: typeof DashboardSettingsEarningsRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/settings/archive': {
-      id: '/dashboard/settings/archive'
-      path: '/archive'
-      fullPath: '/dashboard/settings/archive'
-      preLoaderRoute: typeof DashboardSettingsArchiveRouteImport
-      parentRoute: typeof DashboardSettingsRoute
-    }
-    '/dashboard/revenue/settings': {
-      id: '/dashboard/revenue/settings'
-      path: '/settings'
-      fullPath: '/dashboard/revenue/settings'
-      preLoaderRoute: typeof DashboardRevenueSettingsRouteImport
-      parentRoute: typeof DashboardRevenueRoute
-    }
-    '/dashboard/revenue/payouts': {
-      id: '/dashboard/revenue/payouts'
-      path: '/payouts'
-      fullPath: '/dashboard/revenue/payouts'
-      preLoaderRoute: typeof DashboardRevenuePayoutsRouteImport
-      parentRoute: typeof DashboardRevenueRoute
-    }
-    '/dashboard/revenue/analytics': {
-      id: '/dashboard/revenue/analytics'
-      path: '/analytics'
-      fullPath: '/dashboard/revenue/analytics'
-      preLoaderRoute: typeof DashboardRevenueAnalyticsRouteImport
-      parentRoute: typeof DashboardRevenueRoute
-    }
-    '/dashboard/promotions/$promotionId': {
-      id: '/dashboard/promotions/$promotionId'
-      path: '/$promotionId'
-      fullPath: '/dashboard/promotions/$promotionId'
-      preLoaderRoute: typeof DashboardPromotionsPromotionIdRouteImport
-      parentRoute: typeof DashboardPromotionsRoute
-    }
-    '/dashboard/projects/new': {
-      id: '/dashboard/projects/new'
-      path: '/new'
-      fullPath: '/dashboard/projects/new'
-      preLoaderRoute: typeof DashboardProjectsNewRouteImport
       parentRoute: typeof DashboardProjectsRoute
     }
     '/dashboard/projects/$projectId': {
@@ -697,6 +592,111 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProjectsProjectIdRouteImport
       parentRoute: typeof DashboardProjectsRoute
     }
+    '/dashboard/projects/new': {
+      id: '/dashboard/projects/new'
+      path: '/new'
+      fullPath: '/dashboard/projects/new'
+      preLoaderRoute: typeof DashboardProjectsNewRouteImport
+      parentRoute: typeof DashboardProjectsRoute
+    }
+    '/dashboard/promotions/': {
+      id: '/dashboard/promotions/'
+      path: '/'
+      fullPath: '/dashboard/promotions/'
+      preLoaderRoute: typeof DashboardPromotionsIndexRouteImport
+      parentRoute: typeof DashboardPromotionsRoute
+    }
+    '/dashboard/promotions/$promotionId': {
+      id: '/dashboard/promotions/$promotionId'
+      path: '/$promotionId'
+      fullPath: '/dashboard/promotions/$promotionId'
+      preLoaderRoute: typeof DashboardPromotionsPromotionIdRouteImport
+      parentRoute: typeof DashboardPromotionsRoute
+    }
+    '/dashboard/revenue/': {
+      id: '/dashboard/revenue/'
+      path: '/'
+      fullPath: '/dashboard/revenue/'
+      preLoaderRoute: typeof DashboardRevenueIndexRouteImport
+      parentRoute: typeof DashboardRevenueRoute
+    }
+    '/dashboard/revenue/analytics': {
+      id: '/dashboard/revenue/analytics'
+      path: '/analytics'
+      fullPath: '/dashboard/revenue/analytics'
+      preLoaderRoute: typeof DashboardRevenueAnalyticsRouteImport
+      parentRoute: typeof DashboardRevenueRoute
+    }
+    '/dashboard/revenue/payouts': {
+      id: '/dashboard/revenue/payouts'
+      path: '/payouts'
+      fullPath: '/dashboard/revenue/payouts'
+      preLoaderRoute: typeof DashboardRevenuePayoutsRouteImport
+      parentRoute: typeof DashboardRevenueRoute
+    }
+    '/dashboard/revenue/settings': {
+      id: '/dashboard/revenue/settings'
+      path: '/settings'
+      fullPath: '/dashboard/revenue/settings'
+      preLoaderRoute: typeof DashboardRevenueSettingsRouteImport
+      parentRoute: typeof DashboardRevenueRoute
+    }
+    '/dashboard/settings/': {
+      id: '/dashboard/settings/'
+      path: '/'
+      fullPath: '/dashboard/settings/'
+      preLoaderRoute: typeof DashboardSettingsIndexRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
+    '/dashboard/settings/archive': {
+      id: '/dashboard/settings/archive'
+      path: '/archive'
+      fullPath: '/dashboard/settings/archive'
+      preLoaderRoute: typeof DashboardSettingsArchiveRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
+    '/dashboard/settings/earnings': {
+      id: '/dashboard/settings/earnings'
+      path: '/earnings'
+      fullPath: '/dashboard/settings/earnings'
+      preLoaderRoute: typeof DashboardSettingsEarningsRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
+    '/dashboard/settings/notifications': {
+      id: '/dashboard/settings/notifications'
+      path: '/notifications'
+      fullPath: '/dashboard/settings/notifications'
+      preLoaderRoute: typeof DashboardSettingsNotificationsRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
+    '/dashboard/settings/preferences': {
+      id: '/dashboard/settings/preferences'
+      path: '/preferences'
+      fullPath: '/dashboard/settings/preferences'
+      preLoaderRoute: typeof DashboardSettingsPreferencesRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
+    '/dashboard/settings/security': {
+      id: '/dashboard/settings/security'
+      path: '/security'
+      fullPath: '/dashboard/settings/security'
+      preLoaderRoute: typeof DashboardSettingsSecurityRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
+    '/dashboard/settings/studio': {
+      id: '/dashboard/settings/studio'
+      path: '/studio'
+      fullPath: '/dashboard/settings/studio'
+      preLoaderRoute: typeof DashboardSettingsStudioRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
+    '/dashboard/settings/team': {
+      id: '/dashboard/settings/team'
+      path: '/team'
+      fullPath: '/dashboard/settings/team'
+      preLoaderRoute: typeof DashboardSettingsTeamRouteImport
+      parentRoute: typeof DashboardSettingsRoute
+    }
     '/dashboard/projects/$projectId/': {
       id: '/dashboard/projects/$projectId/'
       path: '/'
@@ -704,11 +704,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProjectsProjectIdIndexRouteImport
       parentRoute: typeof DashboardProjectsProjectIdRoute
     }
-    '/dashboard/projects/$projectId/settings': {
-      id: '/dashboard/projects/$projectId/settings'
-      path: '/settings'
-      fullPath: '/dashboard/projects/$projectId/settings'
-      preLoaderRoute: typeof DashboardProjectsProjectIdSettingsRouteImport
+    '/dashboard/projects/$projectId/analytics': {
+      id: '/dashboard/projects/$projectId/analytics'
+      path: '/analytics'
+      fullPath: '/dashboard/projects/$projectId/analytics'
+      preLoaderRoute: typeof DashboardProjectsProjectIdAnalyticsRouteImport
       parentRoute: typeof DashboardProjectsProjectIdRoute
     }
     '/dashboard/projects/$projectId/episodes': {
@@ -718,11 +718,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardProjectsProjectIdEpisodesRouteImport
       parentRoute: typeof DashboardProjectsProjectIdRoute
     }
-    '/dashboard/projects/$projectId/analytics': {
-      id: '/dashboard/projects/$projectId/analytics'
-      path: '/analytics'
-      fullPath: '/dashboard/projects/$projectId/analytics'
-      preLoaderRoute: typeof DashboardProjectsProjectIdAnalyticsRouteImport
+    '/dashboard/projects/$projectId/settings': {
+      id: '/dashboard/projects/$projectId/settings'
+      path: '/settings'
+      fullPath: '/dashboard/projects/$projectId/settings'
+      preLoaderRoute: typeof DashboardProjectsProjectIdSettingsRouteImport
       parentRoute: typeof DashboardProjectsProjectIdRoute
     }
   }

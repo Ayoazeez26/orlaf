@@ -17,6 +17,7 @@ import { EmailAuthService } from "./email-auth.service"
 import { JwksCacheService } from "./jwks-cache.service"
 import { JwtStrategy } from "./jwt.strategy"
 import { JwtAuthGuard } from "./jwt-auth.guard"
+import { OptionalJwtAuthGuard } from "./optional-jwt-auth.guard"
 import { ProviderTokenService } from "./provider-token.service"
 import { RefreshTokenService } from "./refresh-token.service"
 import { RolesGuard } from "./roles.guard"
@@ -94,6 +95,7 @@ import { SignInService } from "./sign-in.service"
     AuthService,
     JwtStrategy,
     JwtAuthGuard,
+    OptionalJwtAuthGuard,
     RefreshTokenService,
     AccountService,
     ProviderTokenService,
@@ -111,6 +113,7 @@ import { SignInService } from "./sign-in.service"
   exports: [
     AuthService,
     JwtAuthGuard,
+    OptionalJwtAuthGuard,
     AdminAuthGuard,
     RolesGuard,
     RefreshTokenService,

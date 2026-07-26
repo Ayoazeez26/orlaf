@@ -4,9 +4,12 @@ import { AdminModule } from "./admin/admin.module"
 import { AppController } from "./app.controller"
 import { AppService } from "./app.service"
 import { AuthModule } from "./auth/auth.module"
+import { CatalogModule } from "./catalog/catalog.module"
 import { CreatorInvitesModule } from "./creator-invites/creator-invites.module"
 import { CreatorsModule } from "./creators/creators.module"
+import { EngagementModule } from "./engagement/engagement.module"
 import { LibraryModule } from "./library/library.module"
+import { PlaybackModule } from "./playback/playback.module"
 import { PrismaModule } from "./prisma/prisma.module"
 import { ProfileModule } from "./profile/profile.module"
 import { StudioModule } from "./studio/studio.module"
@@ -21,6 +24,7 @@ import { WebhookModule } from "./webhooks/webhook.module"
     }),
     PrismaModule,
     AuthModule,
+    CatalogModule,
     AdminModule,
     CreatorInvitesModule,
     CreatorsModule,
@@ -29,6 +33,8 @@ import { WebhookModule } from "./webhooks/webhook.module"
     WebhookModule,
     ProfileModule,
     LibraryModule,
+    EngagementModule,
+    PlaybackModule,
   ],
 
   controllers: [AppController],

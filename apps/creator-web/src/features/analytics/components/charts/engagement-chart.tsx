@@ -1,5 +1,3 @@
-import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
-import { cn } from "@workspace/ui/lib/utils"
 import {
   Bar,
   BarChart,
@@ -10,6 +8,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
+import { cn } from "@workspace/ui/lib/utils"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
 import {
   ANALYTICS_CHART_AXIS_LINE,
@@ -18,17 +18,14 @@ import {
   ANALYTICS_CHART_Y_AXIS_WIDTH,
   DEVICE_CHART_COLORS,
 } from "../../constants"
-import type { EngagementByDevicePoint } from "../../types"
+import type { EngagementPoint } from "../../types"
 
-interface EngagementByDeviceChartProps {
-  data: EngagementByDevicePoint[]
+interface EngagementChartProps {
+  data: EngagementPoint[]
   className?: string
 }
 
-export function EngagementByDeviceChart({
-  data,
-  className,
-}: EngagementByDeviceChartProps) {
+export function EngagementChart({ data, className }: EngagementChartProps) {
   return (
     <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6", className)}>
       <CardHeader className="pb-4">
@@ -43,7 +40,7 @@ export function EngagementByDeviceChart({
               className="stroke-border"
             />
             <XAxis
-              dataKey="month"
+              dataKey="label"
               axisLine={ANALYTICS_CHART_AXIS_LINE}
               tickLine={ANALYTICS_CHART_AXIS_LINE}
               tick={ANALYTICS_CHART_TICK}
@@ -68,22 +65,22 @@ export function EngagementByDeviceChart({
               wrapperStyle={{ fontSize: 12, paddingBottom: 8 }}
             />
             <Bar
-              dataKey="mobile"
-              name="Mobile"
+              dataKey="views"
+              name="Views"
               fill={DEVICE_CHART_COLORS.mobile}
               radius={[4, 4, 0, 0]}
               maxBarSize={28}
             />
             <Bar
-              dataKey="desktop"
-              name="Desktop"
+              dataKey="likes"
+              name="Likes"
               fill={DEVICE_CHART_COLORS.desktop}
               radius={[4, 4, 0, 0]}
               maxBarSize={28}
             />
             <Bar
-              dataKey="tablet"
-              name="Tablet"
+              dataKey="shares"
+              name="Shares"
               fill={DEVICE_CHART_COLORS.tablet}
               radius={[4, 4, 0, 0]}
               maxBarSize={28}

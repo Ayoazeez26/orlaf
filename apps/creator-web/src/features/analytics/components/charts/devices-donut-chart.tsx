@@ -54,8 +54,9 @@ function DeviceLegendItem({
 
 export function DevicesDonutChart({ data, className }: DevicesDonutChartProps) {
   const byKey = (key: DeviceKey) => {
-    const index = DEVICE_KEYS.indexOf(key)
-    const segment = data[index]
+    const segment = data.find(
+      (item) => item.name.toLowerCase() === key
+    )
     if (!segment) return null
     return { segment, deviceKey: key }
   }
@@ -63,6 +64,10 @@ export function DevicesDonutChart({ data, className }: DevicesDonutChartProps) {
   const mobile = byKey("mobile")
   const desktop = byKey("desktop")
   const tablet = byKey("tablet")
+
+  const pieData = [mobile, desktop, tablet]
+    .filter((item): item is NonNullable<typeof item> => item != null)
+    .map((item) => item.segment)
 
   return (
     <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6", className)}>
@@ -74,7 +79,7 @@ export function DevicesDonutChart({ data, className }: DevicesDonutChartProps) {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={data}
+                data={pieData}
                 dataKey="value"
                 nameKey="name"
                 cx="50%"
@@ -85,13 +90,16 @@ export function DevicesDonutChart({ data, className }: DevicesDonutChartProps) {
                 stroke={ANALYTICS_DONUT_SEGMENT_STROKE}
                 strokeWidth={2}
               >
-                {data.map((entry, index) => (
-                  <Cell
-                    key={entry.name}
-                    fill={DEVICE_CHART_COLORS[DEVICE_KEYS[index] ?? "mobile"]}
-                    stroke={ANALYTICS_DONUT_SEGMENT_STROKE}
-                  />
-                ))}
+                {pieData.map((entry) => {
+                  const key = entry.name.toLowerCase() as DeviceKey
+                  return (
+                    <Cell
+                      key={entry.name}
+                      fill={DEVICE_CHART_COLORS[key] ?? DEVICE_CHART_COLORS.mobile}
+                      stroke={ANALYTICS_DONUT_SEGMENT_STROKE}
+                    />
+                  )
+                })}
               </Pie>
               <Tooltip
                 contentStyle={{
@@ -99,7 +107,13 @@ export function DevicesDonutChart({ data, className }: DevicesDonutChartProps) {
                   border: "1px solid var(--border)",
                   background: "var(--card)",
                 }}
-                formatter={(value) => [`${value}%`, "Share"]}
+                formatter={(_value, _name, item) => {
+                  const percent =
+                    typeof item?.payload?.percent === "number"
+                      ? item.payload.percent
+                      : 0
+                  return [`${percent}%`, "Share"]
+                }}
               />
             </PieChart>
           </ResponsiveContainer>

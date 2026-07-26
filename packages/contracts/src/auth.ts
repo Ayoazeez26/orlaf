@@ -252,6 +252,8 @@ export interface EmailSignUpBody {
   lastName: string;
   email: string;
   password: string;
+  /** Defaults to creator-web when omitted (legacy creator-web clients). */
+  surface?: SignInSurface;
   /** Creator invite token from `/onboarding?invite=…` */
   invite_token?: string;
 }

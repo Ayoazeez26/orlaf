@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -13,6 +14,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger"
 import type { AccessTokenClaims } from "@sable/contracts"
 import type { Request } from "express"
 import { JwtAuthGuard } from "../auth/jwt-auth.guard"
+import { CreateDownloadsDto } from "./dto/create-downloads.dto"
 import { LibraryService } from "./library.service"
 
 @ApiTags("Library")
@@ -62,5 +64,44 @@ export class LibraryController {
     @Param("seriesId") seriesId: string
   ) {
     return this.libraryService.getWatchlistStatus(req.user.sub, seriesId)
+  }
+
+  // ---------------------------------------------------------------------------
+  // Downloads
+  // ---------------------------------------------------------------------------
+
+  @Get("downloads")
+  @ApiOperation({ summary: "List the user's tracked downloads" })
+  async listDownloads(@Req() req: Request & { user: AccessTokenClaims }) {
+    return this.libraryService.listDownloads(req.user.sub)
+  }
+
+  @Post("downloads")
+  @ApiOperation({
+    summary:
+      "Queue downloads for the current/next/all episodes (quality preference stored)",
+  })
+  async createDownloads(
+    @Req() req: Request & { user: AccessTokenClaims },
+    @Body() body: CreateDownloadsDto
+  ) {
+    return this.libraryService.createDownloads(req.user.sub, body)
+  }
+
+  @Delete("downloads")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Clear all downloads for the user" })
+  async clearDownloads(@Req() req: Request & { user: AccessTokenClaims }) {
+    await this.libraryService.clearDownloads(req.user.sub)
+  }
+
+  @Delete("downloads/:id")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Remove a single download entry" })
+  async removeDownload(
+    @Req() req: Request & { user: AccessTokenClaims },
+    @Param("id") id: string
+  ) {
+    await this.libraryService.removeDownload(req.user.sub, id)
   }
 }

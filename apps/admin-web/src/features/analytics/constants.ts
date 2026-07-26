@@ -5,6 +5,17 @@ export const ANALYTICS_SERIES_COLORS = {
   amber: "#f59e0b",
 } as const
 
+export const ANALYTICS_DATE_RANGE_OPTIONS = [
+  "Last 7 days",
+  "Last 30 days",
+  "Last 90 days",
+] as const
+
+export const DEFAULT_ANALYTICS_DATE_RANGE = "Last 30 days" as const
+
+export const DATE_RANGE_SELECT_TRIGGER_HEADER_CLASS =
+  "h-9 w-[160px] shrink-0 bg-background"
+
 export const ANALYTICS_CHART_AXIS_LINE = { stroke: "var(--border)" }
 
 export const ANALYTICS_CHART_TICK = {
