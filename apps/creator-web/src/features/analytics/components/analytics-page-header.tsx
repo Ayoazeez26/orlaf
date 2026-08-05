@@ -1,4 +1,3 @@
-import { useState } from "react"
 import {
   Select,
   SelectContent,
@@ -6,6 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select"
+import { useState } from "react"
 import {
   ANALYTICS_DATE_RANGE_OPTIONS,
   DATE_RANGE_SELECT_TRIGGER_HEADER_CLASS,

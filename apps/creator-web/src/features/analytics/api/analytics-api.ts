@@ -1,4 +1,7 @@
-import type { AnalyticsRangeKey, CreatorAnalyticsOverview } from "@sable/contracts"
+import type {
+  AnalyticsRangeKey,
+  CreatorAnalyticsOverview,
+} from "@sable/contracts"
 import { apiRequest } from "@/lib/http-client"
 import { mapAnalyticsOverview } from "../lib/map-analytics-overview"
 import type { AnalyticsDashboardData } from "../types"

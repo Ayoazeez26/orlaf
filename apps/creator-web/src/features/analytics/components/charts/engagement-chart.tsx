@@ -1,3 +1,5 @@
+import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
+import { cn } from "@workspace/ui/lib/utils"
 import {
   Bar,
   BarChart,
@@ -8,8 +10,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
-import { cn } from "@workspace/ui/lib/utils"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
 import {
   ANALYTICS_CHART_AXIS_LINE,

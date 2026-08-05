@@ -149,7 +149,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setOnSessionExpired(() => {
       applyUnauthenticated()
       clearAuthBootstrapCache()
-      void getRouter().navigate({ to: "/onboarding", replace: true })
+      void getRouter().navigate({ to: "/login", replace: true })
     })
     return () => setOnSessionExpired(null)
   }, [applyUnauthenticated])
@@ -267,7 +267,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       clearOnboardingComplete()
       clearOnboardingProgress()
       clearAuthBootstrapCache()
-      void getRouter().navigate({ to: "/onboarding", replace: true })
+      void getRouter().navigate({ to: "/login", replace: true })
     }
   }, [applyUnauthenticated])
 

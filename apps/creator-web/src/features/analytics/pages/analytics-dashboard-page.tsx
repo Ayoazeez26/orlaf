@@ -45,10 +45,7 @@ export function AnalyticsDashboardPage() {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-3">
-            <EngagementChart
-              data={data.engagement}
-              className="lg:col-span-2"
-            />
+            <EngagementChart data={data.engagement} className="lg:col-span-2" />
             <TopEpisodesList episodes={data.topEpisodes} />
           </div>
         </>

@@ -17,6 +17,7 @@ import { ApiError } from "@/lib/http-client"
 import { SettingsModalShell } from "../components/settings-modal-shell"
 import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
 import { SettingsSectionCard } from "../components/settings-section-card"
+import { TotpSetupPanel } from "../components/totp-setup-panel"
 import {
   useActiveSessions,
   useChangePassword,
@@ -111,6 +112,10 @@ export function SettingsSecurityPage() {
 
   async function handleEnableTotp() {
     await enableTotp.mutateAsync({ code: totpCode })
+    resetTotpSetupState()
+  }
+
+  function resetTotpSetupState() {
     setTotpOpen(false)
     setTotpCode("")
     setTotpSecret(null)
@@ -347,38 +352,37 @@ export function SettingsSecurityPage() {
 
       <SettingsModalShell
         open={totpOpen}
-        onOpenChange={setTotpOpen}
+        onOpenChange={(open) => {
+          setTotpOpen(open)
+          if (!open) resetTotpSetupState()
+        }}
+        className="max-w-lg"
         title="Enable authenticator app"
-        description="Add this account to your authenticator app, then enter the 6-digit code."
+        description="Scan the QR code with your authenticator app, then confirm with a 6-digit code."
         footer={
           <Button
             type="button"
             onClick={() => void handleEnableTotp()}
             disabled={totpCode.length < 6 || enableTotp.isPending}
           >
-            Confirm
+            {enableTotp.isPending ? (
+              <>
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+                Enabling…
+              </>
+            ) : (
+              "Enable 2FA"
+            )}
           </Button>
         }
       >
-        {totpSecret ? (
-          <div className="space-y-3">
-            <p className="break-all font-mono text-sm">{totpSecret}</p>
-            {totpUrl ? (
-              <a
-                href={totpUrl}
-                className="text-primary text-sm underline"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open in authenticator app
-              </a>
-            ) : null}
-            <Input
-              placeholder="123456"
-              value={totpCode}
-              onChange={(e) => setTotpCode(e.target.value)}
-            />
-          </div>
+        {totpSecret && totpUrl ? (
+          <TotpSetupPanel
+            otpauthUrl={totpUrl}
+            secret={totpSecret}
+            code={totpCode}
+            onCodeChange={setTotpCode}
+          />
         ) : null}
       </SettingsModalShell>
 

@@ -54,9 +54,7 @@ function DeviceLegendItem({
 
 export function DevicesDonutChart({ data, className }: DevicesDonutChartProps) {
   const byKey = (key: DeviceKey) => {
-    const segment = data.find(
-      (item) => item.name.toLowerCase() === key
-    )
+    const segment = data.find((item) => item.name.toLowerCase() === key)
     if (!segment) return null
     return { segment, deviceKey: key }
   }
@@ -95,7 +93,9 @@ export function DevicesDonutChart({ data, className }: DevicesDonutChartProps) {
                   return (
                     <Cell
                       key={entry.name}
-                      fill={DEVICE_CHART_COLORS[key] ?? DEVICE_CHART_COLORS.mobile}
+                      fill={
+                        DEVICE_CHART_COLORS[key] ?? DEVICE_CHART_COLORS.mobile
+                      }
                       stroke={ANALYTICS_DONUT_SEGMENT_STROKE}
                     />
                   )

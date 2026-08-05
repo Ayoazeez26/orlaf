@@ -2,9 +2,7 @@ export const ANALYTICS_DATE_RANGE_OPTIONS = [
   "Last 7 days",
   "Last 30 days",
   "Last 90 days",
-] as const satisfies ReadonlyArray<
-  import("./types").AnalyticsDateRangeLabel
->
+] as const satisfies ReadonlyArray<import("./types").AnalyticsDateRangeLabel>
 
 export const DEFAULT_ANALYTICS_DATE_RANGE =
   "Last 30 days" as import("./types").AnalyticsDateRangeLabel

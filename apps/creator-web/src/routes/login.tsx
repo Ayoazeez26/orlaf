@@ -6,7 +6,8 @@ import {
   useNavigate,
 } from "@tanstack/react-router"
 import { Separator } from "@workspace/ui/components/separator"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { z } from "zod"
 import { AppLoadingScreen } from "@/components/app-loading-screen"
 import { SableBrandMark } from "@/components/sable-brand-mark"
 import { ThemeSwitcher } from "@/components/theme-switcher"
@@ -19,8 +20,13 @@ import {
   useOnboarding,
 } from "@/features/onboarding/onboarding-context"
 
+const loginSearchSchema = z.object({
+  reset: z.enum(["success"]).optional(),
+})
+
 export const Route = createFileRoute("/login")({
   ssr: false,
+  validateSearch: loginSearchSchema,
   beforeLoad: async () => {
     const { status, session } = await getAuthReady()
     if (status === "loading" || status !== "authenticated" || !session) return
@@ -46,8 +52,19 @@ function LoginPage() {
 
 function LoginContent() {
   const navigate = useNavigate()
+  const { reset } = Route.useSearch()
   const { dispatch } = useOnboarding()
   const [authError, setAuthError] = useState<string | null>(null)
+  const [resetSuccessVisible, setResetSuccessVisible] = useState(
+    reset === "success"
+  )
+
+  useEffect(() => {
+    if (reset !== "success") return
+
+    setResetSuccessVisible(true)
+    void navigate({ to: "/login", search: {}, replace: true })
+  }, [navigate, reset])
 
   const handleUnverified = (verificationId: string | null) => {
     dispatch({ type: "SET_AUTH_METHOD", payload: "email" })
@@ -76,6 +93,16 @@ function LoginContent() {
             Sign in to your creator studio
           </p>
         </div>
+
+        {resetSuccessVisible && (
+          <p
+            className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-center text-emerald-900 text-sm dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-100"
+            role="status"
+          >
+            Your password was reset. Sign in with your new password.
+          </p>
+        )}
+
         <div className="mt-8">
           <GoogleSignInButton onError={setAuthError} />
         </div>

@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Link } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
@@ -90,7 +91,15 @@ export function EmailSignInForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="login-password">Password</Label>
+          <div className="flex items-center justify-between gap-3">
+            <Label htmlFor="login-password">Password</Label>
+            <Link
+              to="/forgot-password"
+              className="text-primary text-xs hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <PasswordInput
             id="login-password"
             placeholder="Your password"

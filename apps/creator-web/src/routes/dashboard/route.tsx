@@ -8,7 +8,7 @@ export const Route = createFileRoute("/dashboard")({
     const { status } = await getAuthReady()
     if (status === "loading") return
     if (status !== "authenticated") {
-      throw redirect({ to: "/onboarding" })
+      throw redirect({ to: "/login" })
     }
   },
   component: DashboardLayout,

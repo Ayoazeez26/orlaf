@@ -11,8 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
+import { Route as ForgotPasswordRouteRouteImport } from './routes/forgot-password/route'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthPendingApprovalRouteImport } from './routes/auth/pending-approval'
 import { Route as AuthRejectedRouteImport } from './routes/auth/rejected'
 import { Route as AuthSuspendedRouteImport } from './routes/auth/suspended'
@@ -24,6 +26,8 @@ import { Route as DashboardPromotionsRouteImport } from './routes/dashboard/prom
 import { Route as DashboardRevenueRouteImport } from './routes/dashboard/revenue'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
 import { Route as DashboardSupportRouteImport } from './routes/dashboard/support'
+import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password/index'
+import { Route as ForgotPasswordVerifyRouteImport } from './routes/forgot-password/verify'
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard/projects/index'
 import { Route as DashboardProjectsProjectIdRouteImport } from './routes/dashboard/projects.$projectId'
 import { Route as DashboardProjectsNewRouteImport } from './routes/dashboard/projects.new'
@@ -56,6 +60,11 @@ const DashboardRouteRoute = DashboardRouteRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRouteRoute = ForgotPasswordRouteRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -64,6 +73,11 @@ const LoginRoute = LoginRouteImport.update({
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthPendingApprovalRoute = AuthPendingApprovalRouteImport.update({
@@ -120,6 +134,16 @@ const DashboardSupportRoute = DashboardSupportRouteImport.update({
   id: '/support',
   path: '/support',
   getParentRoute: () => DashboardRouteRoute,
+} as any)
+const ForgotPasswordIndexRoute = ForgotPasswordIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ForgotPasswordRouteRoute,
+} as any)
+const ForgotPasswordVerifyRoute = ForgotPasswordVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => ForgotPasswordRouteRoute,
 } as any)
 const DashboardProjectsIndexRoute = DashboardProjectsIndexRouteImport.update({
   id: '/',
@@ -244,8 +268,10 @@ const DashboardProjectsProjectIdSettingsRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/auth/pending-approval': typeof AuthPendingApprovalRoute
   '/auth/rejected': typeof AuthRejectedRoute
   '/auth/suspended': typeof AuthSuspendedRoute
@@ -256,7 +282,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/revenue': typeof DashboardRevenueRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
   '/dashboard/support': typeof DashboardSupportRoute
+  '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/forgot-password/': typeof ForgotPasswordIndexRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRouteWithChildren
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
   '/dashboard/promotions/$promotionId': typeof DashboardPromotionsPromotionIdRoute
@@ -283,13 +311,16 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/auth/pending-approval': typeof AuthPendingApprovalRoute
   '/auth/rejected': typeof AuthRejectedRoute
   '/auth/suspended': typeof AuthSuspendedRoute
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/support': typeof DashboardSupportRoute
+  '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/forgot-password': typeof ForgotPasswordIndexRoute
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
   '/dashboard/promotions/$promotionId': typeof DashboardPromotionsPromotionIdRoute
   '/dashboard/revenue/analytics': typeof DashboardRevenueAnalyticsRoute
@@ -315,8 +346,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/forgot-password': typeof ForgotPasswordRouteRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/auth/pending-approval': typeof AuthPendingApprovalRoute
   '/auth/rejected': typeof AuthRejectedRoute
   '/auth/suspended': typeof AuthSuspendedRoute
@@ -327,7 +360,9 @@ export interface FileRoutesById {
   '/dashboard/revenue': typeof DashboardRevenueRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
   '/dashboard/support': typeof DashboardSupportRoute
+  '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/forgot-password/': typeof ForgotPasswordIndexRoute
   '/dashboard/projects/$projectId': typeof DashboardProjectsProjectIdRouteWithChildren
   '/dashboard/projects/new': typeof DashboardProjectsNewRoute
   '/dashboard/promotions/$promotionId': typeof DashboardPromotionsPromotionIdRoute
@@ -355,8 +390,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/forgot-password'
     | '/login'
     | '/onboarding'
+    | '/reset-password'
     | '/auth/pending-approval'
     | '/auth/rejected'
     | '/auth/suspended'
@@ -367,7 +404,9 @@ export interface FileRouteTypes {
     | '/dashboard/revenue'
     | '/dashboard/settings'
     | '/dashboard/support'
+    | '/forgot-password/verify'
     | '/dashboard/'
+    | '/forgot-password/'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
     | '/dashboard/promotions/$promotionId'
@@ -394,13 +433,16 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/onboarding'
+    | '/reset-password'
     | '/auth/pending-approval'
     | '/auth/rejected'
     | '/auth/suspended'
     | '/dashboard/analytics'
     | '/dashboard/notifications'
     | '/dashboard/support'
+    | '/forgot-password/verify'
     | '/dashboard'
+    | '/forgot-password'
     | '/dashboard/projects/new'
     | '/dashboard/promotions/$promotionId'
     | '/dashboard/revenue/analytics'
@@ -425,8 +467,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/forgot-password'
     | '/login'
     | '/onboarding'
+    | '/reset-password'
     | '/auth/pending-approval'
     | '/auth/rejected'
     | '/auth/suspended'
@@ -437,7 +481,9 @@ export interface FileRouteTypes {
     | '/dashboard/revenue'
     | '/dashboard/settings'
     | '/dashboard/support'
+    | '/forgot-password/verify'
     | '/dashboard/'
+    | '/forgot-password/'
     | '/dashboard/projects/$projectId'
     | '/dashboard/projects/new'
     | '/dashboard/promotions/$promotionId'
@@ -464,8 +510,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  ForgotPasswordRouteRoute: typeof ForgotPasswordRouteRouteWithChildren
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   AuthPendingApprovalRoute: typeof AuthPendingApprovalRoute
   AuthRejectedRoute: typeof AuthRejectedRoute
   AuthSuspendedRoute: typeof AuthSuspendedRoute
@@ -487,6 +535,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -499,6 +554,13 @@ declare module '@tanstack/react-router' {
       path: '/onboarding'
       fullPath: '/onboarding'
       preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/pending-approval': {
@@ -577,6 +639,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/support'
       preLoaderRoute: typeof DashboardSupportRouteImport
       parentRoute: typeof DashboardRouteRoute
+    }
+    '/forgot-password/': {
+      id: '/forgot-password/'
+      path: '/'
+      fullPath: '/forgot-password/'
+      preLoaderRoute: typeof ForgotPasswordIndexRouteImport
+      parentRoute: typeof ForgotPasswordRouteRoute
+    }
+    '/forgot-password/verify': {
+      id: '/forgot-password/verify'
+      path: '/verify'
+      fullPath: '/forgot-password/verify'
+      preLoaderRoute: typeof ForgotPasswordVerifyRouteImport
+      parentRoute: typeof ForgotPasswordRouteRoute
     }
     '/dashboard/projects/': {
       id: '/dashboard/projects/'
@@ -847,11 +923,26 @@ const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
   DashboardRouteRouteChildren,
 )
 
+interface ForgotPasswordRouteRouteChildren {
+  ForgotPasswordVerifyRoute: typeof ForgotPasswordVerifyRoute
+  ForgotPasswordIndexRoute: typeof ForgotPasswordIndexRoute
+}
+
+const ForgotPasswordRouteRouteChildren: ForgotPasswordRouteRouteChildren = {
+  ForgotPasswordVerifyRoute: ForgotPasswordVerifyRoute,
+  ForgotPasswordIndexRoute: ForgotPasswordIndexRoute,
+}
+
+const ForgotPasswordRouteRouteWithChildren =
+  ForgotPasswordRouteRoute._addFileChildren(ForgotPasswordRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  ForgotPasswordRouteRoute: ForgotPasswordRouteRouteWithChildren,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   AuthPendingApprovalRoute: AuthPendingApprovalRoute,
   AuthRejectedRoute: AuthRejectedRoute,
   AuthSuspendedRoute: AuthSuspendedRoute,
