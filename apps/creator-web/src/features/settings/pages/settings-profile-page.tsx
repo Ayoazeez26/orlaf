@@ -15,7 +15,6 @@ import { SettingsField } from "../components/settings-field"
 import { SettingsSectionCard } from "../components/settings-section-card"
 import { PRONOUNS_OPTIONS } from "../constants"
 import { useProfile, useUpdateProfile } from "../hooks/use-profile"
-import { useSettingsDashboard } from "../hooks/use-settings-dashboard"
 import {
   registerSettingsReset,
   registerSettingsSave,
@@ -27,29 +26,26 @@ function getInitials(firstName: string, lastName: string, email: string) {
 }
 
 function buildInitialForm(
-  data: NonNullable<ReturnType<typeof useProfile>["data"]>,
-  dashboard: ReturnType<typeof useSettingsDashboard>["data"]
+  data: NonNullable<ReturnType<typeof useProfile>["data"]>
 ) {
   const username =
-    data.creatorProfile?.handle?.replace(/^@/, "") ??
-    dashboard?.profile.username ??
     data.displayName?.replace(/^@/, "") ??
+    data.creatorProfile?.handle?.replace(/^@/, "") ??
     ""
 
   return {
-    firstName: data.firstName ?? dashboard?.profile.firstName ?? "",
-    lastName: data.lastName ?? dashboard?.profile.lastName ?? "",
+    firstName: data.firstName ?? "",
+    lastName: data.lastName ?? "",
     username,
-    pronouns: dashboard?.profile.pronouns ?? "She / her",
-    bio: data.bio ?? dashboard?.profile.bio ?? "",
-    phone: data.phone ?? dashboard?.profile.phone ?? "",
+    pronouns: "She / her",
+    bio: data.bio ?? "",
+    phone: data.phone ?? "",
     avatarUrl: data.avatarUrl ?? "",
   }
 }
 
 export function SettingsProfilePage() {
   const { data } = useProfile()
-  const { data: dashboard } = useSettingsDashboard()
   const updateProfile = useUpdateProfile()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
@@ -57,6 +53,7 @@ export function SettingsProfilePage() {
   const initialFormRef = useRef<ReturnType<typeof buildInitialForm> | null>(
     null
   )
+  const isDirtyRef = useRef(false)
 
   const [form, setForm] = useState({
     firstName: "",
@@ -68,15 +65,19 @@ export function SettingsProfilePage() {
     avatarUrl: "",
   })
 
-  const hasInitialized = useRef(false)
+  function updateForm(
+    updater: React.SetStateAction<typeof form>
+  ) {
+    isDirtyRef.current = true
+    setForm(updater)
+  }
 
   useEffect(() => {
-    if (!data || hasInitialized.current) return
-    hasInitialized.current = true
-    const initial = buildInitialForm(data, dashboard)
+    if (!data || isDirtyRef.current) return
+    const initial = buildInitialForm(data)
     initialFormRef.current = initial
     setForm(initial)
-  }, [data, dashboard])
+  }, [data])
 
   useEffect(() => {
     if (!data) return
@@ -95,10 +96,20 @@ export function SettingsProfilePage() {
           avatarUrl,
         },
         {
-          onSuccess: () => {
-            if (initialFormRef.current) {
-              initialFormRef.current = { ...form, avatarUrl: avatarUrl ?? "" }
+          onSuccess: (response) => {
+            const saved = {
+              ...form,
+              firstName: response.firstName ?? form.firstName,
+              lastName: response.lastName ?? form.lastName,
+              username:
+                response.displayName?.replace(/^@/, "") ?? form.username,
+              bio: response.bio ?? form.bio,
+              phone: response.phone ?? form.phone,
+              avatarUrl: response.avatarUrl ?? "",
             }
+            initialFormRef.current = saved
+            setForm(saved)
+            isDirtyRef.current = false
           },
         }
       )
@@ -107,6 +118,7 @@ export function SettingsProfilePage() {
     function handleReset() {
       if (initialFormRef.current) {
         setForm(initialFormRef.current)
+        isDirtyRef.current = false
       }
     }
 
@@ -133,6 +145,7 @@ export function SettingsProfilePage() {
     try {
       const { imageUrl } = await uploadAvatar(file)
       setForm((prev) => ({ ...prev, avatarUrl: imageUrl }))
+      isDirtyRef.current = true
       await updateProfile.mutateAsync({ avatarUrl: imageUrl })
     } catch (error) {
       setAvatarError(
@@ -182,7 +195,9 @@ export function SettingsProfilePage() {
                 variant="ghost"
                 size="sm"
                 className="text-muted-foreground"
-                onClick={() => setForm((prev) => ({ ...prev, avatarUrl: "" }))}
+                onClick={() =>
+                  updateForm((prev) => ({ ...prev, avatarUrl: "" }))
+                }
               >
                 Remove
               </Button>
@@ -204,14 +219,14 @@ export function SettingsProfilePage() {
               label="First name"
               value={form.firstName}
               onChange={(value) =>
-                setForm((prev) => ({ ...prev, firstName: value }))
+                updateForm((prev) => ({ ...prev, firstName: value }))
               }
             />
             <SettingsField
               label="Last name"
               value={form.lastName}
               onChange={(value) =>
-                setForm((prev) => ({ ...prev, lastName: value }))
+                updateForm((prev) => ({ ...prev, lastName: value }))
               }
             />
             <SettingsField
@@ -219,7 +234,7 @@ export function SettingsProfilePage() {
               value={form.username}
               prefix="@"
               onChange={(value) =>
-                setForm((prev) => ({
+                updateForm((prev) => ({
                   ...prev,
                   username: value.replace(/^@/, ""),
                 }))
@@ -230,7 +245,7 @@ export function SettingsProfilePage() {
               <Select
                 value={form.pronouns}
                 onValueChange={(value) =>
-                  setForm((prev) => ({ ...prev, pronouns: value }))
+                  updateForm((prev) => ({ ...prev, pronouns: value }))
                 }
               >
                 <SelectTrigger className="h-10 w-full">
@@ -250,7 +265,7 @@ export function SettingsProfilePage() {
               label="Phone"
               value={form.phone}
               onChange={(value) =>
-                setForm((prev) => ({ ...prev, phone: value }))
+                updateForm((prev) => ({ ...prev, phone: value }))
               }
             />
           </div>
@@ -260,7 +275,7 @@ export function SettingsProfilePage() {
             <Textarea
               value={form.bio}
               onChange={(e) =>
-                setForm((prev) => ({ ...prev, bio: e.target.value }))
+                updateForm((prev) => ({ ...prev, bio: e.target.value }))
               }
               className="min-h-[90px] bg-input-bg"
             />

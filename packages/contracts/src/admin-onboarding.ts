@@ -9,41 +9,41 @@
 // Applications
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type AdminApplicationStatus = 'pending' | 'approved' | 'rejected';
+export type AdminApplicationStatus = "pending" | "approved" | "rejected"
 
-export type AdminApplicationFilter = 'all' | AdminApplicationStatus;
+export type AdminApplicationFilter = "all" | AdminApplicationStatus
 
 export interface AdminApplicationListItem {
-  id: string;
-  name: string;
-  email: string;
-  username: string;
-  initials: string;
-  location: string;
-  source: string;
+  id: string
+  name: string
+  email: string
+  username: string
+  initials: string
+  location: string
+  source: string
   /** ISO 8601 submission (account creation) timestamp. */
-  submittedAt: string;
-  status: AdminApplicationStatus;
+  submittedAt: string
+  status: AdminApplicationStatus
 }
 
 export interface AdminApplicationChecklistStep {
-  id: string;
-  label: string;
-  completed: boolean;
+  id: string
+  label: string
+  completed: boolean
 }
 
 export interface AdminApplicationDetail extends AdminApplicationListItem {
-  bio: string | null;
-  reviewedAt: string | null;
-  reviewNote: string | null;
-  checklist: AdminApplicationChecklistStep[];
+  bio: string | null
+  reviewedAt: string | null
+  reviewNote: string | null
+  checklist: AdminApplicationChecklistStep[]
 }
 
 export interface AdminApplicationListQuery {
-  filter?: AdminApplicationFilter;
-  q?: string;
-  page?: number;
-  pageSize?: number;
+  filter?: AdminApplicationFilter
+  q?: string
+  page?: number
+  pageSize?: number
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -51,27 +51,27 @@ export interface AdminApplicationListQuery {
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Mirrors the Prisma InviteStatus enum. */
-export type AdminInviteStatus = 'sent' | 'accepted' | 'expired' | 'revoked';
+export type AdminInviteStatus = "sent" | "accepted" | "expired" | "revoked"
 
-export type AdminInviteFilter = 'all' | AdminInviteStatus;
+export type AdminInviteFilter = "all" | AdminInviteStatus
 
 export interface AdminInviteListItem {
-  id: string;
-  email: string;
-  firstName: string | null;
-  lastName: string | null;
-  status: AdminInviteStatus;
-  sentBy: string;
+  id: string
+  email: string
+  firstName: string | null
+  lastName: string | null
+  status: AdminInviteStatus
+  sentBy: string
   /** ISO 8601 timestamp of the last send. */
-  sentAt: string;
-  expiresAt: string;
+  sentAt: string
+  expiresAt: string
 }
 
 export interface AdminInviteListQuery {
-  filter?: AdminInviteFilter;
-  q?: string;
-  page?: number;
-  pageSize?: number;
+  filter?: AdminInviteFilter
+  q?: string
+  page?: number
+  pageSize?: number
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -79,26 +79,26 @@ export interface AdminInviteListQuery {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface AdminOnboardingStats {
-  pending: number;
-  invited: number;
-  approved: number;
-  rejected: number;
+  pending: number
+  invited: number
+  approved: number
+  rejected: number
 }
 
 export interface AdminApplicationListResponse {
-  items: AdminApplicationListItem[];
-  total: number;
-  page: number;
-  pageSize: number;
-  stats: AdminOnboardingStats;
+  items: AdminApplicationListItem[]
+  total: number
+  page: number
+  pageSize: number
+  stats: AdminOnboardingStats
 }
 
 export interface AdminInviteListResponse {
-  items: AdminInviteListItem[];
-  total: number;
-  page: number;
-  pageSize: number;
-  stats: AdminOnboardingStats;
+  items: AdminInviteListItem[]
+  total: number
+  page: number
+  pageSize: number
+  stats: AdminOnboardingStats
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -106,12 +106,12 @@ export interface AdminInviteListResponse {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface RejectApplicationRequest {
-  note?: string;
+  note?: string
 }
 
 export interface CreateCreatorInviteRequest {
-  email: string;
-  firstName?: string;
-  lastName?: string;
-  note?: string;
+  email: string
+  firstName?: string
+  lastName?: string
+  note?: string
 }

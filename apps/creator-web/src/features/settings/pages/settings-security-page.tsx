@@ -13,7 +13,9 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { PasswordInput } from "@/components/password-input"
+import { PasswordStrengthBar } from "@/components/password-strength-bar"
 import { ApiError } from "@/lib/http-client"
+import { isPasswordValid } from "@/lib/password-schema"
 import { SettingsModalShell } from "../components/settings-modal-shell"
 import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
 import { SettingsSectionCard } from "../components/settings-section-card"
@@ -99,8 +101,8 @@ export function SettingsSecurityPage() {
 
   const canSubmitChangePassword =
     currentPassword.length > 0 &&
-    newPassword.length >= 8 &&
-    confirmPassword.length >= 8 &&
+    isPasswordValid(newPassword) &&
+    confirmPassword.length > 0 &&
     newPassword === confirmPassword
 
   async function handleStartTotp() {
@@ -265,25 +267,28 @@ export function SettingsSecurityPage() {
         open={passwordOpen}
         onOpenChange={setPasswordOpen}
         title="Set password"
-        description="Choose a password with at least 8 characters."
+        description="Choose a password with at least 8 characters, including uppercase, lowercase, and a symbol."
         footer={
           <Button
             type="button"
             onClick={() => void handleSetPassword()}
-            disabled={password.length < 8 || setPasswordMutation.isPending}
+            disabled={!isPasswordValid(password) || setPasswordMutation.isPending}
           >
             Save password
           </Button>
         }
       >
-        <div className="space-y-2">
-          <Label htmlFor="new-password">Password</Label>
-          <Input
-            id="new-password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="new-password">Password</Label>
+            <PasswordInput
+              id="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+            />
+          </div>
+          <PasswordStrengthBar password={password} />
         </div>
       </SettingsModalShell>
 
@@ -294,7 +299,7 @@ export function SettingsSecurityPage() {
           if (!open) resetChangePasswordForm()
         }}
         title="Change password"
-        description="Enter your current password, then choose a new one with at least 8 characters."
+        description="Enter your current password, then choose a new one with at least 8 characters, including uppercase, lowercase, and a symbol."
         footer={
           <Button
             type="button"
@@ -333,6 +338,7 @@ export function SettingsSecurityPage() {
               autoComplete="new-password"
             />
           </div>
+          <PasswordStrengthBar password={newPassword} />
           <div className="space-y-2">
             <Label htmlFor="confirm-new-password">Confirm new password</Label>
             <PasswordInput

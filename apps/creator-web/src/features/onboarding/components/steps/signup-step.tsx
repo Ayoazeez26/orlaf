@@ -7,7 +7,9 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { PasswordInput } from "@/components/password-input"
+import { PasswordStrengthBar } from "@/components/password-strength-bar"
 import { useAuth } from "@/features/auth/auth-context"
+import { passwordFieldSchema } from "@/lib/password-schema"
 import { useOnboarding } from "../../onboarding-context"
 import { OnboardingShell } from "../onboarding-shell"
 
@@ -15,7 +17,7 @@ const signupSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: passwordFieldSchema,
 })
 
 type SignupFormValues = z.infer<typeof signupSchema>
@@ -36,6 +38,7 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -46,6 +49,8 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
       password: data.profile.password,
     },
   })
+
+  const passwordValue = watch("password")
 
   const onSubmit = async (values: SignupFormValues) => {
     setIsSubmitting(true)
@@ -176,11 +181,12 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
           <Label htmlFor="password">Password</Label>
           <PasswordInput
             id="password"
-            placeholder="Min. 6 characters"
+            placeholder="Min. 8 characters with upper, lower & symbol"
             autoComplete="new-password"
             aria-invalid={!!errors.password}
             {...register("password")}
           />
+          <PasswordStrengthBar password={passwordValue} />
           {errors.password && (
             <p className="text-destructive text-xs">
               {errors.password.message}

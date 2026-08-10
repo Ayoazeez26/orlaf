@@ -10,63 +10,63 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 /** Creator statuses surfaced in the admin creators list. */
-export type AdminCreatorStatus = 'active' | 'suspended';
+export type AdminCreatorStatus = "active" | "suspended"
 
-export type AdminSuspendDuration = '24h' | '7d' | '30d' | 'permanent';
+export type AdminSuspendDuration = "24h" | "7d" | "30d" | "permanent"
 
 export const ADMIN_SUSPEND_DURATIONS: AdminSuspendDuration[] = [
-  '24h',
-  '7d',
-  '30d',
-  'permanent',
-];
+  "24h",
+  "7d",
+  "30d",
+  "permanent",
+]
 
 // ─────────────────────────────────────────────────────────────────────────────
 // List
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface AdminCreatorListItem {
-  id: string;
-  name: string;
-  email: string;
+  id: string
+  name: string
+  email: string
   /** Creator handle prefixed with "@", or empty string when unset. */
-  username: string;
-  initials: string;
-  location: string;
+  username: string
+  initials: string
+  location: string
   /** Lifetime views. 0 until analytics is wired (Phase 2). */
-  views: number;
+  views: number
   /** Lifetime earnings in USD. 0 until payouts is wired (Phase 2). */
-  earnings: number;
-  status: AdminCreatorStatus;
-  isVerified: boolean;
+  earnings: number
+  status: AdminCreatorStatus
+  isVerified: boolean
   /** Account created within the current calendar month. */
-  isNew: boolean;
+  isNew: boolean
   /** ISO 8601 account creation timestamp. */
-  joinedAt: string;
+  joinedAt: string
 }
 
 export interface AdminCreatorStats {
-  total: number;
-  active: number;
-  suspended: number;
-  newThisMonth: number;
+  total: number
+  active: number
+  suspended: number
+  newThisMonth: number
 }
 
 export interface AdminCreatorListResponse {
-  items: AdminCreatorListItem[];
-  total: number;
-  page: number;
-  pageSize: number;
-  stats: AdminCreatorStats;
+  items: AdminCreatorListItem[]
+  total: number
+  page: number
+  pageSize: number
+  stats: AdminCreatorStats
 }
 
-export type AdminCreatorListFilter = 'all' | 'active' | 'suspended' | 'new';
+export type AdminCreatorListFilter = "all" | "active" | "suspended" | "new"
 
 export interface AdminCreatorListQuery {
-  filter?: AdminCreatorListFilter;
-  q?: string;
-  page?: number;
-  pageSize?: number;
+  filter?: AdminCreatorListFilter
+  q?: string
+  page?: number
+  pageSize?: number
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -74,14 +74,14 @@ export interface AdminCreatorListQuery {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface AdminCreatorDetail extends AdminCreatorListItem {
-  bio: string | null;
-  handle: string | null;
-  studioName: string | null;
-  creatorType: string | null;
-  verifiedAt: string | null;
-  suspendedAt: string | null;
-  suspendedUntil: string | null;
-  suspendReason: string | null;
+  bio: string | null
+  handle: string | null
+  studioName: string | null
+  creatorType: string | null
+  verifiedAt: string | null
+  suspendedAt: string | null
+  suspendedUntil: string | null
+  suspendReason: string | null
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -89,10 +89,10 @@ export interface AdminCreatorDetail extends AdminCreatorListItem {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface AdminSuspendCreatorRequest {
-  duration: AdminSuspendDuration;
-  reason?: string;
+  duration: AdminSuspendDuration
+  reason?: string
 }
 
 export interface AdminVerifyCreatorRequest {
-  note?: string;
+  note?: string
 }

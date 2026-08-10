@@ -15,6 +15,7 @@ import { Route as ForgotPasswordRouteRouteImport } from './routes/forgot-passwor
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as VerifyEmailRouteImport } from './routes/verify-email'
 import { Route as AuthPendingApprovalRouteImport } from './routes/auth/pending-approval'
 import { Route as AuthRejectedRouteImport } from './routes/auth/rejected'
 import { Route as AuthSuspendedRouteImport } from './routes/auth/suspended'
@@ -78,6 +79,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyEmailRoute = VerifyEmailRouteImport.update({
+  id: '/verify-email',
+  path: '/verify-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthPendingApprovalRoute = AuthPendingApprovalRouteImport.update({
@@ -272,6 +278,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/auth/pending-approval': typeof AuthPendingApprovalRoute
   '/auth/rejected': typeof AuthRejectedRoute
   '/auth/suspended': typeof AuthSuspendedRoute
@@ -312,6 +319,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/auth/pending-approval': typeof AuthPendingApprovalRoute
   '/auth/rejected': typeof AuthRejectedRoute
   '/auth/suspended': typeof AuthSuspendedRoute
@@ -350,6 +358,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/verify-email': typeof VerifyEmailRoute
   '/auth/pending-approval': typeof AuthPendingApprovalRoute
   '/auth/rejected': typeof AuthRejectedRoute
   '/auth/suspended': typeof AuthSuspendedRoute
@@ -394,6 +403,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/reset-password'
+    | '/verify-email'
     | '/auth/pending-approval'
     | '/auth/rejected'
     | '/auth/suspended'
@@ -434,6 +444,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/reset-password'
+    | '/verify-email'
     | '/auth/pending-approval'
     | '/auth/rejected'
     | '/auth/suspended'
@@ -471,6 +482,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/reset-password'
+    | '/verify-email'
     | '/auth/pending-approval'
     | '/auth/rejected'
     | '/auth/suspended'
@@ -514,6 +526,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  VerifyEmailRoute: typeof VerifyEmailRoute
   AuthPendingApprovalRoute: typeof AuthPendingApprovalRoute
   AuthRejectedRoute: typeof AuthRejectedRoute
   AuthSuspendedRoute: typeof AuthSuspendedRoute
@@ -561,6 +574,13 @@ declare module '@tanstack/react-router' {
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify-email': {
+      id: '/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof VerifyEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/pending-approval': {
@@ -943,6 +963,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  VerifyEmailRoute: VerifyEmailRoute,
   AuthPendingApprovalRoute: AuthPendingApprovalRoute,
   AuthRejectedRoute: AuthRejectedRoute,
   AuthSuspendedRoute: AuthSuspendedRoute,

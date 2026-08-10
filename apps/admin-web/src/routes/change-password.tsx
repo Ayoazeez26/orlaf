@@ -7,18 +7,18 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { AppLoadingScreen } from "@/components/app-loading-screen"
 import { PasswordInput } from "@/components/password-input"
+import { PasswordStrengthBar } from "@/components/password-strength-bar"
 import { SableBrandMark } from "@/components/sable-brand-mark"
 import { ThemeSwitcher } from "@/components/theme-switcher"
 import { useAuth } from "@/features/auth/auth-context"
 import { getAuthReady } from "@/features/auth/lib/auth-bootstrap"
 import { resolvePostSignInRoute } from "@/features/auth/lib/post-sign-in-route"
+import { passwordFieldSchema } from "@/lib/password-schema"
 
 const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, "Current password is required"),
-    newPassword: z
-      .string()
-      .min(8, "New password must be at least 8 characters"),
+    newPassword: passwordFieldSchema,
     confirmPassword: z.string().min(1, "Confirm your new password"),
   })
   .refine((values) => values.newPassword === values.confirmPassword, {
@@ -72,6 +72,8 @@ function ChangePasswordContent() {
     },
   })
 
+  const newPasswordValue = form.watch("newPassword")
+
   const onSubmit = form.handleSubmit(async (values) => {
     setFormError(null)
     setSubmitting(true)
@@ -100,7 +102,8 @@ function ChangePasswordContent() {
             Set a new password
           </h1>
           <p className="mt-2 text-muted-foreground text-sm">
-            Your account requires a password change before you can continue.
+            Your account requires a password change before you can continue. Use
+            at least 8 characters with uppercase, lowercase, and a symbol.
           </p>
         </div>
 
@@ -128,6 +131,7 @@ function ChangePasswordContent() {
               disabled={submitting}
               {...form.register("newPassword")}
             />
+            <PasswordStrengthBar password={newPasswordValue} />
             {form.formState.errors.newPassword ? (
               <p className="text-destructive text-sm">
                 {form.formState.errors.newPassword.message}

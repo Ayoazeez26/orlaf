@@ -23,11 +23,13 @@ import {
   readPasswordResetSession,
 } from "@/features/auth/lib/password-reset-storage"
 import { resolvePostSignInRoute } from "@/features/auth/lib/post-sign-in-route"
+import { PasswordStrengthBar } from "@/components/password-strength-bar"
+import { passwordFieldSchema } from "@/lib/password-schema"
 
 const resetPasswordSchema = z
   .object({
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string().min(8, "Confirm your password"),
+    password: passwordFieldSchema,
+    confirmPassword: z.string().min(1, "Confirm your password"),
   })
   .refine((values) => values.password === values.confirmPassword, {
     message: "Passwords do not match",
@@ -76,10 +78,13 @@ function ResetPasswordContent() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
   })
+
+  const passwordValue = watch("password")
 
   const finishReset = () => {
     clearPasswordResetSession()
@@ -119,7 +124,7 @@ function ResetPasswordContent() {
     <>
       <PasswordResetShell
         title="Choose a new password"
-        description="Use at least 8 characters. You'll sign in with this password next time."
+        description="Use at least 8 characters with uppercase, lowercase, and a symbol."
         footer={
           <p className="mt-6 text-center text-muted-foreground text-sm">
             Need a new code?{" "}
@@ -137,11 +142,12 @@ function ResetPasswordContent() {
             <Label htmlFor="reset-password">New password</Label>
             <PasswordInput
               id="reset-password"
-              placeholder="At least 8 characters"
+              placeholder="Min. 8 characters with upper, lower & symbol"
               autoComplete="new-password"
               aria-invalid={!!errors.password}
               {...register("password")}
             />
+            <PasswordStrengthBar password={passwordValue} />
             {errors.password && (
               <p className="text-destructive text-xs">
                 {errors.password.message}
