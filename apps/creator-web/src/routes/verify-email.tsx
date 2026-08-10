@@ -22,9 +22,15 @@ import { PasswordResetShell } from "@/features/auth/components/password-reset-sh
 import { getAuthReady } from "@/features/auth/lib/auth-bootstrap"
 import { resolvePostSignInRoute } from "@/features/auth/lib/post-sign-in-route"
 
+/** Query params that look numeric (e.g. OTP codes) are parsed as numbers by the router. */
+const searchString = z.preprocess(
+  (value) => (value == null || value === "" ? undefined : String(value)),
+  z.string().optional()
+)
+
 const verifyEmailSearchSchema = z.object({
-  vid: z.string().optional(),
-  code: z.string().optional(),
+  vid: searchString,
+  code: searchString,
 })
 
 export const Route = createFileRoute("/verify-email")({
@@ -61,7 +67,9 @@ function VerifyEmailContent() {
   const search = Route.useSearch()
   const { verifyEmailAndSignIn } = useAuth()
   const verificationId = search.vid ?? ""
-  const initialCodeRef = useRef(search.code?.replace(/\D/g, "").slice(0, 6) ?? "")
+  const initialCodeRef = useRef(
+    search.code?.replace(/\D/g, "").slice(0, 6) ?? ""
+  )
   const [code, setCode] = useState(initialCodeRef.current)
   const [isVerifying, setIsVerifying] = useState(false)
   const [isAutoVerifying, setIsAutoVerifying] = useState(false)
@@ -78,7 +86,10 @@ function VerifyEmailContent() {
       setIsVerifying(true)
       setError(null)
 
-      const result = await verifyEmailAndSignIn(verificationId, verificationCode)
+      const result = await verifyEmailAndSignIn(
+        verificationId,
+        verificationCode
+      )
 
       setIsVerifying(false)
       setIsAutoVerifying(false)
