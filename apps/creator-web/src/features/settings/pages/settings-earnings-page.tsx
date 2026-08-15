@@ -12,21 +12,17 @@ import { Pencil, Plus, Star, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { SettingsSectionCard } from "../components/settings-section-card"
 import { PAYOUT_THRESHOLD_OPTIONS } from "../constants"
-import { useSettingsDashboard } from "../hooks/use-settings-dashboard"
+import { MOCK_SETTINGS_DASHBOARD } from "../data/mock-settings"
 import type { PayoutMethod } from "../types"
 
+/** Earnings remains demo UI until a revenue API exists. */
+const MOCK_EARNINGS = MOCK_SETTINGS_DASHBOARD.earnings
+
 export function SettingsEarningsPage() {
-  const { data } = useSettingsDashboard()
-  const [autoPayout, setAutoPayout] = useState(
-    data?.earnings.autoPayoutEnabled ?? true
-  )
-  const [threshold, setThreshold] = useState(
-    data?.earnings.minimumThreshold ?? "₦ 10,000"
-  )
+  const [autoPayout, setAutoPayout] = useState(MOCK_EARNINGS.autoPayoutEnabled)
+  const [threshold, setThreshold] = useState(MOCK_EARNINGS.minimumThreshold)
 
-  if (!data) return null
-
-  const { earnings } = data
+  const earnings = MOCK_EARNINGS
 
   return (
     <div className="space-y-6">

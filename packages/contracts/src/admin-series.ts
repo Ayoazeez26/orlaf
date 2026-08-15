@@ -2,7 +2,7 @@
  * @sable/contracts — admin series / projects management
  */
 
-import type { SeriesStatus } from "./studio.js"
+import type { SeriesStatus, SeriesType } from "./studio.js"
 
 export type AdminSeriesReviewStatus = "approved" | "pending" | "rejected"
 
@@ -20,17 +20,20 @@ export interface AdminSeriesStats {
 export interface AdminSeriesListItem {
   id: string
   title: string
+  type: SeriesType
   genre: string
   language: string
   creatorName: string
   episodeCount: number
-  /** Null until analytics is wired — UI should render as "-". */
+  pendingEpisodeCount: number
+  /** Counted playback sessions (`countedAsView`). */
   views: number | null
   status: SeriesStatus
   reviewStatus: AdminSeriesReviewStatus
   publishStatus: AdminSeriesPublishStatus
   posterUrl: string | null
   createdAt: string
+  updatedAt: string
 }
 
 export interface AdminSeriesListResponse {
@@ -43,6 +46,8 @@ export interface AdminSeriesListResponse {
 
 export interface AdminSeriesListQuery {
   filter?: AdminSeriesListFilter
+  /** When set, only series owned by this creator account. */
+  creatorId?: string
   q?: string
   page?: number
   pageSize?: number
@@ -54,9 +59,10 @@ export interface AdminSeriesEpisode {
   title: string
   duration: string
   size: string
-  /** Null until analytics is wired — UI should render as "-". */
+  /** Counted playback sessions (`countedAsView`). */
   views: number | null
-  status: "published" | "draft" | "processing" | "failed"
+  reviewStatus: AdminSeriesReviewStatus
+  status: "published" | "draft" | "processing" | "failed" | "pending_review"
 }
 
 export interface AdminSeriesDetail extends AdminSeriesListItem {

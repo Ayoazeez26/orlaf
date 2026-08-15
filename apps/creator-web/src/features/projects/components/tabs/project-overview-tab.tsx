@@ -2,23 +2,36 @@ import { useParams } from "@tanstack/react-router"
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import { Calendar, Clapperboard, Globe, Tag } from "lucide-react"
+import { AnalyticsMetricCard } from "@/features/analytics/components/shared/analytics-metric-card"
+import { DEFAULT_ANALYTICS_DATE_RANGE } from "@/features/analytics/constants"
+import { useAnalyticsDashboard } from "@/features/analytics/hooks/use-analytics-dashboard"
+import { formatCompactCount } from "@/features/analytics/lib/map-analytics-overview"
+import { MetricCardsSkeleton } from "@/features/dashboard/components/home/dashboard-home-skeleton"
 import { FROSTED_CARD_SURFACE_CLASS } from "../../constants/frosted-card"
 import { useProject } from "../../hooks/use-project"
-import { MetricStatCard } from "../shared/metric-stat-card"
 
 export function ProjectOverviewTab() {
   const { projectId } = useParams({ strict: false })
   const { data: project } = useProject(projectId ?? "")
+  const { data: analytics, isPending: isAnalyticsPending } =
+    useAnalyticsDashboard(DEFAULT_ANALYTICS_DATE_RANGE, projectId)
 
   if (!project) return null
 
+  const viewsByEpisode = new Map(
+    (analytics?.episodeViews ?? []).map((row) => [row.episodeId, row.views])
+  )
+
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {project.overviewMetrics.map((metric) => (
-          <MetricStatCard key={metric.label} metric={metric} />
-        ))}
-      </div>
+      {isAnalyticsPending ? <MetricCardsSkeleton /> : null}
+      {!isAnalyticsPending && analytics ? (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {analytics.kpis.slice(0, 4).map((kpi) => (
+            <AnalyticsMetricCard key={kpi.label} kpi={kpi} />
+          ))}
+        </div>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card
@@ -83,7 +96,9 @@ export function ProjectOverviewTab() {
                     {episode.title}
                   </p>
                   <p className="text-muted-foreground text-xs">
-                    {episode.duration} · {episode.views} views
+                    {episode.duration} ·{" "}
+                    {formatCompactCount(viewsByEpisode.get(episode.id) ?? 0)}{" "}
+                    views
                   </p>
                 </div>
               </div>

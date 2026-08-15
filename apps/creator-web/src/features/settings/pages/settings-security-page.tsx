@@ -14,7 +14,7 @@ import {
 import { useState } from "react"
 import { PasswordInput } from "@/components/password-input"
 import { PasswordStrengthBar } from "@/components/password-strength-bar"
-import { ApiError } from "@/lib/http-client"
+import { toast, toastMutationError } from "@/lib/toast"
 import { isPasswordValid } from "@/lib/password-schema"
 import { SettingsModalShell } from "../components/settings-modal-shell"
 import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
@@ -63,9 +63,14 @@ export function SettingsSecurityPage() {
   if (!status) return null
 
   async function handleSetPassword() {
-    await setPasswordMutation.mutateAsync({ password })
-    setPasswordOpen(false)
-    setPassword("")
+    try {
+      await setPasswordMutation.mutateAsync({ password })
+      setPasswordOpen(false)
+      setPassword("")
+      toast.success("Password set.")
+    } catch (error) {
+      toastMutationError(error, "Unable to set password. Please try again.")
+    }
   }
 
   function resetChangePasswordForm() {
@@ -90,12 +95,12 @@ export function SettingsSecurityPage() {
       })
       setChangePasswordOpen(false)
       resetChangePasswordForm()
+      toast.success("Password updated.")
     } catch (error) {
-      if (error instanceof ApiError) {
-        setPasswordError(error.message)
-        return
-      }
-      setPasswordError("Unable to change password. Please try again.")
+      toastMutationError(
+        error,
+        "Unable to change password. Please try again."
+      )
     }
   }
 
@@ -106,15 +111,24 @@ export function SettingsSecurityPage() {
     newPassword === confirmPassword
 
   async function handleStartTotp() {
-    const result = await setupTotp.mutateAsync()
-    setTotpSecret(result.secret)
-    setTotpUrl(result.otpauthUrl)
-    setTotpOpen(true)
+    try {
+      const result = await setupTotp.mutateAsync()
+      setTotpSecret(result.secret)
+      setTotpUrl(result.otpauthUrl)
+      setTotpOpen(true)
+    } catch (error) {
+      toastMutationError(error, "Unable to start authenticator setup.")
+    }
   }
 
   async function handleEnableTotp() {
-    await enableTotp.mutateAsync({ code: totpCode })
-    resetTotpSetupState()
+    try {
+      await enableTotp.mutateAsync({ code: totpCode })
+      resetTotpSetupState()
+      toast.success("Authenticator app enabled.")
+    } catch (error) {
+      toastMutationError(error, "Unable to enable authenticator. Try again.")
+    }
   }
 
   function resetTotpSetupState() {
@@ -125,9 +139,14 @@ export function SettingsSecurityPage() {
   }
 
   async function handleDisableTotp() {
-    await disableTotp.mutateAsync({ code: disableCode })
-    setDisableOpen(false)
-    setDisableCode("")
+    try {
+      await disableTotp.mutateAsync({ code: disableCode })
+      setDisableOpen(false)
+      setDisableCode("")
+      toast.success("Authenticator app disabled.")
+    } catch (error) {
+      toastMutationError(error, "Unable to disable authenticator. Try again.")
+    }
   }
 
   return (
@@ -241,7 +260,16 @@ export function SettingsSecurityPage() {
                       size="sm"
                       className="gap-1.5 text-muted-foreground"
                       disabled={revokeSession.isPending}
-                      onClick={() => revokeSession.mutate(session.id)}
+                      onClick={() =>
+                        revokeSession.mutate(session.id, {
+                          onSuccess: () => toast.success("Session signed out."),
+                          onError: (error) =>
+                            toastMutationError(
+                              error,
+                              "Unable to sign out that session."
+                            ),
+                        })
+                      }
                     >
                       {revokeSession.isPending ? (
                         <Loader2
@@ -272,7 +300,9 @@ export function SettingsSecurityPage() {
           <Button
             type="button"
             onClick={() => void handleSetPassword()}
-            disabled={!isPasswordValid(password) || setPasswordMutation.isPending}
+            disabled={
+              !isPasswordValid(password) || setPasswordMutation.isPending
+            }
           >
             Save password
           </Button>

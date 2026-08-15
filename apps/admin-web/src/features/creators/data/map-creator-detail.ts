@@ -15,9 +15,9 @@ function formatJoined(iso: string): string {
 /**
  * Maps the admin creator API detail into the UI CreatorDetail shape.
  *
- * Identity, status, verification, and bio come from the API. Analytics,
- * projects, and payouts remain placeholder data until those APIs land
- * (Phase 2) — see the creators integration plan.
+ * Identity, status, verification, and bio come from the API. Analytics and
+ * payouts remain placeholder data until those APIs land. Projects are loaded
+ * separately via GET /admin/series?creatorId=.
  */
 export function toCreatorDetail(detail: AdminCreatorDetail): CreatorDetail {
   const base: Creator = {

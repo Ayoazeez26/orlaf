@@ -32,7 +32,7 @@ export function UserGrowthChart({ data, className }: UserGrowthChartProps) {
   return (
     <ChartCard
       title="User growth"
-      subtitle="New users and creators joining the platform"
+      subtitle="Viewer activity and creators joining the platform"
       className={className}
     >
       <div className="h-[280px]">

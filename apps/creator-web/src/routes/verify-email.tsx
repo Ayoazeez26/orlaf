@@ -1,10 +1,4 @@
-import {
-  ClientOnly,
-  createFileRoute,
-  Link,
-  redirect,
-  useNavigate,
-} from "@tanstack/react-router"
+import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import {
   InputOTP,
@@ -13,44 +7,31 @@ import {
 } from "@workspace/ui/components/input-otp"
 import { Loader2, Mail } from "lucide-react"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { z } from "zod"
 import { AppLoadingScreen } from "@/components/app-loading-screen"
 import { resendVerification } from "@/features/auth/api/auth-api"
 import { useAuth } from "@/features/auth/auth-context"
 import { MfaVerifyDialog } from "@/features/auth/components/mfa-verify-dialog"
 import { PasswordResetShell } from "@/features/auth/components/password-reset-shell"
-import { getAuthReady } from "@/features/auth/lib/auth-bootstrap"
-import { resolvePostSignInRoute } from "@/features/auth/lib/post-sign-in-route"
 
-/** Query params that look numeric (e.g. OTP codes) are parsed as numbers by the router. */
-const searchString = z.preprocess(
-  (value) => (value == null || value === "" ? undefined : String(value)),
-  z.string().optional()
-)
+function asSearchString(value: unknown): string | undefined {
+  if (value == null || value === "") return undefined
+  const normalized = String(value).replace(/^["']+|["']+$/g, "").trim()
+  return normalized || undefined
+}
 
-const verifyEmailSearchSchema = z.object({
-  vid: searchString,
-  code: searchString,
-})
+function asOtpCode(value: unknown): string | undefined {
+  const digits = asSearchString(value)?.replace(/\D/g, "").slice(0, 6)
+  return digits || undefined
+}
 
 export const Route = createFileRoute("/verify-email")({
   ssr: false,
-  validateSearch: verifyEmailSearchSchema,
-  beforeLoad: async ({ search }) => {
-    const { status, session } = await getAuthReady()
-    if (status === "loading" || status !== "authenticated" || !session) {
-      if (!search.vid) {
-        throw redirect({ to: "/login" })
-      }
-      return
-    }
-
-    const destination = resolvePostSignInRoute(session)
-    if (destination.to === "/onboarding" && destination.search?.step) {
-      throw redirect({ to: destination.to, search: destination.search })
-    }
-    throw redirect({ to: destination.to })
-  },
+  // Public email-link page. Do not auth-redirect here — that loops with
+  // SSR/search serialization (OTP codes bounce between 100602 and "100602").
+  validateSearch: (search: Record<string, unknown>) => ({
+    vid: asSearchString(search.vid),
+    code: asOtpCode(search.code),
+  }),
   component: VerifyEmailPage,
 })
 
@@ -63,13 +44,10 @@ function VerifyEmailPage() {
 }
 
 function VerifyEmailContent() {
-  const navigate = useNavigate()
   const search = Route.useSearch()
   const { verifyEmailAndSignIn } = useAuth()
   const verificationId = search.vid ?? ""
-  const initialCodeRef = useRef(
-    search.code?.replace(/\D/g, "").slice(0, 6) ?? ""
-  )
+  const initialCodeRef = useRef(search.code ?? "")
   const [code, setCode] = useState(initialCodeRef.current)
   const [isVerifying, setIsVerifying] = useState(false)
   const [isAutoVerifying, setIsAutoVerifying] = useState(false)
@@ -116,16 +94,6 @@ function VerifyEmailContent() {
     },
     [verificationId, verifyEmailAndSignIn]
   )
-
-  useEffect(() => {
-    if (!search.code) return
-
-    void navigate({
-      to: "/verify-email",
-      search: { vid: search.vid },
-      replace: true,
-    })
-  }, [navigate, search.code, search.vid])
 
   useEffect(() => {
     const initialCode = initialCodeRef.current

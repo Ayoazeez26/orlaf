@@ -9,9 +9,11 @@ import {
 import { Textarea } from "@workspace/ui/components/textarea"
 import { Download, Loader2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { toast, toastMutationError } from "@/lib/toast"
 import { uploadAvatar } from "../api/profile-upload"
 import { SettingsActionRow } from "../components/settings-action-row"
 import { SettingsField } from "../components/settings-field"
+import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
 import { SettingsSectionCard } from "../components/settings-section-card"
 import { PRONOUNS_OPTIONS } from "../constants"
 import { useProfile, useUpdateProfile } from "../hooks/use-profile"
@@ -49,7 +51,6 @@ export function SettingsProfilePage() {
   const updateProfile = useUpdateProfile()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
-  const [avatarError, setAvatarError] = useState<string | null>(null)
   const initialFormRef = useRef<ReturnType<typeof buildInitialForm> | null>(
     null
   )
@@ -65,9 +66,7 @@ export function SettingsProfilePage() {
     avatarUrl: "",
   })
 
-  function updateForm(
-    updater: React.SetStateAction<typeof form>
-  ) {
+  function updateForm(updater: React.SetStateAction<typeof form>) {
     isDirtyRef.current = true
     setForm(updater)
   }
@@ -110,6 +109,10 @@ export function SettingsProfilePage() {
             initialFormRef.current = saved
             setForm(saved)
             isDirtyRef.current = false
+            toast.success("Profile saved.")
+          },
+          onError: (error) => {
+            toastMutationError(error, "Failed to save profile")
           },
         }
       )
@@ -130,7 +133,7 @@ export function SettingsProfilePage() {
     }
   }, [data, form, updateProfile])
 
-  if (!data) return null
+  if (!data) return <SettingsPageSkeleton />
 
   const initials = getInitials(form.firstName, form.lastName, data.email)
   const email = data.email
@@ -140,17 +143,15 @@ export function SettingsProfilePage() {
     e.target.value = ""
     if (!file) return
 
-    setAvatarError(null)
     setIsUploadingAvatar(true)
     try {
       const { imageUrl } = await uploadAvatar(file)
       setForm((prev) => ({ ...prev, avatarUrl: imageUrl }))
       isDirtyRef.current = true
       await updateProfile.mutateAsync({ avatarUrl: imageUrl })
+      toast.success("Avatar updated.")
     } catch (error) {
-      setAvatarError(
-        error instanceof Error ? error.message : "Avatar upload failed"
-      )
+      toastMutationError(error, "Avatar upload failed")
     } finally {
       setIsUploadingAvatar(false)
     }
@@ -209,9 +210,6 @@ export function SettingsProfilePage() {
               className="hidden"
               onChange={handleAvatarChange}
             />
-            {avatarError ? (
-              <p className="w-full text-destructive text-xs">{avatarError}</p>
-            ) : null}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -280,17 +278,6 @@ export function SettingsProfilePage() {
               className="min-h-[90px] bg-input-bg"
             />
           </div>
-
-          {updateProfile.isError && (
-            <p className="text-destructive text-sm">
-              {updateProfile.error instanceof Error
-                ? updateProfile.error.message
-                : "Failed to save profile"}
-            </p>
-          )}
-          {updateProfile.isSuccess && !updateProfile.isPending ? (
-            <p className="text-muted-foreground text-sm">Saved</p>
-          ) : null}
         </div>
       </SettingsSectionCard>
 

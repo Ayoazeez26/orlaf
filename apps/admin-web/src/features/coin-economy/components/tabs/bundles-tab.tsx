@@ -8,6 +8,9 @@ import { BundlesTable } from "../bundles-table"
 
 interface BundlesTabProps {
   bundles: CoinBundle[]
+  isLoading?: boolean
+  isSaving?: boolean
+  isDeleting?: boolean
   formOpen: boolean
   formMode: "create" | "edit"
   editingBundle?: CoinBundle
@@ -17,12 +20,15 @@ interface BundlesTabProps {
   onDeleteOpenChange: (open: boolean) => void
   onEdit: (bundle: CoinBundle) => void
   onDelete: (bundle: CoinBundle) => void
-  onSave: (values: BundleFormValues) => void
-  onConfirmDelete: () => void
+  onSave: (values: BundleFormValues) => void | Promise<void>
+  onConfirmDelete: () => void | Promise<void>
 }
 
 export function BundlesTab({
   bundles,
+  isLoading = false,
+  isSaving = false,
+  isDeleting = false,
   formOpen,
   formMode,
   editingBundle,
@@ -47,7 +53,12 @@ export function BundlesTab({
               Bundles users can purchase from the store.
             </p>
           </div>
-          <BundlesTable bundles={bundles} onEdit={onEdit} onDelete={onDelete} />
+          <BundlesTable
+            bundles={bundles}
+            isLoading={isLoading}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
         </CardContent>
       </Card>
 
@@ -58,6 +69,7 @@ export function BundlesTab({
         initialValues={
           editingBundle
             ? {
+                productId: editingBundle.productId,
                 name: editingBundle.name,
                 coins: editingBundle.coins,
                 bonusCoins: editingBundle.bonusCoins,
@@ -66,6 +78,7 @@ export function BundlesTab({
               }
             : undefined
         }
+        isSaving={isSaving}
         onSave={onSave}
       />
 
@@ -73,6 +86,7 @@ export function BundlesTab({
         open={deleteOpen}
         onOpenChange={onDeleteOpenChange}
         bundleName={deletingBundle?.name ?? "this"}
+        isDeleting={isDeleting}
         onConfirm={onConfirmDelete}
       />
     </>

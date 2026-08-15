@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react"
 import { useProjectQuery } from "@/features/projects/api/projects-hooks"
 import { ProjectDetailPage } from "@/features/projects/components/detail/project-detail-page"
 import { mapDetailToProject } from "@/features/projects/lib/map-project"
+import { DetailPageSkeleton } from "@/features/workspaces/components/page-skeletons"
 import { WorkspaceSectionGate } from "@/features/workspaces/components/workspace-section-gate"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
 
@@ -32,8 +33,8 @@ function ProjectDetailContent({
 
   if (isPending) {
     return (
-      <div className="flex min-h-40 items-center justify-center p-4 text-muted-foreground text-sm sm:p-6 lg:p-8">
-        Loading project…
+      <div className="p-4 sm:p-6 lg:p-8">
+        <DetailPageSkeleton />
       </div>
     )
   }

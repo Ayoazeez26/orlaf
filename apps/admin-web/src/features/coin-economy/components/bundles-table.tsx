@@ -5,6 +5,8 @@ import { BundleStatusBadge } from "./coin-badges"
 
 interface BundlesTableProps {
   bundles: CoinBundle[]
+  isLoading?: boolean
+  readOnly?: boolean
   onEdit: (bundle: CoinBundle) => void
   onDelete: (bundle: CoinBundle) => void
 }
@@ -21,7 +23,21 @@ function formatBonus(bonusCoins: number) {
   return `+${formatCoins(bonusCoins)}`
 }
 
-export function BundlesTable({ bundles, onEdit, onDelete }: BundlesTableProps) {
+export function BundlesTable({
+  bundles,
+  isLoading = false,
+  readOnly = false,
+  onEdit,
+  onDelete,
+}: BundlesTableProps) {
+  if (isLoading) {
+    return (
+      <div className="flex min-h-40 items-center justify-center p-6 text-center text-muted-foreground text-sm">
+        Loading coin bundles…
+      </div>
+    )
+  }
+
   if (bundles.length === 0) {
     return (
       <div className="flex min-h-40 items-center justify-center p-6 text-center text-muted-foreground text-sm">
@@ -41,9 +57,11 @@ export function BundlesTable({ bundles, onEdit, onDelete }: BundlesTableProps) {
             <th className={HEAD_CLASS}>Price</th>
             <th className={HEAD_CLASS}>Effective rate</th>
             <th className={HEAD_CLASS}>Status</th>
-            <th className={HEAD_CLASS}>
-              <span className="sr-only">Actions</span>
-            </th>
+            {!readOnly ? (
+              <th className={HEAD_CLASS}>
+                <span className="sr-only">Actions</span>
+              </th>
+            ) : null}
           </tr>
         </thead>
         <tbody>
@@ -54,9 +72,14 @@ export function BundlesTable({ bundles, onEdit, onDelete }: BundlesTableProps) {
             >
               <td className="px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-foreground">
-                    {bundle.name}
-                  </span>
+                  <div>
+                    <span className="font-medium text-foreground">
+                      {bundle.name}
+                    </span>
+                    <p className="mt-0.5 font-mono text-muted-foreground text-xs">
+                      {bundle.productId}
+                    </p>
+                  </div>
                   {bundle.isBestValue ? (
                     <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
                       <Star className="size-3" aria-hidden />
@@ -83,29 +106,31 @@ export function BundlesTable({ bundles, onEdit, onDelete }: BundlesTableProps) {
               <td className="px-4 py-3">
                 <BundleStatusBadge status={bundle.status} />
               </td>
-              <td className="px-4 py-3 text-right">
-                <div className="flex items-center justify-end gap-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Edit ${bundle.name}`}
-                    onClick={() => onEdit(bundle)}
-                  >
-                    <Pencil className="size-4" aria-hidden />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label={`Delete ${bundle.name}`}
-                    className="text-muted-foreground hover:text-destructive"
-                    onClick={() => onDelete(bundle)}
-                  >
-                    <Trash2 className="size-4" aria-hidden />
-                  </Button>
-                </div>
-              </td>
+              {!readOnly ? (
+                <td className="px-4 py-3 text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Edit ${bundle.name}`}
+                      onClick={() => onEdit(bundle)}
+                    >
+                      <Pencil className="size-4" aria-hidden />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Delete ${bundle.name}`}
+                      className="text-muted-foreground hover:text-destructive"
+                      onClick={() => onDelete(bundle)}
+                    >
+                      <Trash2 className="size-4" aria-hidden />
+                    </Button>
+                  </div>
+                </td>
+              ) : null}
             </tr>
           ))}
         </tbody>

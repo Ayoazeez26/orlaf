@@ -24,9 +24,9 @@ export function SettingsField({
   return (
     <div className="space-y-2">
       <Label className="font-medium text-foreground text-sm">{label}</Label>
-      <div className="relative flex items-center">
+      <div className="flex h-10 items-center overflow-hidden rounded-md border border-input bg-input-bg">
         {prefix ? (
-          <span className="pointer-events-none absolute left-3 text-muted-foreground text-sm">
+          <span className="shrink-0 pl-3 text-muted-foreground text-sm">
             {prefix}
           </span>
         ) : null}
@@ -35,9 +35,9 @@ export function SettingsField({
           onChange={onChange ? (e) => onChange(e.target.value) : undefined}
           readOnly={readOnly}
           placeholder={placeholder}
-          className={`bg-input-bg ${prefix ? "pl-7" : ""} ${suffix ? "pr-24" : ""}`}
+          className="h-full min-w-0 flex-1 border-0 bg-transparent shadow-none focus-visible:ring-0"
         />
-        {suffix ? <div className="absolute right-1">{suffix}</div> : null}
+        {suffix ? <div className="shrink-0 pr-1">{suffix}</div> : null}
       </div>
     </div>
   )

@@ -1,4 +1,5 @@
 import { Outlet, useParams } from "@tanstack/react-router"
+import { ProjectDetailSkeleton } from "@/features/dashboard/components/home/dashboard-home-skeleton"
 import { useProject } from "../../hooks/use-project"
 import { BackToProjectsLink } from "../shared/back-to-projects-link"
 import { ProjectHeroCard } from "./project-hero-card"
@@ -11,9 +12,8 @@ export function ProjectDetailLayout() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
-        <div className="h-4 w-32 animate-pulse rounded bg-muted" />
-        <div className="h-48 animate-pulse rounded-2xl bg-muted" />
+      <div className="p-4 sm:p-6 lg:p-8">
+        <ProjectDetailSkeleton />
       </div>
     )
   }

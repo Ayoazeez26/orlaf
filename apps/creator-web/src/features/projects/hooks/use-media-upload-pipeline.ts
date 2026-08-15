@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react"
+import { toast, toastMutationError } from "@/lib/toast"
 import { fetchPreferences } from "@/features/settings/api/preferences-api"
 import { publishSeries } from "../api/studio-api"
 import { formatDuration } from "../lib/media/format-duration"
@@ -31,18 +32,16 @@ function validateForPublish(state: UploadWizardState): string | null {
 
 export function useMediaUploadPipeline() {
   const [isPublishing, setIsPublishing] = useState(false)
-  const [publishError, setPublishError] = useState<string | null>(null)
   const [progress, setProgress] = useState<PublishProgress | null>(null)
 
   const publish = useCallback(async (state: UploadWizardState) => {
     const validationError = validateForPublish(state)
     if (validationError) {
-      setPublishError(validationError)
+      toast.error(validationError)
       throw new Error(validationError)
     }
 
     setIsPublishing(true)
-    setPublishError(null)
 
     let publishLabel = "Submitting for review…"
     try {
@@ -68,10 +67,10 @@ export function useMediaUploadPipeline() {
     try {
       await publishSeries(seriesId)
       setProgress({ phase: "done", label: "Submitted", value: 1 })
+      toast.success("Submitted for review.")
       return seriesId
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Publish failed"
-      setPublishError(message)
+      toastMutationError(error, "Publish failed")
       throw error
     } finally {
       setIsPublishing(false)
@@ -81,7 +80,6 @@ export function useMediaUploadPipeline() {
   return {
     publish,
     isPublishing,
-    publishError,
     progress,
   }
 }

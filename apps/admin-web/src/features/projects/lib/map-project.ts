@@ -22,6 +22,7 @@ export function mapListItemToProject(item: AdminSeriesListItem): Project {
     language: item.language,
     creatorName: item.creatorName,
     episodeCount: item.episodeCount,
+    pendingEpisodeCount: item.pendingEpisodeCount,
     views: item.views,
     publishStatus: item.publishStatus,
     reviewStatus: item.reviewStatus,
@@ -48,11 +49,12 @@ export function mapDetailToProject(detail: AdminSeriesDetail): ProjectDetail {
       duration: episode.duration,
       size: episode.size,
       views: episode.views,
+      reviewStatus: episode.reviewStatus,
       status:
         episode.status === "published"
           ? "published"
-          : episode.status === "failed"
-            ? "draft"
+          : episode.status === "pending_review"
+            ? "pending_review"
             : "draft",
     })),
     topEpisodes: [],

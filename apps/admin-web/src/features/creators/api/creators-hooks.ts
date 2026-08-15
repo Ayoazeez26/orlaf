@@ -4,6 +4,10 @@ import type {
 } from "@sable/contracts"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
+  fetchCreatorAnalytics,
+  mapCreatorAnalyticsOverview,
+} from "./creator-analytics-api"
+import {
   getCreator,
   type ListCreatorsParams,
   listCreators,
@@ -18,6 +22,7 @@ export const creatorsKeys = {
   list: (params: ListCreatorsParams) =>
     [...creatorsKeys.all, "list", params] as const,
   detail: (id: string) => [...creatorsKeys.all, "detail", id] as const,
+  analytics: (id: string) => [...creatorsKeys.all, "analytics", id] as const,
 }
 
 export function useCreatorsQuery(params: ListCreatorsParams) {
@@ -32,6 +37,15 @@ export function useCreatorQuery(id: string) {
   return useQuery({
     queryKey: creatorsKeys.detail(id),
     queryFn: () => getCreator(id),
+    enabled: Boolean(id),
+  })
+}
+
+export function useCreatorAnalyticsQuery(id: string) {
+  return useQuery({
+    queryKey: creatorsKeys.analytics(id),
+    queryFn: async () =>
+      mapCreatorAnalyticsOverview(await fetchCreatorAnalytics(id)),
     enabled: Boolean(id),
   })
 }

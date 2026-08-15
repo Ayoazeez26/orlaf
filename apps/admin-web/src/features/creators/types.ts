@@ -80,6 +80,7 @@ export interface CreatorAnalytics {
   totalViews: number
   uniqueViewers: number
   avgWatchTime: string
+  completionRate: number
   totalEarnings: number
   viewershipTrend: ViewershipPoint[]
   deviceShare: DeviceShare[]

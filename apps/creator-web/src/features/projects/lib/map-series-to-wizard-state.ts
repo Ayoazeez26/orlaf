@@ -66,7 +66,22 @@ function mapEpisodeAccess(accessType: EpisodeAccessType): EpisodeAccess {
 }
 
 function mapEpisode(episode: StudioEpisode): UploadEpisodeDraft {
-  const hasVideo = episode.status === "ready" && Boolean(episode.hlsUrl)
+  const hasVideo =
+    episode.status === "ready" ||
+    Boolean(episode.hlsUrl) ||
+    Boolean(episode.videoHostingId)
+
+  const mediaStatus =
+    episode.status === "failed"
+      ? "failed"
+      : episode.status === "processing" ||
+          episode.status === "uploading" ||
+          episode.status === "pending"
+        ? "processing"
+        : hasVideo
+          ? "ready"
+          : null
+
   return {
     id: episode.id,
     backendEpisodeId: episode.id,
@@ -74,19 +89,25 @@ function mapEpisode(episode: StudioEpisode): UploadEpisodeDraft {
     synopsis: episode.synopsis ?? "",
     duration: formatDuration(episode.durationSeconds),
     access: mapEpisodeAccess(episode.accessType),
+    coinPrice: episode.coinPrice ?? undefined,
     autoCaption: true,
-    media: hasVideo
-      ? {
-          file: placeholderFile(`${episode.title || "episode"}.mp4`),
-          status: "ready",
-          progress: 1,
-          durationSeconds: episode.durationSeconds ?? undefined,
-          previewObjectUrl: episode.thumbnailUrl ?? undefined,
-          episodeId: episode.id,
-          videoHostingId: episode.videoHostingId ?? undefined,
-          hlsUrl: episode.hlsUrl ?? undefined,
-        }
-      : null,
+    media:
+      mediaStatus == null
+        ? null
+        : {
+            file: placeholderFile(`${episode.title || "episode"}.mp4`),
+            status: mediaStatus,
+            progress: mediaStatus === "ready" ? 1 : 0.5,
+            error:
+              mediaStatus === "failed"
+                ? "Episode processing failed"
+                : undefined,
+            durationSeconds: episode.durationSeconds ?? undefined,
+            previewObjectUrl: episode.thumbnailUrl ?? undefined,
+            episodeId: episode.id,
+            videoHostingId: episode.videoHostingId ?? undefined,
+            hlsUrl: episode.hlsUrl ?? undefined,
+          },
   }
 }
 

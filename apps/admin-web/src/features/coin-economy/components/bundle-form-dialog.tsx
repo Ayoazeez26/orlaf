@@ -12,10 +12,12 @@ interface BundleFormDialogProps {
   onOpenChange: (open: boolean) => void
   mode: "create" | "edit"
   initialValues?: BundleFormValues
-  onSave: (values: BundleFormValues) => void
+  isSaving?: boolean
+  onSave: (values: BundleFormValues) => void | Promise<void>
 }
 
 const EMPTY_VALUES: BundleFormValues = {
+  productId: "",
   name: "",
   coins: 100,
   bonusCoins: 0,
@@ -28,6 +30,7 @@ export function BundleFormDialog({
   onOpenChange,
   mode,
   initialValues,
+  isSaving = false,
   onSave,
 }: BundleFormDialogProps) {
   const [values, setValues] = useState<BundleFormValues>(EMPTY_VALUES)
@@ -46,10 +49,15 @@ export function BundleFormDialog({
     setValues((current) => ({ ...current, ...patch }))
   }
 
-  function handleSave() {
-    onSave(values)
-    onOpenChange(false)
+  async function handleSave() {
+    await onSave(values)
   }
+
+  const canSave =
+    values.productId.trim().length > 0 &&
+    values.name.trim().length > 0 &&
+    values.price.trim().length > 0 &&
+    values.coins > 0
 
   const title = mode === "create" ? "New Coin Bundle" : "Edit Coin Bundle"
 
@@ -93,6 +101,20 @@ export function BundleFormDialog({
         </div>
 
         <div className="space-y-4 px-6 py-5">
+          <div className="space-y-2">
+            <Label htmlFor="bundle-product-id">RevenueCat product ID</Label>
+            <Input
+              id="bundle-product-id"
+              value={values.productId}
+              disabled={mode === "edit" || isSaving}
+              placeholder="sable_coins_300"
+              onChange={(event) => update({ productId: event.target.value })}
+            />
+            <p className="text-muted-foreground text-xs">
+              Must match the store SKU in RevenueCat. Cannot be changed after
+              creation.
+            </p>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="bundle-name">Bundle name</Label>
             <Input
@@ -151,12 +173,17 @@ export function BundleFormDialog({
           <Button
             type="button"
             variant="outline"
+            disabled={isSaving}
             onClick={() => onOpenChange(false)}
           >
             Cancel
           </Button>
-          <Button type="button" onClick={handleSave}>
-            Save bundle
+          <Button
+            type="button"
+            disabled={!canSave || isSaving}
+            onClick={() => void handleSave()}
+          >
+            {isSaving ? "Saving…" : "Save bundle"}
           </Button>
         </div>
       </div>

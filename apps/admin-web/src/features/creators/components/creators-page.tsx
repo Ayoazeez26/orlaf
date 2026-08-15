@@ -2,6 +2,7 @@ import type { AdminCreatorStats } from "@sable/contracts"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import { useState } from "react"
+import { TablePageSkeleton } from "@/features/workspaces/components/page-skeletons"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
 import { useCreatorsQuery } from "../api/creators-hooks"
@@ -32,45 +33,47 @@ export function CreatorsPage({ role }: { role: WorkspaceRoleId }) {
     <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
       <CreatorsPageHeader />
 
-      <CreatorsStatCards stats={stats} />
+      {isPending ? (
+        <TablePageSkeleton />
+      ) : (
+        <>
+          <CreatorsStatCards stats={stats} />
 
-      <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6")}>
-        <CardContent className="flex flex-col gap-5 px-4 sm:px-6">
-          <CreatorsToolbar
-            activeFilter={activeFilter}
-            onFilterChange={setActiveFilter}
-            search={search}
-            onSearchChange={setSearch}
-          />
+          <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6")}>
+            <CardContent className="flex flex-col gap-5 px-4 sm:px-6">
+              <CreatorsToolbar
+                activeFilter={activeFilter}
+                onFilterChange={setActiveFilter}
+                search={search}
+                onSearchChange={setSearch}
+              />
 
-          {isError ? (
-            <div className="flex min-h-40 flex-col items-center justify-center gap-3 p-6 text-center">
-              <p className="text-muted-foreground text-sm">
-                {error instanceof Error
-                  ? error.message
-                  : "Failed to load creators."}
-              </p>
-              <button
-                type="button"
-                onClick={() => refetch()}
-                className="text-primary text-sm underline underline-offset-4"
-              >
-                Try again
-              </button>
-            </div>
-          ) : isPending ? (
-            <div className="flex min-h-40 items-center justify-center p-6 text-center text-muted-foreground text-sm">
-              Loading creators…
-            </div>
-          ) : (
-            <CreatorsTable
-              creators={creators}
-              role={role}
-              isRefreshing={isFetching}
-            />
-          )}
-        </CardContent>
-      </Card>
+              {isError ? (
+                <div className="flex min-h-40 flex-col items-center justify-center gap-3 p-6 text-center">
+                  <p className="text-muted-foreground text-sm">
+                    {error instanceof Error
+                      ? error.message
+                      : "Failed to load creators."}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => refetch()}
+                    className="text-primary text-sm underline underline-offset-4"
+                  >
+                    Try again
+                  </button>
+                </div>
+              ) : (
+                <CreatorsTable
+                  creators={creators}
+                  role={role}
+                  isRefreshing={isFetching}
+                />
+              )}
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   )
 }

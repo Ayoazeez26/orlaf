@@ -89,6 +89,11 @@ export function ProjectsTable({
               </td>
               <td className="px-4 py-3 text-muted-foreground tabular-nums">
                 {project.episodeCount}
+                {project.pendingEpisodeCount > 0 ? (
+                  <span className="ml-1 text-amber-600">
+                    · {project.pendingEpisodeCount} pending
+                  </span>
+                ) : null}
               </td>
               <td className="whitespace-nowrap px-4 py-3 font-medium text-foreground tabular-nums">
                 {formatProjectViews(project.views)}
@@ -127,7 +132,10 @@ function ProjectRowActions({
   const reject = useRejectProject(project.id)
   const isPending = publish.isPending || reject.isPending
 
-  if (project.reviewStatus === "pending") {
+  if (
+    project.reviewStatus === "pending" &&
+    project.publishStatus !== "published"
+  ) {
     return (
       <div className="flex flex-wrap items-center gap-2">
         <Button

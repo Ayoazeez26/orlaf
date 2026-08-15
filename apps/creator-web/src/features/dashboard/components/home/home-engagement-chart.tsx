@@ -67,18 +67,21 @@ export function HomeEngagementChart({
             />
             <Bar
               dataKey="primary"
+              name="Views"
               fill={ENGAGEMENT_COLORS.primary}
               radius={[4, 4, 0, 0]}
               barSize={20}
             />
             <Bar
               dataKey="secondary"
+              name="Likes"
               fill={ENGAGEMENT_COLORS.secondary}
               radius={[4, 4, 0, 0]}
               barSize={20}
             />
             <Bar
               dataKey="tertiary"
+              name="Shares"
               fill={ENGAGEMENT_COLORS.tertiary}
               radius={[4, 4, 0, 0]}
               barSize={20}

@@ -1,12 +1,10 @@
-import { useState } from "react"
 import { BundlesTable } from "@/features/coin-economy/components/bundles-table"
 import { SettingsTab } from "@/features/coin-economy/components/tabs/settings-tab"
-import { MOCK_COIN_BUNDLES } from "@/features/coin-economy/data/mock-bundles"
-import type { CoinBundle } from "@/features/coin-economy/types"
+import { useAdminCoinBundles } from "@/features/coin-economy/api/coin-economy-hooks"
 import { SettingsPanel, SettingsSection } from "../settings-shared"
 
 export function SettingsCoinEconomyTab() {
-  const [bundles] = useState<CoinBundle[]>(MOCK_COIN_BUNDLES)
+  const bundlesQuery = useAdminCoinBundles()
 
   return (
     <div className="space-y-6">
@@ -18,7 +16,9 @@ export function SettingsCoinEconomyTab() {
           subtitle="Bundles users can purchase from the store."
         >
           <BundlesTable
-            bundles={bundles}
+            bundles={bundlesQuery.data ?? []}
+            isLoading={bundlesQuery.isLoading}
+            readOnly
             onEdit={() => {}}
             onDelete={() => {}}
           />

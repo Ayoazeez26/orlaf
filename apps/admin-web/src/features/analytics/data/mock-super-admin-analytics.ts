@@ -9,7 +9,7 @@ export const MOCK_SUPER_ADMIN_ANALYTICS: SuperAdminAnalytics = {
       changePercent: 12.4,
       icon: DollarSign,
     },
-    { label: "New Users", value: "7.2K", changePercent: 8.1, icon: Users },
+    { label: "Active Users", value: "7.2K", changePercent: 8.1, icon: Users },
     {
       label: "Conversion",
       value: "7.2%",

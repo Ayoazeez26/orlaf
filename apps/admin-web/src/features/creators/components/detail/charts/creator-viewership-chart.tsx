@@ -78,7 +78,7 @@ export function CreatorViewershipChart({ data }: CreatorViewershipChartProps) {
             <Area
               type="monotone"
               dataKey="previous"
-              name="Previous period"
+              name="Unique viewers"
               stroke={ANALYTICS_SERIES_COLORS.amber}
               strokeWidth={2}
               fill="transparent"

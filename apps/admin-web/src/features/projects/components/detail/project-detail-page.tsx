@@ -40,7 +40,7 @@ export function ProjectDetailPage({ project, role }: ProjectDetailPageProps) {
         <ProjectEpisodesTab project={project} />
       ) : null}
       {activeTab === "analytics" ? (
-        <ProjectAnalyticsTab analytics={project.analytics} />
+        <ProjectAnalyticsTab projectId={project.id} />
       ) : null}
       {activeTab === "moderation" ? (
         <ProjectModerationTab project={project} role={role} />

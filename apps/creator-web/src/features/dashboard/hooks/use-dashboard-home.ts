@@ -1,6 +1,7 @@
 import { useMemo } from "react"
+import { DEFAULT_ANALYTICS_DATE_RANGE } from "@/features/analytics/constants"
+import { useAnalyticsDashboard } from "@/features/analytics/hooks/use-analytics-dashboard"
 import { useAuth } from "@/features/auth/auth-context"
-import { MOCK_DASHBOARD_HOME } from "../data/mock-home"
 import type { DashboardHomeData, DashboardUser } from "../types"
 
 function buildUserFromSession(
@@ -22,18 +23,51 @@ function buildUserFromSession(
   }
 }
 
-export function useDashboardHome(): DashboardHomeData {
+const FALLBACK_USER: DashboardUser = {
+  displayName: "Creator",
+  fullName: "Creator",
+  role: "Sable Creator",
+  initials: "CR",
+}
+
+export function useDashboardHome(): DashboardHomeData & {
+  isLoading: boolean
+  isError: boolean
+} {
   const { session } = useAuth()
+  const { data, isPending, isError } = useAnalyticsDashboard(
+    DEFAULT_ANALYTICS_DATE_RANGE
+  )
 
   return useMemo(() => {
     const user =
       session?.email != null
         ? buildUserFromSession(session.email, session.display_name)
-        : MOCK_DASHBOARD_HOME.user
+        : FALLBACK_USER
+
+    if (!data) {
+      return {
+        user,
+        kpis: [],
+        engagementChart: [],
+        topEpisodes: [],
+        isLoading: isPending,
+        isError,
+      }
+    }
 
     return {
-      ...MOCK_DASHBOARD_HOME,
       user,
+      kpis: data.kpis.slice(0, 4),
+      engagementChart: data.engagement.map((point) => ({
+        day: point.label,
+        primary: point.views,
+        secondary: point.likes,
+        tertiary: point.shares,
+      })),
+      topEpisodes: data.topEpisodes,
+      isLoading: false,
+      isError,
     }
-  }, [session])
+  }, [session, data, isPending, isError])
 }

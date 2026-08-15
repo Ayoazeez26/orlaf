@@ -19,6 +19,7 @@ interface SyncedFields {
   title: string
   synopsis: string
   access: EpisodeAccess
+  coinPrice?: number
 }
 
 function hasChanged(episode: UploadEpisodeDraft, synced?: SyncedFields) {
@@ -26,7 +27,8 @@ function hasChanged(episode: UploadEpisodeDraft, synced?: SyncedFields) {
   return (
     episode.title !== synced.title ||
     episode.synopsis !== synced.synopsis ||
-    episode.access !== synced.access
+    episode.access !== synced.access ||
+    episode.coinPrice !== synced.coinPrice
   )
 }
 
@@ -59,6 +61,7 @@ export function useEpisodeAutosave(
           title: episode.title,
           synopsis: episode.synopsis,
           access: episode.access,
+          coinPrice: episode.coinPrice,
         })
         continue
       }
@@ -71,6 +74,7 @@ export function useEpisodeAutosave(
         title: episode.title,
         synopsis: episode.synopsis,
         access: episode.access,
+        coinPrice: episode.coinPrice,
       }
 
       const timer = setTimeout(() => {
@@ -80,6 +84,9 @@ export function useEpisodeAutosave(
           title: fields.title.trim() || "Untitled episode",
           synopsis: fields.synopsis.trim() || undefined,
           accessType: mapEpisodeAccess(fields.access),
+          ...(fields.access === "coins" && fields.coinPrice != null
+            ? { coinPrice: fields.coinPrice }
+            : {}),
         }).catch(() => {
           // Best effort autosave; the user can still continue/publish, which
           // will surface failures explicitly.

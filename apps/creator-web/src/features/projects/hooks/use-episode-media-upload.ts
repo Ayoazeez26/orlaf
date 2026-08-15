@@ -116,6 +116,9 @@ export function useEpisodeMediaUpload() {
               title: draft.title.trim() || "Untitled episode",
               synopsis: draft.synopsis.trim() || undefined,
               accessType: mapEpisodeAccess(draft.access),
+              ...(draft.access === "coins" && draft.coinPrice != null
+                ? { coinPrice: draft.coinPrice }
+                : {}),
               aiVerticalConversion: state.aiConversionEnabled,
             })
             backendEpisodeId = created.id

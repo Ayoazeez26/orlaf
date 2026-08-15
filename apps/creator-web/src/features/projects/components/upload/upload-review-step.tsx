@@ -23,6 +23,7 @@ import { projectKeys } from "../../data/query-keys"
 import { useMediaUploadPipeline } from "../../hooks/use-media-upload-pipeline"
 import { useSaveUploadDraft } from "../../hooks/use-save-upload-draft"
 import { formatUploadGenres } from "../../lib/format-upload-genres"
+import { formatCoinAccessLabel } from "../../lib/coin-price"
 import type { UploadEpisodeDraft, UploadWizardState } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
 import { UploadReviewStepNav } from "./upload-step-nav"
@@ -38,8 +39,7 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
   const queryClient = useQueryClient()
   const { state, dispatch } = useUploadWizard()
   const saveDraft = useSaveUploadDraft()
-  const { publish, isPublishing, publishError, progress } =
-    useMediaUploadPipeline()
+  const { publish, isPublishing, progress } = useMediaUploadPipeline()
   const [scheduleMode, setScheduleMode] = useState<ScheduleMode>("immediate")
   const [goLiveAt, setGoLiveAt] = useState("")
 
@@ -93,7 +93,7 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
       dispatch({ type: "RESET" })
       navigate({ to: "/dashboard/projects" })
     } catch {
-      // publishError is set in the hook
+      // Error toast is shown in the publish hook
     }
   }
 
@@ -233,10 +233,6 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
                 </p>
                 <Progress value={progress.value * 100} />
               </div>
-            ) : null}
-
-            {publishError ? (
-              <p className="text-destructive text-sm">{publishError}</p>
             ) : null}
 
             <div className="flex flex-col gap-2">
@@ -416,7 +412,7 @@ function EpisodeReviewRow({
       ? "Free"
       : episode.access === "premium"
         ? "Premium"
-        : "Coins"
+        : formatCoinAccessLabel(episode.coinPrice)
 
   return (
     <li className="flex items-center gap-3 rounded-xl bg-muted/40 px-4 py-3">
@@ -436,7 +432,7 @@ function EpisodeReviewRow({
         className={cn(
           "shrink-0 rounded-full px-2.5 py-1 font-medium text-[11px]",
           episode.access === "free"
-            ? "bg-[#2BBB7126] text-[#002C0F]"
+            ? "bg-[#2BBB7126] text-[#002C0F] dark:text-emerald-300"
             : "bg-primary/10 text-primary"
         )}
       >

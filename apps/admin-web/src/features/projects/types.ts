@@ -9,6 +9,7 @@ export interface Project {
   language: string
   creatorName: string
   episodeCount: number
+  pendingEpisodeCount: number
   views: number | null
   publishStatus: ProjectPublishStatus
   reviewStatus: ProjectReviewStatus
@@ -23,7 +24,8 @@ export interface ProjectEpisode {
   duration: string
   size: string
   views: number | null
-  status: "published" | "draft"
+  reviewStatus: ProjectReviewStatus
+  status: "published" | "draft" | "pending_review"
 }
 
 export interface TopPerformingEpisode {

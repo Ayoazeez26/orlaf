@@ -24,7 +24,7 @@ function createInitialEpisode(index: number): UploadEpisodeDraft {
     title: `Episode ${index}`,
     synopsis: "",
     duration: "0:00",
-    access: "coins",
+    access: "free",
     autoCaption: true,
     media: null,
   }
@@ -64,7 +64,7 @@ function createEpisode(index: number): UploadEpisodeDraft {
     title: `Episode ${index}`,
     synopsis: "",
     duration: "0:00",
-    access: "coins",
+    access: "free",
     autoCaption: true,
     media: null,
   }
@@ -85,8 +85,19 @@ function uploadWizardReducer(
   action: UploadWizardAction
 ): UploadWizardState {
   switch (action.type) {
-    case "SET_STEP":
-      return { ...state, step: action.payload }
+    case "SET_STEP": {
+      if (action.payload !== "review") {
+        return { ...state, step: action.payload }
+      }
+      const kept = state.episodes.filter(
+        (episode) => episode.backendEpisodeId || episode.media != null
+      )
+      return {
+        ...state,
+        step: "review",
+        episodes: kept.length > 0 ? kept : state.episodes,
+      }
+    }
     case "SET_FIELD":
       return { ...state, ...action.payload }
     case "TOGGLE_GENRE": {
@@ -157,6 +168,14 @@ function uploadWizardReducer(
         ...state,
         episodes: state.episodes.filter((ep) => ep.id !== action.payload.id),
       }
+    case "PRUNE_EMPTY_EPISODES": {
+      const kept = state.episodes.filter(
+        (episode) => episode.backendEpisodeId || episode.media != null
+      )
+      return kept.length === state.episodes.length
+        ? state
+        : { ...state, episodes: kept }
+    }
     case "TOGGLE_GUIDE":
       return { ...state, guideVisible: !state.guideVisible }
     case "SET_TRAILER":

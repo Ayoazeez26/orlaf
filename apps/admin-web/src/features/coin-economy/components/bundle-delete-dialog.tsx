@@ -6,22 +6,23 @@ interface BundleDeleteDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   bundleName: string
-  onConfirm: () => void
+  isDeleting?: boolean
+  onConfirm: () => void | Promise<void>
 }
 
 export function BundleDeleteDialog({
   open,
   onOpenChange,
   bundleName,
+  isDeleting = false,
   onConfirm,
 }: BundleDeleteDialogProps) {
   useModalShell(open, onOpenChange)
 
   if (!open) return null
 
-  function handleConfirm() {
-    onConfirm()
-    onOpenChange(false)
+  async function handleConfirm() {
+    await onConfirm()
   }
 
   return (
@@ -69,6 +70,7 @@ export function BundleDeleteDialog({
           <Button
             type="button"
             variant="outline"
+            disabled={isDeleting}
             onClick={() => onOpenChange(false)}
           >
             Cancel
@@ -76,10 +78,11 @@ export function BundleDeleteDialog({
           <Button
             type="button"
             className="gap-2 bg-destructive text-white hover:bg-destructive/90"
-            onClick={handleConfirm}
+            disabled={isDeleting}
+            onClick={() => void handleConfirm()}
           >
             <Trash2 className="size-4" aria-hidden />
-            Delete Bundle
+            {isDeleting ? "Deleting…" : "Delete Bundle"}
           </Button>
         </div>
       </div>

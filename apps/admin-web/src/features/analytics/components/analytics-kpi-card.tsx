@@ -10,7 +10,8 @@ interface AnalyticsKpiCardProps {
 
 export function AnalyticsKpiCard({ kpi }: AnalyticsKpiCardProps) {
   const Icon = kpi.icon
-  const hasChange = kpi.changePercent != null && !Number.isNaN(kpi.changePercent)
+  const hasChange =
+    kpi.changePercent != null && !Number.isNaN(kpi.changePercent)
   const isPositive = (kpi.changePercent ?? 0) >= 0
   const TrendIcon = isPositive ? ArrowUpRight : ArrowDownRight
   const trendColor = isPositive ? "text-trend-positive" : "text-trend-negative"

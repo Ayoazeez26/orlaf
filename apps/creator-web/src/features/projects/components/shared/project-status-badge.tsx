@@ -2,7 +2,8 @@ import { Badge } from "@workspace/ui/components/badge"
 import { cn } from "@workspace/ui/lib/utils"
 import type { ProjectStatus } from "../../types"
 
-const PUBLISHED_PILL_CLASS = "border-[#2BBB7133] bg-[#2BBB7126] text-[#002C0F]"
+const PUBLISHED_PILL_CLASS =
+  "border-[#2BBB7133] bg-[#2BBB7126] text-[#002C0F] dark:text-emerald-300"
 
 const REJECTED_PILL_CLASS =
   "border-transparent bg-red-500/15 text-red-700 dark:text-red-400"

@@ -26,10 +26,13 @@ import {
   X,
 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { toast, toastMutationError } from "@/lib/toast"
 import { deleteEpisode } from "../../api/studio-api"
 import { useEpisodeAutosave } from "../../hooks/use-episode-autosave"
 import { useEpisodeMediaUpload } from "../../hooks/use-episode-media-upload"
 import { useSaveUploadDraft } from "../../hooks/use-save-upload-draft"
+import { formatCoinUsdHint, parseCoinPriceInput } from "../../lib/coin-price"
+import { getEpisodesStepBlocker } from "../../lib/episode-step-ready"
 import { formatUploadGenres } from "../../lib/format-upload-genres"
 import { MAX_EPISODE_FILE_BYTES } from "../../lib/media/upload-pipeline.types"
 import type { EpisodeAccess, UploadEpisodeDraft } from "../../types"
@@ -90,10 +93,9 @@ export function UploadEpisodesStep({
     try {
       await deleteEpisode(seriesId, backendEpisodeId)
       dispatch({ type: "REMOVE_EPISODE", payload: { id: episode.id } })
+      toast.success(`"${episode.title || "Episode"}" deleted.`)
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to delete episode"
-      alert(message)
+      toastMutationError(error, "Failed to delete episode")
     } finally {
       setDeletingEpisodeId(null)
     }
@@ -103,12 +105,11 @@ export function UploadEpisodesStep({
   const toolbarButtonClassName =
     "text-text-strong hover:text-text-strong aria-expanded:text-text-strong px-3 py-2"
 
-  const allEpisodesReady =
-    state.episodes.length > 0 &&
-    state.episodes.every((episode) => episode.media?.status === "ready")
+  const nextDisabledReason = getEpisodesStepBlocker(state.episodes)
+  const nextDisabled = nextDisabledReason != null
 
   function handleNext() {
-    if (!allEpisodesReady) return
+    if (nextDisabled) return
     onNext()
   }
 
@@ -285,6 +286,7 @@ export function UploadEpisodesStep({
                         </Label>
                         <Textarea
                           rows={4}
+                          placeholder="what happens in this episode"
                           className="mt-2 min-h-[104px] rounded-2xl bg-input-bg px-4 py-3 text-base text-text-strong dark:bg-input-bg"
                           value={episode.synopsis}
                           onChange={(e) =>
@@ -353,6 +355,44 @@ export function UploadEpisodesStep({
                         </div>
                       </div>
 
+                      {episode.access === "coins" ? (
+                        <div className="space-y-2">
+                          <Label
+                            htmlFor={`coin-price-${episode.id}`}
+                            className="font-medium text-sm text-text-strong"
+                          >
+                            Coins to unlock
+                          </Label>
+                          <Input
+                            id={`coin-price-${episode.id}`}
+                            type="text"
+                            inputMode="numeric"
+                            autoComplete="off"
+                            placeholder="e.g. 50"
+                            className="h-10 max-w-40 rounded-xl bg-input-bg text-left"
+                            value={episode.coinPrice ?? ""}
+                            onChange={(e) =>
+                              dispatch({
+                                type: "UPDATE_EPISODE",
+                                payload: {
+                                  id: episode.id,
+                                  patch: {
+                                    coinPrice: parseCoinPriceInput(
+                                      e.target.value
+                                    ),
+                                  },
+                                },
+                              })
+                            }
+                          />
+                          <p className="text-sm text-text-subtle">
+                            {episode.coinPrice != null
+                              ? formatCoinUsdHint(episode.coinPrice)
+                              : "10 coins = $1.00"}
+                          </p>
+                        </div>
+                      ) : null}
+
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div className="flex items-start gap-3">
                           <Subtitles
@@ -396,8 +436,9 @@ export function UploadEpisodesStep({
         <UploadEpisodesStepNav
           onBack={onBack}
           onNext={handleNext}
-          nextDisabled={!allEpisodesReady}
-          className="hidden xl:flex"
+          nextDisabled={nextDisabled}
+          nextDisabledReason={nextDisabledReason}
+          className="hidden xl:flex xl:flex-col"
         />
       </div>
 
@@ -414,8 +455,9 @@ export function UploadEpisodesStep({
         <UploadEpisodesStepNav
           onBack={onBack}
           onNext={handleNext}
-          nextDisabled={!allEpisodesReady}
-          className="xl:hidden"
+          nextDisabled={nextDisabled}
+          nextDisabledReason={nextDisabledReason}
+          className="flex flex-col xl:hidden"
         />
       </div>
     </div>

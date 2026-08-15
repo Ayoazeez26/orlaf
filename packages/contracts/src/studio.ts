@@ -11,14 +11,24 @@ export type SeriesStatus =
   | "rejected"
   | "archived"
 
-export type EpisodeAccessType = "free" | "coin_gated" | "premium"
+export const EpisodeAccessType = {
+  FREE: "free",
+  COIN_GATED: "coin_gated",
+  PREMIUM: "premium",
+} as const
 
-export type EpisodeStatus =
-  | "pending"
-  | "uploading"
-  | "processing"
-  | "ready"
-  | "failed"
+export type EpisodeAccessType =
+  (typeof EpisodeAccessType)[keyof typeof EpisodeAccessType]
+
+export const EpisodeStatus = {
+  PENDING: "pending",
+  UPLOADING: "uploading",
+  PROCESSING: "processing",
+  READY: "ready",
+  FAILED: "failed",
+} as const
+
+export type EpisodeStatus = (typeof EpisodeStatus)[keyof typeof EpisodeStatus]
 
 export interface CastMember {
   fullName: string
@@ -75,6 +85,11 @@ export interface UpdateEpisodeRequest {
   accessType?: EpisodeAccessType
   coinPrice?: number
   aiVerticalConversion?: boolean
+}
+
+/** PATCH /studio/series/:seriesId/episodes/reorder */
+export interface ReorderEpisodesRequest {
+  episodeIds: string[]
 }
 
 export interface UploadUrlResponse {

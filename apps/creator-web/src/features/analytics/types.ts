@@ -64,4 +64,5 @@ export interface AnalyticsDashboardData {
   devices: DeviceSegment[]
   engagement: EngagementPoint[]
   topEpisodes: TopEpisodeRow[]
+  episodeViews: Array<{ episodeId: string; views: number }>
 }

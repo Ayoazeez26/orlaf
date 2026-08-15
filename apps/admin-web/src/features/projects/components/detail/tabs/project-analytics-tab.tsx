@@ -1,4 +1,4 @@
-import { Clock, DollarSign, Eye, Users } from "lucide-react"
+import { Clock, Eye, Percent, Play } from "lucide-react"
 import {
   Area,
   AreaChart,
@@ -17,23 +17,31 @@ import {
   ANALYTICS_SERIES_COLORS,
   ANALYTICS_TOOLTIP_CONTENT_STYLE,
 } from "@/features/analytics/constants"
+import { useProjectAnalyticsQuery } from "@/features/projects/api/projects-hooks"
 import { MetricCardsRow } from "@/features/workspaces/components/home/metric-cards-row"
+import { AnalyticsTabSkeleton } from "@/features/workspaces/components/page-skeletons"
 import type { MetricDef } from "@/features/workspaces/types"
-import { formatProjectSubscribers } from "../../../data/project-details"
-import type { ProjectAnalytics } from "../../../types"
 import { ProjectTopEpisodesCard } from "../charts/project-top-episodes-card"
 
-interface ProjectAnalyticsTabProps {
-  analytics: ProjectAnalytics
+function formatWatchTime(totalSeconds: number): string {
+  const seconds = Math.max(0, Math.round(totalSeconds))
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${mins}:${secs.toString().padStart(2, "0")}`
 }
 
-export function ProjectAnalyticsTab({ analytics }: ProjectAnalyticsTabProps) {
-  const hasData =
-    analytics.totalViews > 0 ||
-    analytics.viewsThisWeek.length > 0 ||
-    analytics.topEpisodes.length > 0
+interface ProjectAnalyticsTabProps {
+  projectId: string
+}
 
-  if (!hasData) {
+export function ProjectAnalyticsTab({ projectId }: ProjectAnalyticsTabProps) {
+  const { data, isPending, isError } = useProjectAnalyticsQuery(projectId)
+
+  if (isPending) {
+    return <AnalyticsTabSkeleton />
+  }
+
+  if (isError || !data) {
     return (
       <div className="flex min-h-40 items-center justify-center rounded-[16px] border bg-surface-frosted p-6 text-center text-muted-foreground text-sm backdrop-blur-[24px]">
         Analytics data is not available yet.
@@ -44,37 +52,46 @@ export function ProjectAnalyticsTab({ analytics }: ProjectAnalyticsTabProps) {
   const metrics: MetricDef[] = [
     {
       label: "Total Views",
-      value: analytics.totalViews.toLocaleString(),
+      value: data.kpis.total_views.value.toLocaleString(),
       icon: Eye,
     },
     {
-      label: "Revenue",
-      value: analytics.revenue.toLocaleString(),
-      icon: DollarSign,
-    },
-    {
-      label: "Subscribers",
-      value: formatProjectSubscribers(analytics.subscribers),
-      icon: Users,
+      label: "Unique Viewers",
+      value: data.kpis.unique_viewers.value.toLocaleString(),
+      icon: Play,
     },
     {
       label: "Avg. Watch Time",
-      value: analytics.avgWatchTime,
+      value: formatWatchTime(data.kpis.avg_watch_seconds.value),
       icon: Clock,
     },
+    {
+      label: "Completion",
+      value: `${(data.kpis.completion_rate.value * 100).toFixed(1)}%`,
+      icon: Percent,
+    },
   ]
+
+  const viewsThisWeek = data.viewership_trend.map((point) => ({
+    day: point.label,
+    views: point.views,
+  }))
+
+  const topEpisodes = data.top_episodes.map((episode) => ({
+    rank: episode.rank,
+    title: episode.episode_title,
+    duration: "—",
+    views: episode.views,
+  }))
 
   return (
     <div className="space-y-6">
       <MetricCardsRow metrics={metrics} />
 
-      <ChartCard title="Views This Week">
+      <ChartCard title="Views">
         <div className="h-[280px]">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart
-              data={analytics.viewsThisWeek}
-              margin={ANALYTICS_CHART_MARGIN}
-            >
+            <AreaChart data={viewsThisWeek} margin={ANALYTICS_CHART_MARGIN}>
               <defs>
                 <linearGradient
                   id="projectViewsFill"
@@ -126,7 +143,7 @@ export function ProjectAnalyticsTab({ analytics }: ProjectAnalyticsTabProps) {
         </div>
       </ChartCard>
 
-      <ProjectTopEpisodesCard episodes={analytics.topEpisodes} />
+      <ProjectTopEpisodesCard episodes={topEpisodes} />
     </div>
   )
 }

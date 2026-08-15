@@ -1,16 +1,32 @@
 import { Badge } from "@workspace/ui/components/badge"
 import { Button } from "@workspace/ui/components/button"
 import { MoreHorizontal, UserPlus } from "lucide-react"
+import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
 import { SettingsSectionCard } from "../components/settings-section-card"
 import { SoloCreatorTeamGate } from "../components/solo-creator-team-gate"
 import { useProfile } from "../hooks/use-profile"
-import { useSettingsDashboard } from "../hooks/use-settings-dashboard"
+import type { TeamMember } from "../types"
+
+function initialsFromProfile(profile: {
+  firstName: string | null
+  lastName: string | null
+  displayName: string | null
+  email: string
+}): string {
+  const fromName = [profile.firstName?.[0], profile.lastName?.[0]]
+    .filter(Boolean)
+    .join("")
+    .toUpperCase()
+  if (fromName) return fromName
+  const fromDisplay = profile.displayName?.trim()?.[0]
+  if (fromDisplay) return fromDisplay.toUpperCase()
+  return profile.email[0]?.toUpperCase() ?? "?"
+}
 
 export function SettingsTeamPage() {
-  const { data: profile } = useProfile()
-  const { data: dashboard } = useSettingsDashboard()
+  const { data: profile, isLoading } = useProfile()
 
-  if (!profile || !dashboard) return null
+  if (isLoading || !profile) return <SettingsPageSkeleton />
 
   const isStudioCreator = profile.creatorProfile?.creatorType === "studio"
 
@@ -18,14 +34,33 @@ export function SettingsTeamPage() {
     return <SoloCreatorTeamGate />
   }
 
-  const members = dashboard.studio.teamMembers
+  const ownerName =
+    [profile.firstName, profile.lastName].filter(Boolean).join(" ").trim() ||
+    profile.displayName?.trim() ||
+    profile.email
+
+  const members: TeamMember[] = [
+    {
+      id: profile.id,
+      name: ownerName,
+      email: profile.email,
+      initials: initialsFromProfile(profile),
+      role: "Owner",
+    },
+  ]
 
   return (
     <SettingsSectionCard
       title="Team"
       description="Manage who has access to Sable Studio."
       headerAction={
-        <Button type="button" size="sm" className="gap-1.5 rounded-lg">
+        <Button
+          type="button"
+          size="sm"
+          className="gap-1.5 rounded-lg"
+          disabled
+          title="Team invites are coming soon"
+        >
           <UserPlus className="size-3.5" aria-hidden />
           Invite members
         </Button>
@@ -37,7 +72,7 @@ export function SettingsTeamPage() {
             Members ({members.length})
           </p>
           <p className="text-muted-foreground text-sm">
-            Owners and Admins can manage roles and invites.
+            Team invites are coming soon. You are the only member for now.
           </p>
         </div>
 
@@ -56,14 +91,6 @@ export function SettingsTeamPage() {
                     <p className="truncate font-medium text-foreground text-sm">
                       {member.name}
                     </p>
-                    {member.pending ? (
-                      <Badge
-                        variant="outline"
-                        className="border-transparent bg-muted px-2 py-0.5 text-muted-foreground text-xs"
-                      >
-                        Pending
-                      </Badge>
-                    ) : null}
                   </div>
                   <p className="truncate text-muted-foreground text-xs">
                     {member.email}

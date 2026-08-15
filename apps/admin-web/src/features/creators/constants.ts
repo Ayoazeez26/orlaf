@@ -34,7 +34,7 @@ export const CREATOR_STATUS_BADGE_CLASS: Record<CreatorStatus, string> = {
 
 export const PROJECT_STATUS_BADGE_CLASS: Record<CreatorProjectStatus, string> =
   {
-    published: "bg-emerald-500/10 text-emerald-600",
+    published: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300",
     "in-review": "bg-amber-500/10 text-amber-600",
     draft: "bg-muted text-muted-foreground",
     scheduled: "bg-indigo-500/10 text-indigo-600",

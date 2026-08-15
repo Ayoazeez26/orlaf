@@ -16,6 +16,7 @@ import {
   registerSettingsReset,
   registerSettingsSave,
 } from "../lib/settings-form-actions"
+import { toast, toastMutationError } from "@/lib/toast"
 import type { NotificationGroup } from "../types"
 
 const ICON_MAP = {
@@ -50,6 +51,10 @@ export function SettingsNotificationsPage() {
             const next = notificationSettingsToGroups(saved, isStudioCreator)
             initialGroupsRef.current = next
             setGroups(next)
+            toast.success("Notification settings saved.")
+          },
+          onError: (error) => {
+            toastMutationError(error, "Failed to save notification settings")
           },
         }
       )
@@ -107,17 +112,6 @@ export function SettingsNotificationsPage() {
           onToggle={(itemId, enabled) => toggle(group.id, itemId, enabled)}
         />
       ))}
-
-      {updateSettings.isError && (
-        <p className="text-destructive text-sm">
-          {updateSettings.error instanceof Error
-            ? updateSettings.error.message
-            : "Failed to save notification settings"}
-        </p>
-      )}
-      {updateSettings.isSuccess && !updateSettings.isPending ? (
-        <p className="text-muted-foreground text-sm">Saved</p>
-      ) : null}
     </div>
   )
 }

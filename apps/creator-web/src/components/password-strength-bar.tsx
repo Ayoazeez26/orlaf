@@ -73,7 +73,9 @@ export function PasswordStrengthBar({
             key={key}
             className={cn(
               "flex items-center gap-2 text-xs",
-              met ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
+              met
+                ? "text-emerald-600 dark:text-emerald-400"
+                : "text-muted-foreground"
             )}
           >
             <Check

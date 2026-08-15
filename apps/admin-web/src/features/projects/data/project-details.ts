@@ -9,6 +9,7 @@ const DEFAULT_EPISODES: ProjectDetail["episodes"] = [
     duration: "3:00",
     size: "35.5 MB",
     views: 125_000,
+    reviewStatus: "approved",
     status: "published",
   },
   {
@@ -18,6 +19,7 @@ const DEFAULT_EPISODES: ProjectDetail["episodes"] = [
     duration: "3:41",
     size: "42.2 MB",
     views: 98_000,
+    reviewStatus: "approved",
     status: "published",
   },
   {
@@ -27,6 +29,7 @@ const DEFAULT_EPISODES: ProjectDetail["episodes"] = [
     duration: "3:20",
     size: "38.1 MB",
     views: 87_000,
+    reviewStatus: "approved",
     status: "published",
   },
   {
@@ -36,6 +39,7 @@ const DEFAULT_EPISODES: ProjectDetail["episodes"] = [
     duration: "3:45",
     size: "41.8 MB",
     views: 72_000,
+    reviewStatus: "approved",
     status: "published",
   },
 ]

@@ -19,10 +19,12 @@ export function PromotionBanner() {
       </div>
       <Button
         type="button"
+        disabled
+        title="Promotions are coming soon"
         className="shrink-0 gap-2 self-start sm:self-center"
       >
         <Megaphone className="size-4" aria-hidden />
-        Create promotion
+        Coming soon
       </Button>
     </div>
   )

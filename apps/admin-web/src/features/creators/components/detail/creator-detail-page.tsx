@@ -26,10 +26,10 @@ export function CreatorDetailPage({ creator, role }: CreatorDetailPageProps) {
         <CreatorOverviewTab creator={creator} />
       ) : null}
       {activeTab === "projects" ? (
-        <CreatorProjectsTab creator={creator} />
+        <CreatorProjectsTab creator={creator} role={role} />
       ) : null}
       {activeTab === "analytics" ? (
-        <CreatorAnalyticsTab analytics={creator.analytics} />
+        <CreatorAnalyticsTab creatorId={creator.id} />
       ) : null}
       {activeTab === "payouts" ? (
         <CreatorPayoutsTab payouts={creator.payouts} />

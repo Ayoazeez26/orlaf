@@ -82,6 +82,12 @@ export function mapAnalyticsOverview(
         "engagement",
         kpis.engagement_rate.change_percent
       ),
+      toKpi(
+        "Completion Rate",
+        formatEngagementRate(kpis.completion_rate.value),
+        "completion",
+        kpis.completion_rate.change_percent
+      ),
     ],
     viewershipTrend: overview.viewership_trend.map((point) => ({
       bucket: point.bucket,
@@ -109,6 +115,10 @@ export function mapAnalyticsOverview(
       seriesTitle: episode.series_title,
       views: formatCompactCount(episode.views),
       changePercent: episode.change_percent,
+    })),
+    episodeViews: (overview.episode_views ?? []).map((row) => ({
+      episodeId: row.episode_id,
+      views: row.views,
     })),
   }
 }

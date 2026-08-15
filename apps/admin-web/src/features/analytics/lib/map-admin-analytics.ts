@@ -2,7 +2,7 @@ import type {
   AdminAnalyticsOverview,
   AnalyticsRangeKey,
 } from "@sable/contracts"
-import { Users } from "lucide-react"
+import { Eye, PlayCircle, Users } from "lucide-react"
 import { MOCK_SUPER_ADMIN_ANALYTICS } from "../data/mock-super-admin-analytics"
 import type {
   AnalyticsDateRangeLabel,
@@ -29,25 +29,41 @@ export function formatCompactCount(value: number): string {
   return `${(value / 1_000_000).toFixed(2).replace(/\.?0+$/, "")}M`
 }
 
+export function formatPercent(rate: number): string {
+  return `${(rate * 100).toFixed(1)}%`
+}
+
 /**
- * Merge live growth metrics into the mock dashboard shell.
- * Revenue / conversion / retention / funnel stay mocked until those APIs exist.
+ * Merge live growth, views, completion, retention, and watch funnel.
+ * Revenue stays mocked until billing exists.
  */
 export function mapAdminAnalyticsOverview(
   overview: AdminAnalyticsOverview
 ): SuperAdminAnalytics {
   const mock = MOCK_SUPER_ADMIN_ANALYTICS
 
+  const revenueKpi = mock.kpis.find((kpi) => kpi.label === "Revenue")
+
   const liveKpis: AnalyticsKpi[] = [
-    mock.kpis[0]!, // Revenue — still mocked
+    ...(revenueKpi ? [revenueKpi] : []),
     {
-      label: "New Users",
+      label: "Active Users",
       value: formatCompactCount(overview.kpis.new_users.value),
       changePercent: overview.kpis.new_users.change_percent,
       icon: Users,
     },
-    mock.kpis[2]!, // Conversion — still mocked
-    mock.kpis[3]!, // Avg Completion — still mocked
+    {
+      label: "Total Views",
+      value: formatCompactCount(overview.kpis.total_views.value),
+      changePercent: overview.kpis.total_views.change_percent,
+      icon: Eye,
+    },
+    {
+      label: "Avg Completion",
+      value: formatPercent(overview.kpis.completion_rate.value),
+      changePercent: overview.kpis.completion_rate.change_percent,
+      icon: PlayCircle,
+    },
   ]
 
   const userGrowth: UserGrowthPoint[] = overview.user_growth.map((point) => ({
@@ -56,9 +72,25 @@ export function mapAdminAnalyticsOverview(
     creators: point.creators,
   }))
 
+  const d14 = overview.retention.find((point) => point.day === "D14")
+
   return {
     ...mock,
     kpis: liveKpis,
     userGrowth,
+    retention: overview.retention.map((point) => ({
+      day: point.day,
+      retention: point.retention,
+    })),
+    retentionBadge: d14 ? `${d14.retention}% @ D14` : mock.retentionBadge,
+    funnel: {
+      subtitle: overview.funnel.subtitle,
+      stages: overview.funnel.stages.map((stage) => ({
+        label: stage.label,
+        count: stage.count,
+        percentOfTop: stage.percent_of_top,
+        dropPercent: stage.drop_percent,
+      })),
+    },
   }
 }

@@ -4,6 +4,7 @@ import type {
   EpisodeStatus,
   ImageUploadUrlResponse,
   PublicGenre,
+  ReorderEpisodesRequest,
   StudioEpisode,
   StudioSeries,
   TrailerStatusResponse,
@@ -83,6 +84,29 @@ export async function deleteEpisode(
     studioPath(`/series/${seriesId}/episodes/${episodeId}`),
     { method: "DELETE" }
   )
+}
+
+export async function archiveEpisode(
+  seriesId: string,
+  episodeId: string
+): Promise<StudioEpisode> {
+  return apiRequest<StudioEpisode>(
+    studioPath(`/series/${seriesId}/episodes/${episodeId}/archive`),
+    {
+      method: "POST",
+      body: JSON.stringify({}),
+    }
+  )
+}
+
+export async function reorderEpisodes(
+  seriesId: string,
+  body: ReorderEpisodesRequest
+): Promise<void> {
+  await apiRequest<void>(studioPath(`/series/${seriesId}/episodes/reorder`), {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  })
 }
 
 export async function getEpisode(

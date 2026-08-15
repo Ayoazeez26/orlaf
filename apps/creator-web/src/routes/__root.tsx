@@ -4,6 +4,7 @@ import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
 import appCss from "@workspace/ui/globals.css?url"
 import { QueryProvider } from "@/components/query-provider"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "@/components/toaster"
 import { AuthProvider } from "@/features/auth/auth-context"
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ""
@@ -57,7 +58,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <QueryProvider>
           <AuthProvider>
             <GoogleOAuthProvider clientId={googleClientId}>
-              <ThemeProvider>{children}</ThemeProvider>
+              <ThemeProvider>
+                {children}
+                <Toaster position="top-right" richColors closeButton />
+              </ThemeProvider>
             </GoogleOAuthProvider>
           </AuthProvider>
         </QueryProvider>

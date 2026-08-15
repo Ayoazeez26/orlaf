@@ -292,9 +292,6 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
             Back
           </Button>
           <div className="flex flex-col items-end gap-2">
-            {state.continueError ? (
-              <p className="text-destructive text-sm">{state.continueError}</p>
-            ) : null}
             <Button
               type="button"
               disabled={!canContinue}

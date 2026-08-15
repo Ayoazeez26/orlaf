@@ -28,6 +28,7 @@ import {
   useProject,
   useUpdateProjectSettings,
 } from "../../hooks/use-project"
+import { toast, toastMutationError } from "@/lib/toast"
 import type { ProjectDetail } from "../../types"
 
 const VISIBILITY_OPTIONS = ["Public", "Unlisted", "Private"] as const
@@ -98,7 +99,6 @@ export function ProjectSettingsTab() {
   const [savedForm, setSavedForm] = useState<SettingsFormState | null>(null)
   const [form, setForm] = useState<SettingsFormState | null>(null)
   const [archiveOpen, setArchiveOpen] = useState(false)
-  const [saveError, setSaveError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!project) return
@@ -120,13 +120,11 @@ export function ProjectSettingsTab() {
 
   function handleCancel() {
     if (savedForm) setForm(savedForm)
-    setSaveError(null)
   }
 
   async function handleSave() {
     if (!form) return
 
-    setSaveError(null)
     const visibilityPatch = visibilityToPatch(form.visibility)
 
     try {
@@ -142,18 +140,23 @@ export function ProjectSettingsTab() {
       const next = buildFormState(updated)
       setSavedForm(next)
       setForm(next)
-    } catch {
-      setSaveError("Unable to save changes. Please try again.")
+      toast.success("Project settings saved.")
+    } catch (error) {
+      toastMutationError(error, "Unable to save changes. Please try again.")
     }
   }
 
   async function handleArchive() {
     try {
       await archiveProject.mutateAsync()
+      toast.success("Series archived.")
       setArchiveOpen(false)
       void navigate({ to: "/dashboard/projects" })
-    } catch {
-      setSaveError("Unable to archive this series. Please try again.")
+    } catch (error) {
+      toastMutationError(
+        error,
+        "Unable to archive this series. Please try again."
+      )
     }
   }
 
@@ -326,11 +329,6 @@ export function ProjectSettingsTab() {
                 ? "You have unsaved changes"
                 : "All changes saved"}
           </p>
-          {saveError ? (
-            <p className="text-destructive text-sm sm:order-3" role="alert">
-              {saveError}
-            </p>
-          ) : null}
           <div className="flex gap-3 sm:ml-auto">
             <Button
               type="button"

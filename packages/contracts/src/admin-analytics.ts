@@ -9,10 +9,21 @@ export interface AdminUserGrowthPoint {
   creators: number
 }
 
+export interface AdminRetentionPoint {
+  day: string
+  retention: number
+}
+
+export interface AdminFunnelStage {
+  label: string
+  count: number
+  percent_of_top: number
+  drop_percent: number | null
+}
+
 /**
  * Platform growth analytics for the admin Analytics dashboard.
- * v1 covers New Users KPI + user/creator growth series.
- * Revenue / conversion / retention / funnel stay mocked until billing + retention data exist.
+ * Revenue stays mocked until billing exists.
  */
 export interface AdminAnalyticsOverview {
   range: {
@@ -21,8 +32,27 @@ export interface AdminAnalyticsOverview {
     to: string
   }
   kpis: {
+    /** Unique viewer accounts that signed up, liked, or played in the range. */
     new_users: AnalyticsMetricValue
     new_creators: AnalyticsMetricValue
+    total_views: AnalyticsMetricValue
+    completion_rate: AnalyticsMetricValue
   }
   user_growth: AdminUserGrowthPoint[]
+  retention: AdminRetentionPoint[]
+  funnel: {
+    subtitle: string
+    stages: AdminFunnelStage[]
+  }
+}
+
+export interface AdminAnalyticsSummary {
+  total_users: number
+  total_creators: number
+  published_series: number
+  pending_review_series: number
+  /** Always 0 until moderation reports exist. */
+  flagged_series: number
+  views_30d: number
+  new_creators_7d: number
 }

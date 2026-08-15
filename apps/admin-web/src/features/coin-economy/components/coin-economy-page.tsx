@@ -1,6 +1,15 @@
 import { useState } from "react"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
-import { MOCK_COIN_BUNDLES } from "../data/mock-bundles"
+import {
+  useAdminCoinBundles,
+  useCreateAdminCoinBundle,
+  useDeleteAdminCoinBundle,
+  useUpdateAdminCoinBundle,
+} from "../api/coin-economy-hooks"
+import {
+  bundleFormToCreateRequest,
+  bundleFormToUpdateRequest,
+} from "../lib/map-admin-coin-bundle"
 import type { BundleFormValues, CoinBundle, CoinEconomyView } from "../types"
 import { CoinEconomyPageHeader } from "./coin-economy-page-header"
 import { CoinEconomyStatCards } from "./coin-economy-stat-cards"
@@ -10,62 +19,63 @@ import { BundlesTab } from "./tabs/bundles-tab"
 import { PurchaseHistoryTab } from "./tabs/purchase-history-tab"
 import { SettingsTab } from "./tabs/settings-tab"
 
-function formValuesToBundle(
-  values: BundleFormValues,
-  existing?: CoinBundle
-): CoinBundle {
-  const totalCoins = values.coins + values.bonusCoins
-  const priceNumber =
-    Number.parseFloat(values.price.replace(/[^\d.]/g, "")) || 1
-
-  return {
-    id: existing?.id ?? `bundle-${Date.now()}`,
-    name: values.name,
-    coins: values.coins,
-    bonusCoins: values.bonusCoins,
-    price: values.price,
-    effectiveRate: Math.round(totalCoins / priceNumber),
-    status: values.isLive ? "live" : "draft",
-    isBestValue: existing?.isBestValue,
-  }
-}
-
 export function CoinEconomyPage({ role: _role }: { role: WorkspaceRoleId }) {
   const [activeView, setActiveView] = useState<CoinEconomyView>("bundles")
-  const [bundles, setBundles] = useState(MOCK_COIN_BUNDLES)
   const [formOpen, setFormOpen] = useState(false)
   const [formMode, setFormMode] = useState<"create" | "edit">("create")
   const [editingBundle, setEditingBundle] = useState<CoinBundle | undefined>()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deletingBundle, setDeletingBundle] = useState<CoinBundle | undefined>()
+  const [actionError, setActionError] = useState<string | null>(null)
+
+  const bundlesQuery = useAdminCoinBundles()
+  const createBundle = useCreateAdminCoinBundle()
+  const updateBundle = useUpdateAdminCoinBundle()
+  const deleteBundle = useDeleteAdminCoinBundle()
+
+  const bundles = bundlesQuery.data ?? []
+  const isSaving = createBundle.isPending || updateBundle.isPending
+  const isDeleting = deleteBundle.isPending
 
   function handleNewBundle() {
     setActiveView("bundles")
     setFormMode("create")
     setEditingBundle(undefined)
+    setActionError(null)
     setFormOpen(true)
   }
 
-  function handleSaveBundle(values: BundleFormValues) {
-    if (formMode === "edit" && editingBundle) {
-      setBundles((current) =>
-        current.map((bundle) =>
-          bundle.id === editingBundle.id
-            ? formValuesToBundle(values, editingBundle)
-            : bundle
-        )
+  async function handleSaveBundle(values: BundleFormValues) {
+    setActionError(null)
+    try {
+      if (formMode === "edit" && editingBundle) {
+        await updateBundle.mutateAsync({
+          id: editingBundle.id,
+          body: bundleFormToUpdateRequest(values),
+        })
+      } else {
+        await createBundle.mutateAsync(bundleFormToCreateRequest(values))
+      }
+      setFormOpen(false)
+    } catch (error) {
+      setActionError(
+        error instanceof Error ? error.message : "Failed to save bundle"
       )
-      return
     }
-
-    setBundles((current) => [...current, formValuesToBundle(values)])
   }
 
-  function handleConfirmDelete() {
+  async function handleConfirmDelete() {
     if (!deletingBundle) return
-    setBundles((current) =>
-      current.filter((bundle) => bundle.id !== deletingBundle.id)
-    )
+    setActionError(null)
+    try {
+      await deleteBundle.mutateAsync(deletingBundle.id)
+      setDeleteOpen(false)
+      setDeletingBundle(undefined)
+    } catch (error) {
+      setActionError(
+        error instanceof Error ? error.message : "Failed to delete bundle"
+      )
+    }
   }
 
   return (
@@ -74,9 +84,16 @@ export function CoinEconomyPage({ role: _role }: { role: WorkspaceRoleId }) {
       <CoinEconomyStatCards />
       <CoinEconomyViewTabs active={activeView} onChange={setActiveView} />
 
+      {actionError ? (
+        <p className="text-destructive text-sm">{actionError}</p>
+      ) : null}
+
       {activeView === "bundles" ? (
         <BundlesTab
           bundles={bundles}
+          isLoading={bundlesQuery.isLoading}
+          isSaving={isSaving}
+          isDeleting={isDeleting}
           formOpen={formOpen}
           formMode={formMode}
           editingBundle={editingBundle}
@@ -87,10 +104,12 @@ export function CoinEconomyPage({ role: _role }: { role: WorkspaceRoleId }) {
           onEdit={(bundle) => {
             setFormMode("edit")
             setEditingBundle(bundle)
+            setActionError(null)
             setFormOpen(true)
           }}
           onDelete={(bundle) => {
             setDeletingBundle(bundle)
+            setActionError(null)
             setDeleteOpen(true)
           }}
           onSave={handleSaveBundle}

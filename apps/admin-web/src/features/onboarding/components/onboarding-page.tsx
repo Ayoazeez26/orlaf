@@ -2,6 +2,10 @@ import type { AdminOnboardingStats } from "@sable/contracts"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import { useMemo, useState } from "react"
+import {
+  MetricCardsSkeleton,
+  TableRowsSkeleton,
+} from "@/features/workspaces/components/page-skeletons"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
 import { toast, toastMutationError } from "@/lib/toast"
@@ -64,9 +68,13 @@ function StateMessage({
     )
   }
 
+  if (isPending) {
+    return <TableRowsSkeleton />
+  }
+
   return (
     <div className="flex min-h-40 items-center justify-center p-6 text-center text-muted-foreground text-sm">
-      {isPending ? "Loading…" : emptyLabel}
+      {emptyLabel}
     </div>
   )
 }
@@ -112,7 +120,11 @@ export function OnboardingPage({ role }: { role: WorkspaceRoleId }) {
     <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
       <OnboardingPageHeader onOnboardCreator={() => setOnboardOpen(true)} />
 
-      <OnboardingStatCards stats={stats} />
+      {applicationsQuery.isPending && !applicationsQuery.data ? (
+        <MetricCardsSkeleton />
+      ) : (
+        <OnboardingStatCards stats={stats} />
+      )}
 
       <OnboardingViewToggle active={activeView} onChange={setActiveView} />
 

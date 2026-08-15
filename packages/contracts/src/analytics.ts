@@ -36,20 +36,29 @@ export interface AnalyticsTopEpisode {
   change_percent: number | null
 }
 
+export interface AnalyticsEpisodeViews {
+  episode_id: string
+  views: number
+}
+
 export interface CreatorAnalyticsOverview {
   range: {
     key: AnalyticsRangeKey
     from: string
     to: string
+    series_id?: string
   }
   kpis: {
     total_views: AnalyticsMetricValue
     unique_viewers: AnalyticsMetricValue
     avg_watch_seconds: AnalyticsMetricValue
     engagement_rate: AnalyticsMetricValue
+    completion_rate: AnalyticsMetricValue
   }
   viewership_trend: AnalyticsTrendPoint[]
   devices: AnalyticsDeviceSegment[]
   engagement: AnalyticsEngagementPoint[]
   top_episodes: AnalyticsTopEpisode[]
+  /** Present when the overview is scoped to a single series. */
+  episode_views?: AnalyticsEpisodeViews[]
 }

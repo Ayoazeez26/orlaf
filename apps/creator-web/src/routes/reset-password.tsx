@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { AppLoadingScreen } from "@/components/app-loading-screen"
 import { PasswordInput } from "@/components/password-input"
+import { PasswordStrengthBar } from "@/components/password-strength-bar"
 import { confirmPasswordReset } from "@/features/auth/api/password-reset-api"
 import { PasswordResetShell } from "@/features/auth/components/password-reset-shell"
 import { ResetPasswordMfaDialog } from "@/features/auth/components/reset-password-mfa-dialog"
@@ -23,7 +24,6 @@ import {
   readPasswordResetSession,
 } from "@/features/auth/lib/password-reset-storage"
 import { resolvePostSignInRoute } from "@/features/auth/lib/post-sign-in-route"
-import { PasswordStrengthBar } from "@/components/password-strength-bar"
 import { passwordFieldSchema } from "@/lib/password-schema"
 
 const resetPasswordSchema = z

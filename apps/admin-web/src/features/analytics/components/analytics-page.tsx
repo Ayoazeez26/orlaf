@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react"
+import { useState } from "react"
+import { AnalyticsPageSkeleton } from "@/features/workspaces/components/page-skeletons"
 import { useAdminAnalyticsOverview } from "../api/analytics-hooks"
 import { DEFAULT_ANALYTICS_DATE_RANGE } from "../constants"
-import { MOCK_SUPER_ADMIN_ANALYTICS } from "../data/mock-super-admin-analytics"
 import {
   mapAdminAnalyticsOverview,
   RANGE_LABEL_TO_KEY,
@@ -19,58 +19,54 @@ export function AnalyticsPage() {
     DEFAULT_ANALYTICS_DATE_RANGE
   )
   const range = RANGE_LABEL_TO_KEY[period]
-  const { data, isLoading, isError, isFetching } =
+  const { data, isPending, isError, isFetching } =
     useAdminAnalyticsOverview(range)
 
-  const analytics = useMemo(() => {
-    if (!data) return MOCK_SUPER_ADMIN_ANALYTICS
-    return mapAdminAnalyticsOverview(data)
-  }, [data])
-
-  const { kpis, revenue, userGrowth, retention, retentionBadge, funnel } =
-    analytics
+  const analytics = data ? mapAdminAnalyticsOverview(data) : null
 
   return (
     <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
       <AnalyticsPageHeader period={period} onPeriodChange={setPeriod} />
 
-      {isError ? (
+      {isPending ? <AnalyticsPageSkeleton /> : null}
+
+      {isError || (!isPending && !analytics) ? (
         <p className="text-destructive text-sm">
-          Could not load growth analytics. Showing placeholder numbers for
-          unavailable metrics.
+          Could not load growth analytics. Please try again.
         </p>
       ) : null}
 
-      {isLoading && !data ? (
-        <p className="text-muted-foreground text-sm">Loading analytics…</p>
-      ) : (
+      {analytics ? (
         <>
           <div
             className={
-              isFetching && data
+              isFetching
                 ? "grid gap-4 opacity-80 transition-opacity sm:grid-cols-2 xl:grid-cols-4"
                 : "grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
             }
           >
-            {kpis.map((kpi) => (
+            {analytics.kpis.map((kpi) => (
               <AnalyticsKpiCard key={kpi.label} kpi={kpi} />
             ))}
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <RevenueAnalyticsChart data={revenue} />
-            <UserGrowthChart data={userGrowth} />
+            <RevenueAnalyticsChart data={analytics.revenue} />
+            <UserGrowthChart data={analytics.userGrowth} />
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <RetentionChart data={retention} badge={retentionBadge} />
+            <RetentionChart
+              data={analytics.retention}
+              badge={analytics.retentionBadge}
+            />
             <ConversionFunnelCard
-              subtitle={funnel.subtitle}
-              stages={funnel.stages}
+              subtitle={analytics.funnel.subtitle}
+              stages={analytics.funnel.stages}
             />
           </div>
         </>
-      )}
+      ) : null}
     </div>
   )
 }

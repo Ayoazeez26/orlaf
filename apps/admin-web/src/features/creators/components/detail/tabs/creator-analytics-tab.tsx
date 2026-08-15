@@ -1,22 +1,37 @@
-import { Clock, Eye, TrendingUp, Users } from "lucide-react"
+import { Clock, Eye, Percent, Users } from "lucide-react"
+import { useCreatorAnalyticsQuery } from "@/features/creators/api/creators-hooks"
 import { MetricCardsRow } from "@/features/workspaces/components/home/metric-cards-row"
+import { AnalyticsTabSkeleton } from "@/features/workspaces/components/page-skeletons"
 import type { MetricDef } from "@/features/workspaces/types"
-import {
-  formatCreatorEarnings,
-  formatCreatorViews,
-} from "../../../data/creator-details"
-import type { CreatorAnalytics } from "../../../types"
-import { CreatorAudienceCountryCard } from "../charts/creator-audience-country-card"
+import { formatCreatorViews } from "../../../data/creator-details"
 import { CreatorDevicesChart } from "../charts/creator-devices-chart"
 import { CreatorEngagementChart } from "../charts/creator-engagement-chart"
 import { CreatorTopEpisodesCard } from "../charts/creator-top-episodes-card"
 import { CreatorViewershipChart } from "../charts/creator-viewership-chart"
 
 interface CreatorAnalyticsTabProps {
-  analytics: CreatorAnalytics
+  creatorId: string
 }
 
-export function CreatorAnalyticsTab({ analytics }: CreatorAnalyticsTabProps) {
+export function CreatorAnalyticsTab({ creatorId }: CreatorAnalyticsTabProps) {
+  const {
+    data: analytics,
+    isPending,
+    isError,
+  } = useCreatorAnalyticsQuery(creatorId)
+
+  if (isPending) {
+    return <AnalyticsTabSkeleton />
+  }
+
+  if (isError || !analytics) {
+    return (
+      <p className="text-destructive text-sm">
+        Could not load analytics for this creator.
+      </p>
+    )
+  }
+
   const metrics: MetricDef[] = [
     {
       label: "Total views",
@@ -34,9 +49,9 @@ export function CreatorAnalyticsTab({ analytics }: CreatorAnalyticsTabProps) {
       icon: Clock,
     },
     {
-      label: "Total earnings",
-      value: formatCreatorEarnings(analytics.totalEarnings),
-      icon: TrendingUp,
+      label: "Completion",
+      value: `${(analytics.completionRate * 100).toFixed(1)}%`,
+      icon: Percent,
     },
   ]
 
@@ -50,8 +65,6 @@ export function CreatorAnalyticsTab({ analytics }: CreatorAnalyticsTabProps) {
         <CreatorEngagementChart data={analytics.engagementByDay} />
         <CreatorTopEpisodesCard episodes={analytics.topEpisodes} />
       </div>
-
-      <CreatorAudienceCountryCard countries={analytics.audienceByCountry} />
     </div>
   )
 }

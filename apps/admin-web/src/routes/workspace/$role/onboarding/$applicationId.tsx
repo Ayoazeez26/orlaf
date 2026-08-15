@@ -3,6 +3,7 @@ import { ArrowLeft } from "lucide-react"
 import { useApplicationQuery } from "@/features/onboarding/api/onboarding-hooks"
 import { ApplicationDetailPage } from "@/features/onboarding/components/detail/application-detail-page"
 import { toApplicationDetail } from "@/features/onboarding/data/map-onboarding"
+import { DetailPageSkeleton } from "@/features/workspaces/components/page-skeletons"
 import { WorkspaceSectionGate } from "@/features/workspaces/components/workspace-section-gate"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
 
@@ -37,8 +38,8 @@ function ApplicationDetailContent({
 
   if (isPending) {
     return (
-      <div className="p-4 text-muted-foreground text-sm sm:p-6 lg:p-8">
-        Loading application…
+      <div className="p-4 sm:p-6 lg:p-8">
+        <DetailPageSkeleton />
       </div>
     )
   }

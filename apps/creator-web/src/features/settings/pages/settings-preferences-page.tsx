@@ -31,6 +31,7 @@ import {
   registerSettingsReset,
   registerSettingsSave,
 } from "../lib/settings-form-actions"
+import { toast, toastMutationError } from "@/lib/toast"
 
 const COLOR_SCHEMES = [
   { value: "light", label: "Light", icon: Sun },
@@ -86,6 +87,10 @@ export function SettingsPreferencesPage() {
           initialFormRef.current = next
           setForm(next)
           applyDisplayPreferences(saved, setTheme)
+          toast.success("Preferences saved.")
+        },
+        onError: (error) => {
+          toastMutationError(error, "Failed to save preferences")
         },
       })
     }
@@ -242,17 +247,6 @@ export function SettingsPreferencesPage() {
           />
         </div>
       </SettingsSectionCard>
-
-      {updatePreferences.isError && (
-        <p className="text-destructive text-sm">
-          {updatePreferences.error instanceof Error
-            ? updatePreferences.error.message
-            : "Failed to save preferences"}
-        </p>
-      )}
-      {updatePreferences.isSuccess && !updatePreferences.isPending ? (
-        <p className="text-muted-foreground text-sm">Saved</p>
-      ) : null}
     </div>
   )
 }

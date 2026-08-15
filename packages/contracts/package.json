@@ -12,9 +12,12 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc --project tsconfig.build.json",
+    "prepare": "pnpm run build",
     "dev": "tsc --project tsconfig.build.json --watch",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf dist"

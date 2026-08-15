@@ -13,6 +13,7 @@ import { useMemo, useState } from "react"
 import { SettingsModalShell } from "../components/settings-modal-shell"
 import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
 import { SettingsSectionCard } from "../components/settings-section-card"
+import { toast, toastMutationError } from "@/lib/toast"
 import {
   type ArchiveFilter,
   useArchive,
@@ -62,8 +63,13 @@ export function SettingsArchivePage() {
   }
 
   async function handleEmptyArchive() {
-    await emptyArchive.mutateAsync()
-    setEmptyOpen(false)
+    try {
+      await emptyArchive.mutateAsync()
+      toast.success("Archive emptied.")
+      setEmptyOpen(false)
+    } catch (error) {
+      toastMutationError(error, "Unable to empty archive. Please try again.")
+    }
   }
 
   return (
@@ -130,16 +136,38 @@ export function SettingsArchivePage() {
                   key={item.id}
                   item={item}
                   onRestore={() =>
-                    restoreItem.mutate({
-                      type: item.type,
-                      entityId: item.entityId,
-                    })
+                    restoreItem.mutate(
+                      {
+                        type: item.type,
+                        entityId: item.entityId,
+                      },
+                      {
+                        onSuccess: () =>
+                          toast.success(`"${item.title}" restored.`),
+                        onError: (error) =>
+                          toastMutationError(
+                            error,
+                            "Unable to restore this item."
+                          ),
+                      }
+                    )
                   }
                   onDelete={() =>
-                    deleteItem.mutate({
-                      type: item.type,
-                      entityId: item.entityId,
-                    })
+                    deleteItem.mutate(
+                      {
+                        type: item.type,
+                        entityId: item.entityId,
+                      },
+                      {
+                        onSuccess: () =>
+                          toast.success(`"${item.title}" deleted.`),
+                        onError: (error) =>
+                          toastMutationError(
+                            error,
+                            "Unable to delete this item."
+                          ),
+                      }
+                    )
                   }
                   isRestoring={restoreItem.isPending}
                   isDeleting={deleteItem.isPending}

@@ -5,6 +5,7 @@ const DEFAULT_ANALYTICS: CreatorDetail["analytics"] = {
   totalViews: 2_520_000,
   uniqueViewers: 1_100_000,
   avgWatchTime: "3:47",
+  completionRate: 0.42,
   totalEarnings: 29_500,
   viewershipTrend: [
     { month: "Jan", views: 3200, previous: 2800 },

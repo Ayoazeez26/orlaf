@@ -1,3 +1,4 @@
+import type { UpdateStudioRequest } from "@sable/contracts"
 import { Button } from "@workspace/ui/components/button"
 import {
   Select,
@@ -8,45 +9,70 @@ import {
 } from "@workspace/ui/components/select"
 import { ArrowLeftRight, Copy, Download, Loader2, Trash2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { toast, toastMutationError } from "@/lib/toast"
 import { uploadStudioLogo } from "../api/profile-upload"
 import { SettingsActionRow } from "../components/settings-action-row"
 import { SettingsField } from "../components/settings-field"
+import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
 import { SettingsSectionCard } from "../components/settings-section-card"
 import { SoloCreatorStudioGate } from "../components/solo-creator-studio-gate"
 import { COUNTRY_OPTIONS, GENRE_OPTIONS, TEAM_SIZE_OPTIONS } from "../constants"
 import { useProfile, useUpdateStudio } from "../hooks/use-profile"
-import { useSettingsDashboard } from "../hooks/use-settings-dashboard"
 import { getWorkspaceDisplayName } from "../lib/get-workspace-display-name"
 import {
   registerSettingsReset,
   registerSettingsSave,
 } from "../lib/settings-form-actions"
 
+const DEFAULT_STUDIO_FORM = {
+  studioName: "",
+  handle: "",
+  tagline: "",
+  website: "",
+  teamSize: "1-5 people",
+  primaryGenre: "Drama",
+  country: "Nigeria",
+}
+
+function normalizeHandle(value: string | null | undefined) {
+  return (value ?? "").replace(/^@/, "").trim()
+}
+
+function buildStudioPatch(
+  form: typeof DEFAULT_STUDIO_FORM,
+  initial: typeof DEFAULT_STUDIO_FORM
+): UpdateStudioRequest {
+  const patch: UpdateStudioRequest = {}
+
+  if (form.studioName !== initial.studioName) {
+    patch.studioName = form.studioName
+  }
+
+  const nextHandle = normalizeHandle(form.handle)
+  const prevHandle = normalizeHandle(initial.handle)
+  if (nextHandle !== prevHandle && nextHandle.length > 0) {
+    patch.handle = nextHandle
+  }
+
+  if (form.tagline !== initial.tagline) {
+    patch.description = form.tagline
+  }
+
+  if (form.website !== initial.website) {
+    patch.studioWebsite = form.website.trim()
+  }
+
+  return patch
+}
+
 export function SettingsStudioPage() {
   const { data, isLoading } = useProfile()
-  const { data: dashboard } = useSettingsDashboard()
   const updateStudio = useUpdateStudio()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isUploadingLogo, setIsUploadingLogo] = useState(false)
-  const initialFormRef = useRef<{
-    studioName: string
-    handle: string
-    tagline: string
-    website: string
-    teamSize: string
-    primaryGenre: string
-    country: string
-  } | null>(null)
+  const initialFormRef = useRef<typeof DEFAULT_STUDIO_FORM | null>(null)
 
-  const [form, setForm] = useState({
-    studioName: "",
-    handle: "",
-    tagline: "",
-    website: "",
-    teamSize: "1-5 people",
-    primaryGenre: "Drama",
-    country: "Nigeria",
-  })
+  const [form, setForm] = useState(DEFAULT_STUDIO_FORM)
 
   const hasInitialized = useRef(false)
 
@@ -54,29 +80,44 @@ export function SettingsStudioPage() {
     if (!data || hasInitialized.current) return
     hasInitialized.current = true
     const initial = {
-      studioName:
-        data.creatorProfile?.studioName ?? dashboard?.studio.name ?? "",
-      handle: data.creatorProfile?.handle ?? dashboard?.studio.handle ?? "",
-      tagline:
-        data.creatorProfile?.description ?? dashboard?.studio.tagline ?? "",
-      website:
-        data.creatorProfile?.studioWebsite ?? dashboard?.studio.website ?? "",
-      teamSize: dashboard?.studio.teamSize ?? "1-5 people",
-      primaryGenre: dashboard?.studio.primaryGenre ?? "Drama",
-      country: dashboard?.studio.country ?? "Nigeria",
+      studioName: data.creatorProfile?.studioName ?? "",
+      handle: normalizeHandle(data.creatorProfile?.handle),
+      tagline: data.creatorProfile?.description ?? "",
+      website: data.creatorProfile?.studioWebsite ?? "",
+      teamSize: DEFAULT_STUDIO_FORM.teamSize,
+      primaryGenre: DEFAULT_STUDIO_FORM.primaryGenre,
+      country: DEFAULT_STUDIO_FORM.country,
     }
     initialFormRef.current = initial
     setForm(initial)
-  }, [data, dashboard])
+  }, [data])
 
   useEffect(() => {
     if (data?.creatorProfile?.creatorType !== "studio") return
 
     function handleSave() {
-      updateStudio.mutate({
-        studioName: form.studioName,
-        handle: form.handle,
-        description: form.tagline,
+      const initial = initialFormRef.current
+      if (!initial) return
+
+      const patch = buildStudioPatch(form, initial)
+      if (Object.keys(patch).length === 0) return
+
+      updateStudio.mutate(patch, {
+        onSuccess: (profile) => {
+          const saved = {
+            ...form,
+            studioName: profile.studioName ?? form.studioName,
+            handle: normalizeHandle(profile.handle ?? form.handle),
+            tagline: profile.description ?? form.tagline,
+            website: profile.studioWebsite ?? form.website,
+          }
+          initialFormRef.current = saved
+          setForm(saved)
+          toast.success("Studio settings saved.")
+        },
+        onError: (error) => {
+          toastMutationError(error, "Failed to save studio")
+        },
       })
     }
 
@@ -92,19 +133,15 @@ export function SettingsStudioPage() {
     }
   }, [data, form, updateStudio])
 
-  if (isLoading || !data) return null
+  if (isLoading || !data) return <SettingsPageSkeleton />
 
   const isStudioCreator = data.creatorProfile?.creatorType === "studio"
 
   if (!isStudioCreator) {
     return (
-      <SoloCreatorStudioGate
-        workspaceName={getWorkspaceDisplayName(data, dashboard?.workspace.name)}
-      />
+      <SoloCreatorStudioGate workspaceName={getWorkspaceDisplayName(data)} />
     )
   }
-
-  if (!dashboard) return null
 
   return (
     <div className="space-y-6">
@@ -184,17 +221,6 @@ export function SettingsStudioPage() {
             />
           </div>
 
-          {updateStudio.isError && (
-            <p className="text-destructive text-sm">
-              {updateStudio.error instanceof Error
-                ? updateStudio.error.message
-                : "Failed to save studio"}
-            </p>
-          )}
-          {updateStudio.isSuccess && !updateStudio.isPending ? (
-            <p className="text-muted-foreground text-sm">Saved</p>
-          ) : null}
-
           <input
             ref={fileInputRef}
             type="file"
@@ -208,6 +234,9 @@ export function SettingsStudioPage() {
               try {
                 const { imageUrl } = await uploadStudioLogo(file)
                 await updateStudio.mutateAsync({ logoUrl: imageUrl })
+                toast.success("Studio logo updated.")
+              } catch (error) {
+                toastMutationError(error, "Failed to upload studio logo")
               } finally {
                 setIsUploadingLogo(false)
               }

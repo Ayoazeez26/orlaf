@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react"
+import { toast, toastMutationError } from "@/lib/toast"
 import { createSeries, updateSeries } from "../api/studio-api"
 import { buildSeriesPayload } from "../lib/map-wizard-series-payload"
 import type { UploadWizardState } from "../types"
@@ -25,9 +26,7 @@ export function useContinueFromInfo() {
 
       return true
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to save series"
-      dispatch({ type: "SET_FIELD", payload: { continueError: message } })
+      toastMutationError(error, "Failed to save series")
       return false
     } finally {
       setIsContinuing(false)

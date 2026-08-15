@@ -163,6 +163,7 @@ export interface UploadEpisodeDraft {
   synopsis: string
   duration: string
   access: EpisodeAccess
+  coinPrice?: number
   autoCaption: boolean
   media: UploadMediaAsset | null
 }
@@ -217,6 +218,7 @@ export type UploadWizardAction =
       payload: { id: string; patch: Partial<UploadEpisodeDraft> }
     }
   | { type: "REMOVE_EPISODE"; payload: { id: string } }
+  | { type: "PRUNE_EMPTY_EPISODES" }
   | { type: "TOGGLE_GUIDE" }
   | { type: "SET_TRAILER"; payload: UploadMediaAsset | null }
   | { type: "UPDATE_TRAILER"; payload: Partial<UploadMediaAsset> }

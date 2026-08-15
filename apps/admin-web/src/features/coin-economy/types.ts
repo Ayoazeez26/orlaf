@@ -12,6 +12,7 @@ export type PurchaseFilter = "all" | PurchaseStatus
 
 export interface CoinBundle {
   id: string
+  productId: string
   name: string
   coins: number
   bonusCoins: number
@@ -59,6 +60,7 @@ export interface CoinEconomySettings {
 }
 
 export interface BundleFormValues {
+  productId: string
   name: string
   coins: number
   bonusCoins: number
