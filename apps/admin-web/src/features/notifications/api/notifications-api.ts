@@ -7,7 +7,7 @@ import type {
 } from "@sable/contracts"
 import { apiRequest } from "@/lib/http-client"
 
-const BASE = "/api/v1/notifications"
+const BASE = "/api/v1/mobile/notifications"
 
 export function fetchNotifications(params?: {
   cursor?: string

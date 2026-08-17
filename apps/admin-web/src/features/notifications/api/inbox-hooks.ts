@@ -12,6 +12,8 @@ function mapCategory(type: InboxNotificationType): NotificationCategory {
   if (type === "creators") return "creators"
   if (type === "projects") return "projects"
   if (type === "support") return "support"
+  if (type === "promotions") return "promotions"
+  if (type === "payouts") return "payouts"
   return "system"
 }
 
