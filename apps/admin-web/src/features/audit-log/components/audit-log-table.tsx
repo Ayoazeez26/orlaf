@@ -2,9 +2,9 @@ import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import {
-  AUDIT_ACTION_CONFIG,
   AUDIT_ROLE_CLASS,
   AUDIT_ROLE_LABEL,
+  auditActionConfig,
 } from "../constants"
 import type { AuditLogEntry } from "../types"
 
@@ -38,7 +38,7 @@ export function AuditLogTable({ entries }: AuditLogTableProps) {
         </thead>
         <tbody>
           {entries.map((entry) => {
-            const action = AUDIT_ACTION_CONFIG[entry.action]
+            const action = auditActionConfig(entry.action)
             const ActionIcon = action.icon
 
             return (

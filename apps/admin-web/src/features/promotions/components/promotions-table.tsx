@@ -76,7 +76,7 @@ export function PromotionsTable({
                   </div>
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
-                  {campaign.placement}
+                  {campaign.placementLabel}
                 </td>
                 <td className="min-w-[180px] px-4 py-3">
                   <div className="space-y-1.5">

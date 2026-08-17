@@ -11,6 +11,7 @@ export const NOTIFICATION_FILTERS: {
   { key: "payouts", label: "Payouts" },
   { key: "creators", label: "Creators" },
   { key: "projects", label: "Projects" },
+  { key: "support", label: "Support" },
   { key: "system", label: "System" },
 ]
 
@@ -21,5 +22,6 @@ export const NOTIFICATION_CATEGORY_LABEL: Record<NotificationCategory, string> =
     payouts: "Payouts",
     creators: "Creators",
     projects: "Projects",
+    support: "Support",
     system: "System",
   }

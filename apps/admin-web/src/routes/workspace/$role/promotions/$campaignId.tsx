@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { ArrowLeft } from "lucide-react"
 import { PromotionDetailPage } from "@/features/promotions/components/detail/promotion-detail-page"
-import { getPromotionDetail } from "@/features/promotions/data/promotion-details"
+import { useAdminPromotionDetail } from "@/features/promotions/hooks/use-promotions"
 import { WorkspaceSectionGate } from "@/features/workspaces/components/workspace-section-gate"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
 
@@ -29,9 +29,29 @@ function PromotionDetailContent({
   role: WorkspaceRoleId
   campaignId: string
 }) {
-  const campaign = getPromotionDetail(campaignId)
+  const {
+    data: campaign,
+    isLoading,
+    isError,
+  } = useAdminPromotionDetail(campaignId)
 
-  if (!campaign) {
+  if (isLoading) {
+    return (
+      <div className="space-y-4 p-4 sm:p-6 lg:p-8">
+        <div className="h-8 w-48 animate-pulse rounded bg-muted" />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {(["a", "b", "c", "d"] as const).map((key) => (
+            <div
+              key={key}
+              className="h-24 animate-pulse rounded-2xl bg-muted"
+            />
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (isError || !campaign) {
     return (
       <div className="space-y-4 p-4 sm:p-6 lg:p-8">
         <Link

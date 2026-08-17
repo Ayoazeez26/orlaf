@@ -27,6 +27,7 @@ import {
   writePasswordResetSession,
 } from "@/features/auth/lib/password-reset-storage"
 import { resolvePostSignInRoute } from "@/features/auth/lib/post-sign-in-route"
+import { toastApiError } from "@/lib/toast"
 
 const verifySearchSchema = z.object({
   reset_id: z.string().optional(),
@@ -80,7 +81,6 @@ function ForgotPasswordVerifyContent() {
   const [isVerifying, setIsVerifying] = useState(false)
   const [isResending, setIsResending] = useState(false)
   const [resent, setResent] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [sentNoticeVisible, setSentNoticeVisible] = useState(
     search.sent === true
   )
@@ -113,7 +113,6 @@ function ForgotPasswordVerifyContent() {
     if (code.length !== 6 || !resetId) return
 
     setIsVerifying(true)
-    setError(null)
 
     const result = await verifyPasswordResetOtp({ resetId, code })
 
@@ -130,18 +129,17 @@ function ForgotPasswordVerifyContent() {
       result.outcome === "code_expired" ||
       result.outcome === "too_many_attempts"
     ) {
-      setError(result.message)
+      toastApiError(result.message)
       return
     }
 
-    setError(result.message)
+    toastApiError(result.message)
   }
 
   const handleResend = async () => {
     if (!resetId || isResending) return
 
     setIsResending(true)
-    setError(null)
 
     const result = await resendPasswordResetOtp(resetId)
 
@@ -155,13 +153,13 @@ function ForgotPasswordVerifyContent() {
     }
 
     if (result.outcome === "cooldown") {
-      setError(
+      toastApiError(
         `${result.message} Try again in ${result.retryAfterSeconds} seconds.`
       )
       return
     }
 
-    setError(result.message)
+    toastApiError(result.message)
   }
 
   return (
@@ -206,12 +204,6 @@ function ForgotPasswordVerifyContent() {
           </InputOTPGroup>
         </InputOTP>
       </div>
-
-      {error && (
-        <p className="mt-4 text-center text-destructive text-sm" role="alert">
-          {error}
-        </p>
-      )}
 
       <Button
         type="button"

@@ -1,6 +1,7 @@
 import { Button } from "@workspace/ui/components/button"
 import { Plus } from "lucide-react"
 import { useState } from "react"
+import { ConfirmDeleteDialog } from "@/components/confirm-delete-dialog"
 import { MOCK_SUBSCRIPTION_PLANS } from "../../data/mock-subscription-plans"
 import type {
   EditPlanForm,
@@ -65,6 +66,9 @@ export function SubscriptionsPlansTab() {
   const [planDialog, setPlanDialog] = useState<PlanDialogState>({
     mode: "closed",
   })
+  const [planToDelete, setPlanToDelete] = useState<SubscriptionPlan | null>(
+    null
+  )
 
   function updatePlanLive(id: string, isLive: boolean) {
     setPlans((current) =>
@@ -120,7 +124,7 @@ export function SubscriptionsPlansTab() {
             plan={plan}
             onLiveChange={(isLive) => updatePlanLive(plan.id, isLive)}
             onEdit={() => setPlanDialog({ mode: "edit", plan })}
-            onDelete={plan.canDelete ? () => deletePlan(plan.id) : undefined}
+            onDelete={plan.canDelete ? () => setPlanToDelete(plan) : undefined}
           />
         ))}
       </div>
@@ -133,6 +137,21 @@ export function SubscriptionsPlansTab() {
         mode={planDialog.mode === "create" ? "create" : "edit"}
         plan={planDialog.mode === "edit" ? planDialog.plan : null}
         onSave={handleSave}
+      />
+
+      <ConfirmDeleteDialog
+        open={planToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setPlanToDelete(null)
+        }}
+        title={`Delete ${planToDelete?.name ?? "plan"}?`}
+        description="This plan will be removed from the list. Viewers will no longer see it."
+        confirmLabel="Delete plan"
+        onConfirm={() => {
+          if (!planToDelete) return
+          deletePlan(planToDelete.id)
+          setPlanToDelete(null)
+        }}
       />
     </div>
   )

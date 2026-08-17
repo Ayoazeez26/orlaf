@@ -1,3 +1,4 @@
+import { CATALOG_COLLECTION_KEYS } from "@sable/contracts"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
@@ -28,36 +29,62 @@ interface NewRailDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   defaultSurface?: DiscoverySurface
-  onConfirm?: () => void
+  initialValues?: {
+    title: string
+    surface: DiscoverySurface
+    type: RailType
+    status: RailStatus
+    audience: RailAudience
+    collectionKey?: string | null
+  }
+  onConfirm?: (values: {
+    title: string
+    surface: DiscoverySurface
+    type: RailType
+    status: RailStatus
+    audience: RailAudience
+    collectionKey?: string | null
+  }) => void
 }
 
 export function NewRailDialog({
   open,
   onOpenChange,
   defaultSurface = "home",
+  initialValues,
   onConfirm,
 }: NewRailDialogProps) {
-  const [title, setTitle] = useState("Old Nollywood")
+  const [title, setTitle] = useState("")
   const [surface, setSurface] = useState<DiscoverySurface>(defaultSurface)
   const [type, setType] = useState<RailType>("rail")
   const [status, setStatus] = useState<RailStatus>("draft")
   const [audience, setAudience] = useState<RailAudience>("all-users")
+  const [collectionKey, setCollectionKey] = useState<string>("none")
 
   useEffect(() => {
     if (!open) return
-    setTitle("Old Nollywood")
-    setSurface(defaultSurface)
-    setType("rail")
-    setStatus("draft")
-    setAudience("all-users")
-  }, [open, defaultSurface])
+    setTitle(initialValues?.title ?? "")
+    setSurface(initialValues?.surface ?? defaultSurface)
+    setType(initialValues?.type ?? "rail")
+    setStatus(initialValues?.status ?? "draft")
+    setAudience(initialValues?.audience ?? "all-users")
+    setCollectionKey(initialValues?.collectionKey || "none")
+  }, [open, defaultSurface, initialValues])
 
   useModalShell(open, onOpenChange)
 
   if (!open) return null
 
   function handleConfirm() {
-    onConfirm?.()
+    if (!title.trim()) return
+    onConfirm?.({
+      title: title.trim(),
+      surface,
+      type,
+      status,
+      audience,
+      collectionKey: collectionKey === "none" ? null : collectionKey,
+    })
     onOpenChange(false)
   }
 
@@ -82,7 +109,7 @@ export function NewRailDialog({
                 id="new-rail-title"
                 className="font-semibold text-foreground text-lg"
               >
-                New rail
+                {initialValues ? "Edit rail" : "New rail"}
               </h2>
               <p className="mt-1 text-muted-foreground text-sm">
                 Configure where and when this rail shows in the app.
@@ -116,6 +143,7 @@ export function NewRailDialog({
               <Select
                 value={surface}
                 onValueChange={(value) => setSurface(value as DiscoverySurface)}
+                disabled={Boolean(initialValues)}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -189,6 +217,23 @@ export function NewRailDialog({
               </Select>
             </div>
           </div>
+
+          <div className="space-y-2">
+            <Label>Catalog collection override</Label>
+            <Select value={collectionKey} onValueChange={setCollectionKey}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None (editorial only)</SelectItem>
+                {CATALOG_COLLECTION_KEYS.map((key) => (
+                  <SelectItem key={key} value={key}>
+                    {key}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="flex items-center justify-end gap-3 border-border border-t px-6 py-4">
@@ -200,7 +245,7 @@ export function NewRailDialog({
             Cancel
           </Button>
           <Button type="button" onClick={handleConfirm}>
-            Create rail
+            {initialValues ? "Save changes" : "Create rail"}
           </Button>
         </div>
       </div>

@@ -1,3 +1,5 @@
+import { useQueryClient } from "@tanstack/react-query"
+import { Link } from "@tanstack/react-router"
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
 import {
   DropdownMenu,
@@ -10,7 +12,6 @@ import {
 } from "@workspace/ui/components/dropdown-menu"
 import { cn } from "@workspace/ui/lib/utils"
 import {
-  Building2,
   Check,
   ChevronDown,
   CircleHelp,
@@ -19,7 +20,9 @@ import {
   User,
   UserPlus,
 } from "lucide-react"
-import { MOCK_WORKSPACES } from "../../constants"
+import { useAuth } from "@/features/auth/auth-context"
+import { useStudioMembershipsQuery } from "@/features/settings/api/team-hooks"
+import { getActiveStudioId, setActiveStudioId } from "@/lib/studio-id"
 import type { DashboardUser } from "../../types"
 
 interface WorkspaceSwitcherProps {
@@ -28,7 +31,20 @@ interface WorkspaceSwitcherProps {
 }
 
 export function WorkspaceSwitcher({ user, className }: WorkspaceSwitcherProps) {
-  const { workspace } = user
+  const { signOut } = useAuth()
+  const queryClient = useQueryClient()
+  const { data } = useStudioMembershipsQuery()
+  const items = data?.items ?? []
+  const stored = getActiveStudioId()
+  const active =
+    items.find((item) => item.studioOwnerId === stored) ?? items[0] ?? null
+
+  const label = active?.name ?? user.fullName
+  const initials = active?.initials ?? user.initials
+  const role = active
+    ? active.role.charAt(0).toUpperCase() + active.role.slice(1)
+    : user.role
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -39,13 +55,13 @@ export function WorkspaceSwitcher({ user, className }: WorkspaceSwitcherProps) {
       >
         <Avatar className="size-10 shrink-0">
           <AvatarFallback className="bg-primary text-primary-foreground text-sm">
-            {workspace.initials}
+            {initials}
           </AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
-          <p className="text-muted-foreground text-xs">{user.role}</p>
+          <p className="text-muted-foreground text-xs">{role}</p>
           <p className="truncate font-semibold text-foreground text-sm">
-            {workspace.name}
+            {label}
           </p>
         </div>
         <ChevronDown
@@ -58,8 +74,15 @@ export function WorkspaceSwitcher({ user, className }: WorkspaceSwitcherProps) {
           Switch workspace
         </DropdownMenuLabel>
         <DropdownMenuGroup>
-          {MOCK_WORKSPACES.map((ws) => (
-            <DropdownMenuItem key={ws.id} className="gap-3 py-2.5">
+          {items.map((ws) => (
+            <DropdownMenuItem
+              key={ws.studioOwnerId}
+              className="gap-3 py-2.5"
+              onClick={() => {
+                setActiveStudioId(ws.studioOwnerId)
+                void queryClient.invalidateQueries()
+              }}
+            >
               <Avatar className="size-8">
                 <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                   {ws.initials}
@@ -67,38 +90,48 @@ export function WorkspaceSwitcher({ user, className }: WorkspaceSwitcherProps) {
               </Avatar>
               <div className="flex-1">
                 <p className="font-medium text-sm">{ws.name}</p>
-                <p className="text-muted-foreground text-xs">{ws.role}</p>
+                <p className="text-muted-foreground text-xs">
+                  {ws.role.charAt(0).toUpperCase() + ws.role.slice(1)}
+                </p>
               </div>
-              {ws.id === workspace.id && (
+              {ws.studioOwnerId === active?.studioOwnerId ? (
                 <Check className="size-4 text-primary" aria-hidden />
-              )}
+              ) : null}
             </DropdownMenuItem>
           ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Building2 className="size-4" aria-hidden />
-          New Studio
+        <DropdownMenuItem asChild>
+          <Link to="/dashboard/settings/team">
+            <UserPlus className="size-4" aria-hidden />
+            Invite Team
+          </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem>
-          <UserPlus className="size-4" aria-hidden />
-          Invite Team
+        <DropdownMenuItem asChild>
+          <Link to="/dashboard/settings">
+            <User className="size-4" aria-hidden />
+            View Profile
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/dashboard/settings">
+            <Settings className="size-4" aria-hidden />
+            Settings
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/dashboard/support">
+            <CircleHelp className="size-4" aria-hidden />
+            Help &amp; Support
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <User className="size-4" aria-hidden />
-          View Profile
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <Settings className="size-4" aria-hidden />
-          Settings
-        </DropdownMenuItem>
-        <DropdownMenuItem>
-          <CircleHelp className="size-4" aria-hidden />
-          Help &amp; Support
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive">
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={() => {
+            void signOut()
+          }}
+        >
           <LogOut className="size-4" aria-hidden />
           Sign Out
         </DropdownMenuItem>

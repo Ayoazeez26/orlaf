@@ -22,9 +22,17 @@ const STATUS_STYLES: Record<
     label: "Completed",
     className: "border-transparent bg-muted text-muted-foreground",
   },
+  rejected: {
+    label: "Rejected",
+    className: "border-transparent bg-destructive/15 text-destructive",
+  },
   draft: {
     label: "Draft",
     className: "border-transparent bg-primary/15 text-primary",
+  },
+  archived: {
+    label: "Archived",
+    className: "border-transparent bg-muted text-muted-foreground",
   },
 }
 

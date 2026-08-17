@@ -5,6 +5,7 @@ import {
   enableTotp,
   fetchActiveSessions,
   fetchSecurityStatus,
+  revokeOtherSessions,
   revokeSession,
   setPassword,
   setupTotp,
@@ -34,6 +35,16 @@ export function useRevokeSession() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: revokeSession,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: securityKeys.sessions() })
+    },
+  })
+}
+
+export function useRevokeOtherSessions() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: revokeOtherSessions,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: securityKeys.sessions() })
     },

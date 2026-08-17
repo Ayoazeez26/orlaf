@@ -6,10 +6,24 @@ import type {
   StudioSeries,
 } from "@sable/contracts"
 import { apiRequest } from "@/lib/http-client"
-import { MOCK_PROJECT_ANALYTICS } from "../data/mock-project-analytics"
 import { formatRelativeUpdatedAt } from "../lib/format-relative-time"
-import type { EpisodeAccess, ProjectDetail, ProjectSummary } from "../types"
+import type {
+  EpisodeAccess,
+  ProjectAnalytics,
+  ProjectDetail,
+  ProjectSummary,
+} from "../types"
 import { updateSeries } from "./studio-api"
+
+/** Legacy field on ProjectDetail; charts use useAnalyticsDashboard instead. */
+const EMPTY_PROJECT_ANALYTICS: ProjectAnalytics = {
+  kpis: [],
+  engagementKpis: [],
+  viewershipTrend: [],
+  devices: [],
+  audienceRetention: [],
+  trafficSources: [],
+}
 
 const STATUS_MAP: Record<StudioSeries["status"], ProjectSummary["status"]> = {
   draft: "draft",
@@ -127,7 +141,7 @@ export async function fetchProject(id: string): Promise<ProjectDetail> {
     access: "free",
     overviewMetrics: [],
     analyticsMetrics: [],
-    analytics: MOCK_PROJECT_ANALYTICS,
+    analytics: EMPTY_PROJECT_ANALYTICS,
     recentEpisodes: episodes.slice(0, 5),
     episodes,
     weeklyViews: [],

@@ -15,9 +15,9 @@ function formatJoined(iso: string): string {
 /**
  * Maps the admin creator API detail into the UI CreatorDetail shape.
  *
- * Identity, status, verification, and bio come from the API. Analytics and
- * payouts remain placeholder data until those APIs land. Projects are loaded
- * separately via GET /admin/series?creatorId=.
+ * Identity/status/bio from the API. Analytics tab uses a separate analytics
+ * query. Projects load via GET /admin/series?creatorId=. Payouts stay empty
+ * until monetization.
  */
 export function toCreatorDetail(detail: AdminCreatorDetail): CreatorDetail {
   const base: Creator = {
@@ -28,18 +28,18 @@ export function toCreatorDetail(detail: AdminCreatorDetail): CreatorDetail {
     initials: detail.initials,
     location: detail.location,
     views: detail.views,
-    earnings: detail.earnings,
+    earnings: 0,
     status: detail.status,
     isVerified: detail.isVerified,
     isNew: detail.isNew,
     joinedAt: detail.joinedAt,
   }
 
-  const placeholder = buildDetail(base)
+  const shell = buildDetail(base)
 
   return {
-    ...placeholder,
-    bio: detail.bio ?? placeholder.bio,
+    ...shell,
+    bio: detail.bio?.trim() || shell.bio,
     joined: formatJoined(detail.joinedAt),
     role: "Creator",
   }

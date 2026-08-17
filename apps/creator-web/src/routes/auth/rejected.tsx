@@ -16,7 +16,7 @@ function RejectedPage() {
           re-apply or contact support for more information.
         </p>
         <Button asChild className="mt-6" variant="outline">
-          <Link to="/onboarding">Back to sign in</Link>
+          <Link to="/login">Back to sign in</Link>
         </Button>
       </div>
     </main>

@@ -1,59 +1,42 @@
-import type { LucideIcon } from "lucide-react"
+import type {
+  CreatePromotionRequest,
+  PromotionAudience,
+  PromotionDetail,
+  PromotionGoal,
+  PromotionPlacement,
+  PromotionStatus,
+  PromotionStatusFilter,
+  PromotionSummary,
+  PromotionsListResponse,
+  UpdatePromotionRequest,
+} from "@sable/contracts"
 
-export type PromotionStatus =
-  | "active"
-  | "paused"
-  | "pending"
-  | "completed"
-  | "draft"
-
-export type PromotionStatusFilter = "all" | PromotionStatus
-
-export type PromotionGoal = "views" | "subscribers" | "watch_time"
-
-export type PromotionPlacement =
-  | "home_banner"
-  | "series_page"
-  | "player_preroll"
-
-export type PromotionAudience = "all_viewers" | "subscribers" | "new_viewers"
-
-export interface PromotionSummary {
-  id: string
-  title: string
-  status: PromotionStatus
-  projectName: string
-  placement: string
-  startDate: string
-  endDate: string
-  spent: number
-  budget: number
-  progressPercent: number
-  impressions: string
-  ctr?: string
-}
-
-export interface PromotionPerformancePoint {
-  day: string
-  impressions: number
-}
-
-export interface PromotionDetail extends PromotionSummary {
-  ctr: string
-  goal: PromotionGoal
-  audience: PromotionAudience
-  performanceData: PromotionPerformancePoint[]
+export type { PromotionPerformancePoint } from "@sable/contracts"
+export type {
+  CreatePromotionRequest,
+  PromotionAudience,
+  PromotionDetail,
+  PromotionGoal,
+  PromotionPlacement,
+  PromotionStatus,
+  PromotionStatusFilter,
+  PromotionSummary,
+  UpdatePromotionRequest,
 }
 
 export interface PromotionsSummaryKpi {
   label: string
   value: string
-  icon: LucideIcon
 }
 
 export interface PromotionsListData {
   summaryKpis: PromotionsSummaryKpi[]
   promotions: PromotionSummary[]
+}
+
+export interface PromotionFormProject {
+  id: string
+  name: string
 }
 
 export interface EstimatedReach {
@@ -63,7 +46,28 @@ export interface EstimatedReach {
   footnote: string
 }
 
-export interface PromotionFormProject {
-  id: string
-  name: string
+export function mapPromotionsListResponse(
+  response: PromotionsListResponse
+): PromotionsListData {
+  return {
+    summaryKpis: [
+      { label: "Active", value: String(response.summary.activeCount) },
+      {
+        label: "Total Spend",
+        value: `$${response.summary.totalSpend.toLocaleString("en-US")}`,
+      },
+      {
+        label: "Impressions",
+        value: formatCompactCount(response.summary.totalImpressions),
+      },
+      { label: "Avg. CTR", value: response.summary.averageCtr },
+    ],
+    promotions: response.promotions,
+  }
+}
+
+function formatCompactCount(value: number) {
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}k`
+  return String(value)
 }

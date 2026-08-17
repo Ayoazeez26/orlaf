@@ -53,3 +53,53 @@ export interface DownloadListResponse {
   items: DownloadListItem[]
   total: number
 }
+
+export interface FollowedCreatorItem {
+  creatorId: string
+  name: string
+  handle: string | null
+  logoUrl: string | null
+  verified: boolean
+  seriesCount: number
+  episodeCount: number
+  previewPosterUrls: string[]
+  followedAt: string
+}
+
+export interface FollowedCreatorsResponse {
+  items: FollowedCreatorItem[]
+  total: number
+}
+
+export interface CreatorFollowStatusResponse {
+  following: boolean
+}
+
+export interface PublicCreatorProfile {
+  id: string
+  studioName: string | null
+  handle: string | null
+  description: string | null
+  logoUrl: string | null
+  verified: boolean
+  seriesCount: number
+  followerCount: number
+  following: boolean
+}
+
+export interface HistoryListItem {
+  seriesId: string
+  episodeId: string
+  seriesTitle: string
+  episodeTitle: string
+  episodeNumber: number
+  posterUrl: string | null
+  progressPercent: number
+  completed: boolean
+  watchedAt: string
+}
+
+export interface HistoryListResponse {
+  items: HistoryListItem[]
+  total: number
+}

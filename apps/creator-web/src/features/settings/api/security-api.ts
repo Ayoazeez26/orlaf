@@ -28,6 +28,12 @@ export async function revokeSession(sessionId: string): Promise<void> {
   })
 }
 
+export async function revokeOtherSessions(): Promise<void> {
+  await apiRequest("/api/v1/auth/sessions/revoke-others", {
+    method: "POST",
+  })
+}
+
 export async function setPassword(body: SetPasswordRequest): Promise<void> {
   await apiRequest("/api/v1/auth/password/set", {
     method: "POST",

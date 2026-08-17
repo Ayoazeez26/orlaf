@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react"
-import { toast, toastMutationError } from "@/lib/toast"
+import { toastMutationError } from "@/lib/toast"
 import { createSeries, updateSeries } from "../api/studio-api"
 import { buildSeriesPayload } from "../lib/map-wizard-series-payload"
 import type { UploadWizardState } from "../types"

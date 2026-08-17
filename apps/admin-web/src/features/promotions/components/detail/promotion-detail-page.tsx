@@ -1,5 +1,12 @@
 import { useState } from "react"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
+import { toast, toastMutationError } from "@/lib/toast"
+import {
+  useApproveAdminPromotion,
+  useEndAdminPromotion,
+  usePauseAdminPromotion,
+  useRejectAdminPromotion,
+} from "../../hooks/use-promotions"
 import type { PromotionCampaignDetail } from "../../types"
 import { ApproveCampaignDialog } from "../dialogs/approve-campaign-dialog"
 import { InternalNoteDialog } from "../dialogs/internal-note-dialog"
@@ -17,14 +24,54 @@ interface PromotionDetailPageProps {
 }
 
 export function PromotionDetailPage({
-  campaign: initialCampaign,
+  campaign,
   role,
 }: PromotionDetailPageProps) {
-  const [campaign, setCampaign] = useState(initialCampaign)
   const [approveOpen, setApproveOpen] = useState(false)
   const [rejectOpen, setRejectOpen] = useState(false)
   const [pauseOpen, setPauseOpen] = useState(false)
   const [noteOpen, setNoteOpen] = useState(false)
+
+  const approvePromotion = useApproveAdminPromotion(campaign.id)
+  const rejectPromotion = useRejectAdminPromotion(campaign.id)
+  const pausePromotion = usePauseAdminPromotion(campaign.id)
+  const endPromotion = useEndAdminPromotion(campaign.id)
+
+  async function handleApprove() {
+    try {
+      await approvePromotion.mutateAsync(undefined)
+      toast.success("Campaign approved.")
+    } catch (error) {
+      toastMutationError(error, "Unable to approve campaign.")
+    }
+  }
+
+  async function handleReject(note?: string) {
+    try {
+      await rejectPromotion.mutateAsync(note)
+      toast.success("Campaign rejected.")
+    } catch (error) {
+      toastMutationError(error, "Unable to reject campaign.")
+    }
+  }
+
+  async function handlePause() {
+    try {
+      await pausePromotion.mutateAsync(undefined)
+      toast.success("Campaign paused.")
+    } catch (error) {
+      toastMutationError(error, "Unable to pause campaign.")
+    }
+  }
+
+  async function handleEnd() {
+    try {
+      await endPromotion.mutateAsync(undefined)
+      toast.success("Campaign ended.")
+    } catch (error) {
+      toastMutationError(error, "Unable to end campaign.")
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -44,6 +91,7 @@ export function PromotionDetailPage({
           onPause={() => setPauseOpen(true)}
           onReject={() => setRejectOpen(true)}
           onApprove={() => setApproveOpen(true)}
+          onEnd={() => void handleEnd()}
         />
       </div>
 
@@ -53,9 +101,7 @@ export function PromotionDetailPage({
         open={approveOpen}
         onOpenChange={setApproveOpen}
         campaignTitle={campaign.title}
-        onConfirm={() =>
-          setCampaign((current) => ({ ...current, status: "live" }))
-        }
+        onConfirm={() => void handleApprove()}
       />
 
       <RejectCampaignDialog
@@ -64,9 +110,7 @@ export function PromotionDetailPage({
         campaignTitle={campaign.title}
         creatorName={campaign.creatorName}
         variant="simple"
-        onConfirm={() =>
-          setCampaign((current) => ({ ...current, status: "rejected" }))
-        }
+        onConfirm={(note) => void handleReject(note)}
       />
 
       <PauseCampaignDialog
@@ -74,18 +118,14 @@ export function PromotionDetailPage({
         onOpenChange={setPauseOpen}
         campaignTitle={campaign.title}
         action="pause"
-        onConfirm={() =>
-          setCampaign((current) => ({ ...current, status: "paused" }))
-        }
+        onConfirm={() => void handlePause()}
       />
 
       <InternalNoteDialog
         open={noteOpen}
         onOpenChange={setNoteOpen}
         initialNote={campaign.reviewerNote}
-        onSave={(note) =>
-          setCampaign((current) => ({ ...current, reviewerNote: note }))
-        }
+        onSave={() => setNoteOpen(false)}
       />
     </div>
   )

@@ -18,15 +18,33 @@ interface Stat {
   tone: Tone
 }
 
-const SUMMARY_STATS: Stat[] = [
-  { label: "Live rails", value: 5, icon: Sparkles, tone: "primary" },
-  { label: "Scheduled", value: 1, icon: Calendar, tone: "info" },
-  { label: "Featured hero", value: 3, icon: Star, tone: "warning" },
-  { label: "For You queue", value: 7, icon: Heart, tone: "positive" },
-]
-
-export function DiscoveryStatCards(_props: DiscoveryStatCardsProps) {
-  const stats = SUMMARY_STATS
+export function DiscoveryStatCards({ rails = [] }: DiscoveryStatCardsProps) {
+  const stats: Stat[] = [
+    {
+      label: "Live rails",
+      value: rails.filter((rail) => rail.status === "live").length,
+      icon: Sparkles,
+      tone: "primary",
+    },
+    {
+      label: "Scheduled",
+      value: rails.filter((rail) => rail.status === "scheduled").length,
+      icon: Calendar,
+      tone: "info",
+    },
+    {
+      label: "Featured hero",
+      value: rails.filter((rail) => rail.type === "hero").length,
+      icon: Star,
+      tone: "warning",
+    },
+    {
+      label: "For You queue",
+      value: rails.filter((rail) => rail.surface === "for-you").length,
+      icon: Heart,
+      tone: "positive",
+    },
+  ]
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

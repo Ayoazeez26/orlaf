@@ -160,9 +160,14 @@ export interface CatalogFeedItem {
   title: string
   synopsis: string | null
   thumbnailUrl: string | null
+  /** Series poster — used for For You card thumbnail */
+  posterUrl: string | null
+  /** Primary genre label when available */
+  genre: string | null
   hlsUrl: string
   durationSeconds: number | null
   accessType: EpisodeAccessType
+  kind: "trailer" | "episode"
 }
 
 export interface CatalogEpisodeDetail {
@@ -214,11 +219,17 @@ export interface CatalogCollectionSeries {
   viewCount: number | null
 }
 
+export interface CatalogPromotedHero {
+  promotionId: string
+  series: CatalogCollectionSeries
+}
+
 export interface CatalogCollectionResponse {
   key: CatalogCollectionKey
   title: string
   description: string
   items: CatalogCollectionSeries[]
+  promotedHero?: CatalogPromotedHero | null
 }
 
 /** Seed list for the genres table — runtime catalog reads from the database. */

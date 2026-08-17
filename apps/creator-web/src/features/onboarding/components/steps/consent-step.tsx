@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { getPolicies, recordConsent } from "@/features/auth/api/auth-api"
 import { useAuth } from "@/features/auth/auth-context"
+import { toastApiError } from "@/lib/toast"
 import { OnboardingShell } from "../onboarding-shell"
 
 interface ConsentStepProps {
@@ -15,7 +16,6 @@ interface ConsentStepProps {
 export function ConsentStep({ progress, onBack, onNext }: ConsentStepProps) {
   const { session, updateSession } = useAuth()
   const [policies, setPolicies] = useState<PolicyVersions | null>(null)
-  const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isLoadingPolicies, setIsLoadingPolicies] = useState(true)
 
@@ -23,7 +23,7 @@ export function ConsentStep({ progress, onBack, onNext }: ConsentStepProps) {
     getPolicies()
       .then(setPolicies)
       .catch(() =>
-        setError("Unable to load policy versions. Please try again.")
+        toastApiError("Unable to load policy versions. Please try again.")
       )
       .finally(() => setIsLoadingPolicies(false))
   }, [])
@@ -31,7 +31,6 @@ export function ConsentStep({ progress, onBack, onNext }: ConsentStepProps) {
   const handleAccept = async () => {
     if (!policies) return
     setIsSubmitting(true)
-    setError(null)
     try {
       await recordConsent({
         accepted: true,
@@ -40,7 +39,7 @@ export function ConsentStep({ progress, onBack, onNext }: ConsentStepProps) {
       updateSession({ needs_consent: false })
       onNext()
     } catch {
-      setError("Unable to record consent. Please try again.")
+      toastApiError("Unable to record consent. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
@@ -90,12 +89,6 @@ export function ConsentStep({ progress, onBack, onNext }: ConsentStepProps) {
             <Loader2 className="size-4 animate-spin" aria-hidden />
             Loading policies…
           </div>
-        )}
-
-        {error && (
-          <p className="text-center text-destructive text-sm" role="alert">
-            {error}
-          </p>
         )}
 
         <Button

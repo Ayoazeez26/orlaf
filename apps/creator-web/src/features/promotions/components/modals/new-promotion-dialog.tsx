@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
@@ -9,15 +10,18 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select"
 import { cn } from "@workspace/ui/lib/utils"
-import { Eye, LineChart, Users } from "lucide-react"
-import { useState } from "react"
+import { Eye, LineChart, Loader2, Users } from "lucide-react"
+import { useEffect, useState } from "react"
+import { toast, toastMutationError } from "@/lib/toast"
 import {
   DEFAULT_ESTIMATED_REACH,
   PROMOTION_AUDIENCE_OPTIONS,
-  PROMOTION_FORM_PROJECTS,
   PROMOTION_GOAL_OPTIONS,
   PROMOTION_PLACEMENT_OPTIONS,
+  promotionDetailPath,
 } from "../../constants"
+import { usePromotionProjects } from "../../hooks/use-promotion-projects"
+import { useCreatePromotion } from "../../hooks/use-promotions"
 import type {
   PromotionAudience,
   PromotionGoal,
@@ -41,21 +45,84 @@ export function NewPromotionDialog({
   open,
   onOpenChange,
 }: NewPromotionDialogProps) {
+  const navigate = useNavigate()
+  const createPromotion = useCreatePromotion()
+  const { data: projects = [] } = usePromotionProjects()
+
   const [step, setStep] = useState(1)
-  const [title, setTitle] = useState("Premiere Boost — Lagos After Dark")
-  const [projectId, setProjectId] = useState("lagos-after-dark")
+  const [title, setTitle] = useState("")
+  const [projectId, setProjectId] = useState("")
   const [goal, setGoal] = useState<PromotionGoal>("views")
   const [placement, setPlacement] = useState<PromotionPlacement>("home_banner")
   const [audience, setAudience] = useState<PromotionAudience>("all_viewers")
   const [budget, setBudget] = useState("50")
   const [duration, setDuration] = useState("14")
 
-  function handleClose(nextOpen: boolean) {
-    if (!nextOpen) {
-      setStep(1)
+  useEffect(() => {
+    if (open && projects.length > 0 && !projectId) {
+      setProjectId(projects[0]?.id ?? "")
     }
+  }, [open, projects, projectId])
+
+  function resetForm() {
+    setStep(1)
+    setTitle("")
+    setProjectId(projects[0]?.id ?? "")
+    setGoal("views")
+    setPlacement("home_banner")
+    setAudience("all_viewers")
+    setBudget("50")
+    setDuration("14")
+  }
+
+  function handleClose(nextOpen: boolean) {
+    if (!nextOpen) resetForm()
     onOpenChange(nextOpen)
   }
+
+  async function handleCreate(submit: boolean) {
+    const budgetValue = Number(budget)
+    const durationValue = Number(duration)
+
+    if (
+      !title.trim() ||
+      !projectId ||
+      !Number.isFinite(budgetValue) ||
+      budgetValue < 1
+    ) {
+      toast.error("Enter a title, project, and budget of at least $1.")
+      return
+    }
+
+    if (!Number.isFinite(durationValue) || durationValue < 1) {
+      toast.error("Duration must be at least 1 day.")
+      return
+    }
+
+    try {
+      const promotion = await createPromotion.mutateAsync({
+        title: title.trim(),
+        seriesId: projectId,
+        goal,
+        placement,
+        audience,
+        budget: budgetValue,
+        durationDays: durationValue,
+        submit,
+      })
+
+      toast.success(submit ? "Promotion submitted for review." : "Draft saved.")
+      handleClose(false)
+
+      if (submit) {
+        navigate(promotionDetailPath(promotion.id))
+      }
+    } catch (error) {
+      toastMutationError(error, "Unable to create promotion. Please try again.")
+    }
+  }
+
+  const isPending = createPromotion.isPending
 
   return (
     <PromotionModalShell
@@ -77,7 +144,11 @@ export function NewPromotionDialog({
             >
               Cancel
             </Button>
-            <Button type="button" onClick={() => setStep(2)}>
+            <Button
+              type="button"
+              onClick={() => setStep(2)}
+              disabled={!title.trim() || !projectId}
+            >
               Continue
             </Button>
           </div>
@@ -87,10 +158,25 @@ export function NewPromotionDialog({
               Back
             </Button>
             <div className="flex items-center gap-2">
-              <Button type="button" variant="outline">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isPending}
+                onClick={() => void handleCreate(false)}
+              >
+                {isPending ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                ) : null}
                 Save draft
               </Button>
-              <Button type="button" onClick={() => handleClose(false)}>
+              <Button
+                type="button"
+                disabled={isPending}
+                onClick={() => void handleCreate(true)}
+              >
+                {isPending ? (
+                  <Loader2 className="size-4 animate-spin" aria-hidden />
+                ) : null}
                 Launch promotion
               </Button>
             </div>
@@ -106,6 +192,7 @@ export function NewPromotionDialog({
               id="promotion-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              placeholder="Premiere Boost — Lagos After Dark"
             />
           </div>
 
@@ -113,16 +200,21 @@ export function NewPromotionDialog({
             <Label>Project</Label>
             <Select value={projectId} onValueChange={setProjectId}>
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder="Select a published project" />
               </SelectTrigger>
               <SelectContent>
-                {PROMOTION_FORM_PROJECTS.map((project) => (
+                {projects.map((project) => (
                   <SelectItem key={project.id} value={project.id}>
                     {project.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {projects.length === 0 ? (
+              <p className="text-muted-foreground text-xs">
+                Publish a public project before creating a promotion.
+              </p>
+            ) : null}
           </div>
 
           <div className="space-y-3">

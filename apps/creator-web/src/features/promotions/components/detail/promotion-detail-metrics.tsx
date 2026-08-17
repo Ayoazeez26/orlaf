@@ -4,12 +4,17 @@ import { cn } from "@workspace/ui/lib/utils"
 import {
   DollarSign,
   Eye,
+  Loader2,
   Megaphone,
   MousePointerClick,
   Pause,
   Pencil,
+  Play,
+  Square,
+  Trash2,
 } from "lucide-react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
+import type { PromotionStatus } from "../../types"
 
 const METRIC_ICONS = {
   dollar: DollarSign,
@@ -21,7 +26,7 @@ const METRIC_ICONS = {
 interface PromotionMetricCardsProps {
   budget: number
   spent: number
-  impressions: string
+  impressionsLabel: string
   ctr: string
   className?: string
 }
@@ -29,14 +34,14 @@ interface PromotionMetricCardsProps {
 export function PromotionMetricCards({
   budget,
   spent,
-  impressions,
+  impressionsLabel,
   ctr,
   className,
 }: PromotionMetricCardsProps) {
   const metrics = [
     { label: "Budget", value: `$${budget}`, icon: "dollar" as const },
     { label: "Spent", value: `$${spent}`, icon: "megaphone" as const },
-    { label: "Impressions", value: impressions, icon: "eye" as const },
+    { label: "Impressions", value: impressionsLabel, icon: "eye" as const },
     { label: "CTR", value: ctr, icon: "cursor" as const },
   ]
 
@@ -75,14 +80,32 @@ export function PromotionMetricCards({
 }
 
 interface PromotionActionsCardProps {
+  status: PromotionStatus
   onEdit: () => void
+  onPause: () => void
+  onResume: () => void
+  onEnd: () => void
+  onDelete: () => void
+  isPending?: boolean
   className?: string
 }
 
 export function PromotionActionsCard({
+  status,
   onEdit,
+  onPause,
+  onResume,
+  onEnd,
+  onDelete,
+  isPending = false,
   className,
 }: PromotionActionsCardProps) {
+  const canEdit = status === "draft" || status === "rejected"
+  const canPause = status === "active"
+  const canResume = status === "paused"
+  const canEnd = status === "active" || status === "paused"
+  const canDelete = status === "draft" || status === "completed"
+
   return (
     <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6", className)}>
       <CardHeader className="space-y-1 pb-4">
@@ -90,37 +113,82 @@ export function PromotionActionsCard({
         <p className="text-muted-foreground text-sm">Manage this promotion</p>
       </CardHeader>
       <CardContent className="space-y-2">
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full justify-start gap-2"
-          onClick={onEdit}
-        >
-          <Pencil className="size-4" aria-hidden />
-          Edit promotion
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full justify-start gap-2"
-        >
-          <Pause className="size-4" aria-hidden />
-          Pause
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full justify-start"
-        >
-          End promotion
-        </Button>
-        <Button
-          type="button"
-          variant="destructive"
-          className="w-full justify-start"
-        >
-          Delete
-        </Button>
+        {canEdit ? (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full justify-start gap-2"
+            disabled={isPending}
+            onClick={onEdit}
+          >
+            <Pencil className="size-4" aria-hidden />
+            Edit promotion
+          </Button>
+        ) : null}
+        {canPause ? (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full justify-start gap-2"
+            disabled={isPending}
+            onClick={onPause}
+          >
+            {isPending ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <Pause className="size-4" aria-hidden />
+            )}
+            Pause
+          </Button>
+        ) : null}
+        {canResume ? (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full justify-start gap-2"
+            disabled={isPending}
+            onClick={onResume}
+          >
+            {isPending ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <Play className="size-4" aria-hidden />
+            )}
+            Resume
+          </Button>
+        ) : null}
+        {canEnd ? (
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full justify-start gap-2"
+            disabled={isPending}
+            onClick={onEnd}
+          >
+            {isPending ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <Square className="size-4" aria-hidden />
+            )}
+            End promotion
+          </Button>
+        ) : null}
+        {canDelete ? (
+          <Button
+            type="button"
+            variant="destructive"
+            className="w-full justify-start gap-2"
+            disabled={isPending}
+            onClick={onDelete}
+          >
+            {isPending ? (
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+            ) : (
+              <Trash2 className="size-4" aria-hidden />
+            )}
+            Delete
+          </Button>
+        ) : null}
       </CardContent>
     </Card>
   )

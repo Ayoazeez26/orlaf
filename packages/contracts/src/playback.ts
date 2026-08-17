@@ -8,6 +8,7 @@ export type PlaybackSource =
   | "search"
   | "share"
   | "external"
+  | "promotion"
 
 export interface StartPlaybackSessionRequest {
   episode_id: string
@@ -15,6 +16,7 @@ export interface StartPlaybackSessionRequest {
   device_type: PlaybackDeviceType
   platform?: PlaybackPlatform | null
   source?: PlaybackSource | null
+  promotion_id?: string | null
   app_version?: string | null
 }
 

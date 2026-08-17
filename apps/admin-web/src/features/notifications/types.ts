@@ -6,6 +6,7 @@ export type NotificationCategory =
   | "payouts"
   | "creators"
   | "projects"
+  | "support"
   | "system"
 
 export type NotificationFilter = "all" | "unread" | NotificationCategory
@@ -18,6 +19,7 @@ export interface NotificationItem {
   timestamp: string
   isRead: boolean
   needsReview?: boolean
+  href: string | null
 }
 
 export interface NotificationSummaryStat {

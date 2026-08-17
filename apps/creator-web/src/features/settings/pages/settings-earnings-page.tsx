@@ -10,6 +10,7 @@ import {
 import { Switch } from "@workspace/ui/components/switch"
 import { Pencil, Plus, Star, Trash2 } from "lucide-react"
 import { useState } from "react"
+import { ConfirmDeleteDialog } from "../components/confirm-delete-dialog"
 import { SettingsSectionCard } from "../components/settings-section-card"
 import { PAYOUT_THRESHOLD_OPTIONS } from "../constants"
 import { MOCK_SETTINGS_DASHBOARD } from "../data/mock-settings"
@@ -21,6 +22,10 @@ const MOCK_EARNINGS = MOCK_SETTINGS_DASHBOARD.earnings
 export function SettingsEarningsPage() {
   const [autoPayout, setAutoPayout] = useState(MOCK_EARNINGS.autoPayoutEnabled)
   const [threshold, setThreshold] = useState(MOCK_EARNINGS.minimumThreshold)
+  const [methods, setMethods] = useState(MOCK_EARNINGS.payoutMethods)
+  const [methodToDelete, setMethodToDelete] = useState<PayoutMethod | null>(
+    null
+  )
 
   const earnings = MOCK_EARNINGS
 
@@ -96,11 +101,35 @@ export function SettingsEarningsPage() {
         }
       >
         <div className="divide-y rounded-xl border border-border">
-          {earnings.payoutMethods.map((method) => (
-            <PayoutMethodRow key={method.id} method={method} />
+          {methods.map((method) => (
+            <PayoutMethodRow
+              key={method.id}
+              method={method}
+              onDelete={() => setMethodToDelete(method)}
+            />
           ))}
         </div>
       </SettingsSectionCard>
+
+      <ConfirmDeleteDialog
+        open={methodToDelete != null}
+        onOpenChange={(open) => {
+          if (!open) setMethodToDelete(null)
+        }}
+        title="Delete payout method?"
+        description={
+          methodToDelete
+            ? `Remove ${methodToDelete.name} (${methodToDelete.details}) from this studio?`
+            : ""
+        }
+        onConfirm={() => {
+          if (!methodToDelete) return
+          setMethods((current) =>
+            current.filter((method) => method.id !== methodToDelete.id)
+          )
+          setMethodToDelete(null)
+        }}
+      />
 
       <SettingsSectionCard
         title="Tax & deductions"
@@ -180,7 +209,13 @@ function StatCard({
   )
 }
 
-function PayoutMethodRow({ method }: { method: PayoutMethod }) {
+function PayoutMethodRow({
+  method,
+  onDelete,
+}: {
+  method: PayoutMethod
+  onDelete: () => void
+}) {
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3.5">
       <div className="min-w-0">
@@ -229,6 +264,7 @@ function PayoutMethodRow({ method }: { method: PayoutMethod }) {
           size="icon-sm"
           className="text-muted-foreground"
           aria-label={`Delete ${method.name}`}
+          onClick={onDelete}
         >
           <Trash2 className="size-4" aria-hidden />
         </Button>

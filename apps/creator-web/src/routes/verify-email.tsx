@@ -12,10 +12,13 @@ import { resendVerification } from "@/features/auth/api/auth-api"
 import { useAuth } from "@/features/auth/auth-context"
 import { MfaVerifyDialog } from "@/features/auth/components/mfa-verify-dialog"
 import { PasswordResetShell } from "@/features/auth/components/password-reset-shell"
+import { toastApiError } from "@/lib/toast"
 
 function asSearchString(value: unknown): string | undefined {
   if (value == null || value === "") return undefined
-  const normalized = String(value).replace(/^["']+|["']+$/g, "").trim()
+  const normalized = String(value)
+    .replace(/^["']+|["']+$/g, "")
+    .trim()
   return normalized || undefined
 }
 
@@ -53,7 +56,6 @@ function VerifyEmailContent() {
   const [isAutoVerifying, setIsAutoVerifying] = useState(false)
   const [isResending, setIsResending] = useState(false)
   const [resent, setResent] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [mfaToken, setMfaToken] = useState<string | null>(null)
   const autoVerifyAttempted = useRef(false)
 
@@ -62,7 +64,6 @@ function VerifyEmailContent() {
       if (verificationCode.length !== 6 || !verificationId) return
 
       setIsVerifying(true)
-      setError(null)
 
       const result = await verifyEmailAndSignIn(
         verificationId,
@@ -86,11 +87,11 @@ function VerifyEmailContent() {
         result.outcome === "code_expired" ||
         result.outcome === "too_many_attempts"
       ) {
-        setError(result.message)
+        toastApiError(result.message)
         return
       }
 
-      setError(result.message)
+      toastApiError(result.message)
     },
     [verificationId, verifyEmailAndSignIn]
   )
@@ -118,7 +119,6 @@ function VerifyEmailContent() {
     if (!verificationId || isResending) return
 
     setIsResending(true)
-    setError(null)
 
     const result = await resendVerification(verificationId)
 
@@ -131,13 +131,13 @@ function VerifyEmailContent() {
     }
 
     if (result.outcome === "cooldown") {
-      setError(
+      toastApiError(
         `${result.message} Try again in ${result.retryAfterSeconds} seconds.`
       )
       return
     }
 
-    setError(result.message)
+    toastApiError(result.message)
   }
 
   if (isAutoVerifying) {
@@ -184,12 +184,6 @@ function VerifyEmailContent() {
             </InputOTPGroup>
           </InputOTP>
         </div>
-
-        {error && (
-          <p className="mt-4 text-center text-destructive text-sm" role="alert">
-            {error}
-          </p>
-        )}
 
         <Button
           type="button"

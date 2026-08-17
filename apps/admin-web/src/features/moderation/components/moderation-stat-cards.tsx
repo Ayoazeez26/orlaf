@@ -1,3 +1,4 @@
+import type { ModerationStats } from "@sable/contracts"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import type { LucideIcon } from "lucide-react"
@@ -9,6 +10,7 @@ import type { ModerationReport } from "../types"
 
 interface ModerationStatCardsProps {
   reports: ModerationReport[]
+  stats?: ModerationStats
 }
 
 interface Stat {
@@ -18,11 +20,24 @@ interface Stat {
   tone: Tone
 }
 
-export function ModerationStatCards({ reports }: ModerationStatCardsProps) {
-  const stats: Stat[] = [
+export function ModerationStatCards({
+  reports,
+  stats,
+}: ModerationStatCardsProps) {
+  const pending =
+    stats?.pending ??
+    reports.filter((report) => report.status === "pending").length
+  const reviewed =
+    stats?.reviewed ??
+    reports.filter((report) => report.status === "reviewed").length
+  const resolved =
+    stats?.resolved ??
+    reports.filter((r) => r.status === "resolved" || r.status === "dismissed")
+      .length
+  const statsList: Stat[] = [
     {
       label: "Pending",
-      value: reports.filter((report) => report.status === "pending").length,
+      value: pending,
       icon: Clock,
       tone: "danger",
     },
@@ -34,13 +49,13 @@ export function ModerationStatCards({ reports }: ModerationStatCardsProps) {
     },
     {
       label: "Reviewed",
-      value: reports.filter((report) => report.status === "reviewed").length,
+      value: reviewed,
       icon: ShieldCheck,
       tone: "primary",
     },
     {
       label: "Resolved",
-      value: reports.filter((report) => report.status === "resolved").length,
+      value: resolved,
       icon: CheckCircle2,
       tone: "positive",
     },
@@ -48,7 +63,7 @@ export function ModerationStatCards({ reports }: ModerationStatCardsProps) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {stats.map((stat) => {
+      {statsList.map((stat) => {
         const Icon = stat.icon
 
         return (

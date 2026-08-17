@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
 import { Button } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
 import type { Streamer } from "../types"
 import { PlanBadge, StatusBadge } from "./streamer-badges"
@@ -8,12 +9,17 @@ import { PlanBadge, StatusBadge } from "./streamer-badges"
 interface StreamersTableProps {
   streamers: Streamer[]
   role: WorkspaceRoleId
+  isRefreshing?: boolean
 }
 
 const HEAD_CLASS =
   "px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wide"
 
-export function StreamersTable({ streamers, role }: StreamersTableProps) {
+export function StreamersTable({
+  streamers,
+  role,
+  isRefreshing = false,
+}: StreamersTableProps) {
   if (streamers.length === 0) {
     return (
       <div className="flex min-h-40 items-center justify-center p-6 text-center text-muted-foreground text-sm">
@@ -23,7 +29,12 @@ export function StreamersTable({ streamers, role }: StreamersTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div
+      className={cn(
+        "overflow-x-auto transition-opacity",
+        isRefreshing && "opacity-60"
+      )}
+    >
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-border border-b">

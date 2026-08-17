@@ -1,6 +1,7 @@
 import { Switch } from "@workspace/ui/components/switch"
 import { Bell, Mail, Smartphone } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { toast, toastMutationError } from "@/lib/toast"
 import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
 import { SettingsSectionCard } from "../components/settings-section-card"
 import {
@@ -16,7 +17,6 @@ import {
   registerSettingsReset,
   registerSettingsSave,
 } from "../lib/settings-form-actions"
-import { toast, toastMutationError } from "@/lib/toast"
 import type { NotificationGroup } from "../types"
 
 const ICON_MAP = {

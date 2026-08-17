@@ -22,6 +22,7 @@ export interface DiscoveryRail {
   audience: RailAudience
   position: number
   isVisible: boolean
+  collectionKey?: string | null
   items: RailContentItem[]
 }
 

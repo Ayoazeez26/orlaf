@@ -1,3 +1,4 @@
+import { AdminRole } from "@sable/contracts"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
@@ -10,6 +11,7 @@ import {
 } from "@workspace/ui/components/select"
 import { Send, X } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useInviteAdminMember } from "../../api/team-hooks"
 import { TEAM_ROLE_OPTIONS } from "../../constants"
 import { useModalShell } from "../use-modal-shell"
 
@@ -22,17 +24,18 @@ export function InviteMemberDialog({
   open,
   onOpenChange,
 }: InviteMemberDialogProps) {
+  const invite = useInviteAdminMember()
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
-  const [role, setRole] = useState("finance-admin")
+  const [role, setRole] = useState<string>(AdminRole.CONTENT_ADMIN)
 
   useEffect(() => {
     if (!open) return
     setFirstName("")
     setLastName("")
     setEmail("")
-    setRole("finance-admin")
+    setRole(AdminRole.CONTENT_ADMIN)
   }, [open])
 
   useModalShell(open, onOpenChange)
@@ -137,7 +140,17 @@ export function InviteMemberDialog({
           <Button
             type="button"
             className="gap-2"
-            onClick={() => onOpenChange(false)}
+            disabled={invite.isPending || !email.trim()}
+            onClick={() => {
+              void invite
+                .mutateAsync({
+                  email: email.trim(),
+                  role: role as AdminRole,
+                  firstName: firstName.trim() || undefined,
+                  lastName: lastName.trim() || undefined,
+                })
+                .then(() => onOpenChange(false))
+            }}
           >
             <Send className="size-4" aria-hidden />
             Send invite

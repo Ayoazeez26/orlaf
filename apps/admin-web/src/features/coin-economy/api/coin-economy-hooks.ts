@@ -1,18 +1,16 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type {
   CreateAdminCoinBundleRequest,
   UpdateAdminCoinBundleRequest,
 } from "@sable/contracts"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { mapAdminCoinBundles } from "../lib/map-admin-coin-bundle"
+import type { CoinBundle } from "../types"
 import {
   createAdminCoinBundle,
   deleteAdminCoinBundle,
   listAdminCoinBundles,
   updateAdminCoinBundle,
 } from "./coin-economy-api"
-import {
-  mapAdminCoinBundles,
-} from "../lib/map-admin-coin-bundle"
-import type { CoinBundle } from "../types"
 
 export const coinEconomyKeys = {
   all: ["admin", "coin-economy"] as const,

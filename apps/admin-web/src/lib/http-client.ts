@@ -81,14 +81,20 @@ async function refreshOnce(): Promise<string | null> {
   return refreshPromise
 }
 
-export async function apiRequest<T = unknown>(
-  path: string,
-  options: RequestInit = {}
-): Promise<T> {
+/** Returns the current access token, refreshing it first if it's expiring soon. */
+export async function getValidAccessToken(): Promise<string | null> {
   if (inMemoryAccessToken && isTokenExpiringSoon(inMemoryAccessToken)) {
     const refreshed = await refreshOnce()
     if (refreshed) inMemoryAccessToken = refreshed
   }
+  return inMemoryAccessToken
+}
+
+export async function apiRequest<T = unknown>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  await getValidAccessToken()
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",

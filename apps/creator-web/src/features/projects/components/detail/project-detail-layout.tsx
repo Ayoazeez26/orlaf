@@ -22,7 +22,9 @@ export function ProjectDetailLayout() {
     return (
       <div className="space-y-4 p-4 sm:p-6 lg:p-8">
         <BackToProjectsLink />
-        <p className="text-destructive text-sm">Project not found.</p>
+        <p className="text-muted-foreground text-sm">
+          Unable to load this project.
+        </p>
       </div>
     )
   }

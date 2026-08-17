@@ -14,8 +14,8 @@ import {
 import { useState } from "react"
 import { PasswordInput } from "@/components/password-input"
 import { PasswordStrengthBar } from "@/components/password-strength-bar"
-import { toast, toastMutationError } from "@/lib/toast"
 import { isPasswordValid } from "@/lib/password-schema"
+import { toast, toastMutationError } from "@/lib/toast"
 import { SettingsModalShell } from "../components/settings-modal-shell"
 import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
 import { SettingsSectionCard } from "../components/settings-section-card"
@@ -25,6 +25,7 @@ import {
   useChangePassword,
   useDisableTotp,
   useEnableTotp,
+  useRevokeOtherSessions,
   useRevokeSession,
   useSecurityStatus,
   useSetPassword,
@@ -36,6 +37,7 @@ export function SettingsSecurityPage() {
   const { data: status, isLoading: statusLoading } = useSecurityStatus()
   const { data: sessionsData, isLoading: sessionsLoading } = useActiveSessions()
   const revokeSession = useRevokeSession()
+  const revokeOtherSessions = useRevokeOtherSessions()
   const setPasswordMutation = useSetPassword()
   const changePasswordMutation = useChangePassword()
   const setupTotp = useSetupTotp()
@@ -97,10 +99,7 @@ export function SettingsSecurityPage() {
       resetChangePasswordForm()
       toast.success("Password updated.")
     } catch (error) {
-      toastMutationError(
-        error,
-        "Unable to change password. Please try again."
-      )
+      toastMutationError(error, "Unable to change password. Please try again.")
     }
   }
 
@@ -218,73 +217,104 @@ export function SettingsSecurityPage() {
 
       <SettingsSectionCard
         title="Active sessions"
-        description="Devices currently signed in to your studio."
+        description="Devices signed in to your studio on the web or Sable mobile app. If you get a new sign-in alert email, review this list and sign out anything you don't recognize."
       >
         <div className="space-y-3">
           {sessionsData?.sessions.length ? (
-            sessionsData.sessions.map((session) => {
-              const DeviceIcon = session.device.includes("iPhone")
-                ? Smartphone
-                : Laptop
-              return (
-                <div
-                  key={session.id}
-                  className="flex items-center justify-between gap-4 border-border border-b py-3 last:border-b-0"
-                >
-                  <div className="flex min-w-0 items-start gap-3">
-                    <DeviceIcon
-                      className="mt-0.5 size-4 shrink-0 text-muted-foreground"
-                      aria-hidden
-                    />
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-foreground text-sm">
-                          {session.device} · {session.location}
+            <>
+              {sessionsData.sessions.map((session) => {
+                const DeviceIcon =
+                  session.surface === "mobile" ? Smartphone : Laptop
+                return (
+                  <div
+                    key={session.id}
+                    className="flex items-center justify-between gap-4 border-border border-b py-3 last:border-b-0"
+                  >
+                    <div className="flex min-w-0 items-start gap-3">
+                      <DeviceIcon
+                        className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                        aria-hidden
+                      />
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-foreground text-sm">
+                            {session.device} · {session.location}
+                          </p>
+                          {session.current ? (
+                            <Badge className="border-transparent bg-muted text-muted-foreground text-xs">
+                              Current
+                            </Badge>
+                          ) : null}
+                        </div>
+                        <p className="text-muted-foreground text-xs">
+                          {session.browser} ·{" "}
+                          {formatSessionLastActive(session.lastActiveAt)}
                         </p>
-                        {session.current ? (
-                          <Badge className="border-transparent bg-muted text-muted-foreground text-xs">
-                            Current
-                          </Badge>
-                        ) : null}
                       </div>
-                      <p className="text-muted-foreground text-xs">
-                        {session.browser} ·{" "}
-                        {formatSessionLastActive(session.lastActiveAt)}
-                      </p>
                     </div>
+                    {!session.current ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="gap-1.5 text-muted-foreground"
+                        disabled={revokeSession.isPending}
+                        onClick={() =>
+                          revokeSession.mutate(session.id, {
+                            onSuccess: () =>
+                              toast.success("Session signed out."),
+                            onError: (error) =>
+                              toastMutationError(
+                                error,
+                                "Unable to sign out that session."
+                              ),
+                          })
+                        }
+                      >
+                        {revokeSession.isPending ? (
+                          <Loader2
+                            className="size-3.5 animate-spin"
+                            aria-hidden
+                          />
+                        ) : (
+                          <LogOut className="size-3.5" aria-hidden />
+                        )}
+                        Sign out
+                      </Button>
+                    ) : null}
                   </div>
-                  {!session.current ? (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="gap-1.5 text-muted-foreground"
-                      disabled={revokeSession.isPending}
-                      onClick={() =>
-                        revokeSession.mutate(session.id, {
-                          onSuccess: () => toast.success("Session signed out."),
-                          onError: (error) =>
-                            toastMutationError(
-                              error,
-                              "Unable to sign out that session."
-                            ),
-                        })
-                      }
-                    >
-                      {revokeSession.isPending ? (
-                        <Loader2
-                          className="size-3.5 animate-spin"
-                          aria-hidden
-                        />
-                      ) : (
-                        <LogOut className="size-3.5" aria-hidden />
-                      )}
-                      Sign out
-                    </Button>
-                  ) : null}
+                )
+              })}
+              {sessionsData.sessions.some((session) => !session.current) ? (
+                <div className="flex justify-end pt-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="gap-1.5"
+                    disabled={revokeOtherSessions.isPending}
+                    onClick={() =>
+                      revokeOtherSessions.mutate(undefined, {
+                        onSuccess: () =>
+                          toast.success("Signed out all other devices."),
+                        onError: (error) =>
+                          toastMutationError(
+                            error,
+                            "Unable to sign out other devices."
+                          ),
+                      })
+                    }
+                  >
+                    {revokeOtherSessions.isPending ? (
+                      <Loader2 className="size-3.5 animate-spin" aria-hidden />
+                    ) : (
+                      <LogOut className="size-3.5" aria-hidden />
+                    )}
+                    Sign out all other devices
+                  </Button>
                 </div>
-              )
-            })
+              ) : null}
+            </>
           ) : (
             <p className="text-muted-foreground text-sm">No active sessions.</p>
           )}

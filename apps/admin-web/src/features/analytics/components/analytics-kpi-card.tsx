@@ -40,7 +40,7 @@ export function AnalyticsKpiCard({ kpi }: AnalyticsKpiCardProps) {
             />
             <span className={cn("font-medium", trendColor)}>
               {isPositive ? "+" : "-"}
-              {Math.abs(kpi.changePercent!).toFixed(1)}%
+              {Math.abs(kpi.changePercent ?? 0).toFixed(1)}%
             </span>
             <span className="text-muted-foreground">vs last period</span>
           </p>

@@ -2,9 +2,9 @@ import { Link } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import { Separator } from "@workspace/ui/components/separator"
 import { Mail } from "lucide-react"
-import { useState } from "react"
 import { SableBrandMark } from "@/components/sable-brand-mark"
 import { GoogleSignInButton } from "@/features/auth/components/google-sign-in-button"
+import { toastApiError } from "@/lib/toast"
 import { useOnboarding } from "../../onboarding-context"
 import { OnboardingProgress } from "../onboarding-progress"
 
@@ -28,7 +28,6 @@ function AppleIcon() {
 
 export function WelcomeStep({ progress, onContinueEmail }: WelcomeStepProps) {
   const { dispatch } = useOnboarding()
-  const [authError, setAuthError] = useState<string | null>(null)
 
   const handleContinueEmail = () => {
     dispatch({ type: "SET_AUTH_METHOD", payload: "email" })
@@ -53,7 +52,7 @@ export function WelcomeStep({ progress, onContinueEmail }: WelcomeStepProps) {
             onSuccess={() =>
               dispatch({ type: "SET_AUTH_METHOD", payload: "google" })
             }
-            onError={setAuthError}
+            onError={toastApiError}
           />
 
           <Button
@@ -86,12 +85,6 @@ export function WelcomeStep({ progress, onContinueEmail }: WelcomeStepProps) {
             Continue with Email
           </Button>
         </div>
-
-        {authError && (
-          <p className="mt-4 text-center text-destructive text-sm" role="alert">
-            {authError}
-          </p>
-        )}
 
         <p className="mt-6 text-center text-muted-foreground text-xs">
           By signing up, you agree to our{" "}

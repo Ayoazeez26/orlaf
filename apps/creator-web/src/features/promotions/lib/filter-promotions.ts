@@ -31,7 +31,7 @@ export function filterPromotions(
 }
 
 export function formatPromotionMeta(promotion: PromotionSummary) {
-  return `${promotion.projectName} · ${promotion.placement} · ${promotion.startDate} → ${promotion.endDate}`
+  return `${promotion.projectName} · ${promotion.placementLabel} · ${promotion.startDate} → ${promotion.endDate}`
 }
 
 export function formatCurrency(amount: number) {

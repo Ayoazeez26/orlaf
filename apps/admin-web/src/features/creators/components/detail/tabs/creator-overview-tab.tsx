@@ -2,9 +2,10 @@ import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import type { LucideIcon } from "lucide-react"
 import { AtSign, Calendar, MapPin, ShieldCheck } from "lucide-react"
+import { useCreatorAnalyticsQuery } from "@/features/creators/api/creators-hooks"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import { formatCreatorViews } from "../../../data/creator-details"
-import type { CreatorDetail } from "../../../types"
+import type { CreatorDetail, TopProject } from "../../../types"
 
 interface InfoField {
   icon: LucideIcon
@@ -26,7 +27,35 @@ function InfoFieldRow({ icon: Icon, label, value }: InfoField) {
   )
 }
 
+function topProjectsFromEpisodes(
+  episodes: {
+    series: string
+    title: string
+    views: number
+  }[]
+): TopProject[] {
+  const bySeries = new Map<string, TopProject>()
+  for (const episode of episodes) {
+    const existing = bySeries.get(episode.series)
+    if (existing) {
+      existing.views += episode.views
+    } else {
+      bySeries.set(episode.series, {
+        title: episode.series,
+        duration: episode.title,
+        views: episode.views,
+      })
+    }
+  }
+  return [...bySeries.values()].sort((a, b) => b.views - a.views).slice(0, 5)
+}
+
 export function CreatorOverviewTab({ creator }: { creator: CreatorDetail }) {
+  const { data: analytics, isPending } = useCreatorAnalyticsQuery(creator.id)
+  const topProjects = analytics
+    ? topProjectsFromEpisodes(analytics.topEpisodes)
+    : []
+
   const fields: InfoField[] = [
     { icon: AtSign, label: "Username", value: creator.username },
     { icon: Calendar, label: "Joined", value: creator.joined },
@@ -75,24 +104,32 @@ export function CreatorOverviewTab({ creator }: { creator: CreatorDetail }) {
             Top Performing Projects
           </h2>
 
-          <ul className="space-y-4">
-            {creator.topProjects.map((project, index) => (
-              <li key={project.title} className="flex items-center gap-3">
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted font-medium text-muted-foreground text-xs">
-                  {index + 1}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-foreground text-sm">
-                    {project.title}
-                  </p>
-                  <p className="text-muted-foreground text-xs">
-                    {project.duration} · {formatCreatorViews(project.views)}{" "}
-                    views
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {isPending ? (
+            <p className="text-muted-foreground text-sm">Loading…</p>
+          ) : topProjects.length === 0 ? (
+            <p className="text-muted-foreground text-sm">
+              No view data yet for this creator.
+            </p>
+          ) : (
+            <ul className="space-y-4">
+              {topProjects.map((project, index) => (
+                <li key={project.title} className="flex items-center gap-3">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted font-medium text-muted-foreground text-xs">
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-foreground text-sm">
+                      {project.title}
+                    </p>
+                    <p className="text-muted-foreground text-xs">
+                      {project.duration} · {formatCreatorViews(project.views)}{" "}
+                      views
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </CardContent>
       </Card>
     </div>

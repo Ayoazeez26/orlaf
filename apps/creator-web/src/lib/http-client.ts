@@ -4,6 +4,7 @@
  */
 
 import { getApiBaseUrl } from "./api-base-url"
+import { getActiveStudioId } from "./studio-id"
 
 const API_BASE_URL = getApiBaseUrl()
 
@@ -82,14 +83,20 @@ async function refreshOnce(): Promise<string | null> {
   return refreshPromise
 }
 
-export async function apiRequest<T = unknown>(
-  path: string,
-  options: RequestInit = {}
-): Promise<T> {
+/** Returns the current access token, refreshing it first if it's expiring soon. */
+export async function getValidAccessToken(): Promise<string | null> {
   if (inMemoryAccessToken && isTokenExpiringSoon(inMemoryAccessToken)) {
     const refreshed = await refreshOnce()
     if (refreshed) inMemoryAccessToken = refreshed
   }
+  return inMemoryAccessToken
+}
+
+export async function apiRequest<T = unknown>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  await getValidAccessToken()
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -98,6 +105,11 @@ export async function apiRequest<T = unknown>(
 
   if (inMemoryAccessToken) {
     headers.Authorization = `Bearer ${inMemoryAccessToken}`
+  }
+
+  const studioId = getActiveStudioId()
+  if (studioId && path.startsWith("/api/v1/studio")) {
+    headers["X-Studio-Id"] = studioId
   }
 
   let response = await apiFetch(path, {

@@ -65,6 +65,12 @@ export function PromotionsListPage() {
         </p>
       )}
 
+      {data && data.promotions.length === 0 && (
+        <p className="text-muted-foreground text-sm">
+          No promotions yet. Create your first campaign to reach more viewers.
+        </p>
+      )}
+
       {showEmptyResults && (
         <p className="text-muted-foreground text-sm">
           No promotions match your search or filters.

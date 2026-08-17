@@ -28,7 +28,7 @@ function AuthStatusPage({
         <h1 className="font-semibold text-xl">{title}</h1>
         <p className="mt-3 text-muted-foreground text-sm">{description}</p>
         <Button asChild className="mt-6" variant="outline">
-          <Link to="/onboarding">Back to sign in</Link>
+          <Link to="/login">Back to sign in</Link>
         </Button>
       </div>
     </main>

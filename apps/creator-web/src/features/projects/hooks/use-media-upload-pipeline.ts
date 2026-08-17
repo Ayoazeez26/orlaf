@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react"
-import { toast, toastMutationError } from "@/lib/toast"
 import { fetchPreferences } from "@/features/settings/api/preferences-api"
+import { toast, toastMutationError } from "@/lib/toast"
 import { publishSeries } from "../api/studio-api"
 import { formatDuration } from "../lib/media/format-duration"
 import { probeMediaFile } from "../lib/media/probe-media"

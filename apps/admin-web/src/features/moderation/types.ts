@@ -4,14 +4,18 @@ export type ModerationReportType = "content" | "user"
 
 export type ModerationSeverity = "high" | "medium" | "low"
 
-export type ModerationReportStatus = "pending" | "reviewed" | "resolved"
+export type ModerationReportStatus =
+  | "pending"
+  | "reviewed"
+  | "resolved"
+  | "dismissed"
 
 export interface ModerationReport {
   id: string
   title: string
   contentType: ModerationContentType
   reportType: ModerationReportType
-  parent?: string
+  parent?: string | null
   severity: ModerationSeverity
   reason: string
   status: ModerationReportStatus
@@ -26,8 +30,8 @@ export interface ModerationActivityEntry {
 
 export interface ModerationReportDetail extends ModerationReport {
   reporterNote: string
-  projectId?: string
-  creatorId?: string
-  creatorName?: string
+  projectId?: string | null
+  creatorId?: string | null
+  creatorName?: string | null
   activity: ModerationActivityEntry[]
 }

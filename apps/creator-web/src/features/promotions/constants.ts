@@ -8,6 +8,7 @@ export const PROMOTION_STATUS_FILTER_PILLS: {
   { value: "active", label: "Active" },
   { value: "pending", label: "Pending" },
   { value: "completed", label: "Completed" },
+  { value: "rejected", label: "Rejected" },
   { value: "draft", label: "Draft" },
 ]
 
@@ -39,12 +40,6 @@ export const PROMOTION_GOAL_OPTIONS = [
     label: "Watch time",
     description: "Increase engagement",
   },
-]
-
-export const PROMOTION_FORM_PROJECTS = [
-  { id: "lagos-after-dark", name: "Lagos After Dark" },
-  { id: "lagos-nights", name: "Lagos Nights" },
-  { id: "studio-sessions", name: "Studio Sessions" },
 ]
 
 export function promotionDetailPath(promotionId: string) {

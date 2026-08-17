@@ -21,11 +21,29 @@ import { AddContentCard, DiscoveryContentCard } from "./discovery-content-card"
 interface DiscoveryRailCardProps {
   rail: DiscoveryRail
   onAddContent?: (rail: DiscoveryRail) => void
+  onMoveUp?: () => void
+  onMoveDown?: () => void
+  canMoveUp?: boolean
+  canMoveDown?: boolean
+  onToggleVisible?: () => void
+  onToggleLive?: () => void
+  onDelete?: () => void
+  onEdit?: () => void
+  onRemoveItem?: (seriesId: string) => void
 }
 
 export function DiscoveryRailCard({
   rail,
   onAddContent,
+  onMoveUp,
+  onMoveDown,
+  canMoveUp = true,
+  canMoveDown = true,
+  onToggleVisible,
+  onToggleLive,
+  onDelete,
+  onEdit,
+  onRemoveItem,
 }: DiscoveryRailCardProps) {
   const AudienceIcon = rail.audience === "new-users" ? UserRound : Users
 
@@ -51,8 +69,23 @@ export function DiscoveryRailCard({
               <h3 className="font-semibold text-foreground text-sm">
                 {rail.title}
               </h3>
-              <RailStatusBadge status={rail.status} />
+              <button
+                type="button"
+                onClick={onToggleLive}
+                title={
+                  rail.status === "live"
+                    ? "Set rail to draft"
+                    : "Set rail live for catalog"
+                }
+              >
+                <RailStatusBadge status={rail.status} />
+              </button>
               {rail.type === "hero" ? <HeroBadge /> : null}
+              {rail.collectionKey ? (
+                <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary text-xs">
+                  catalog:{rail.collectionKey}
+                </span>
+              ) : null}
             </div>
 
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-muted-foreground text-xs">
@@ -75,6 +108,8 @@ export function DiscoveryRailCard({
             variant="ghost"
             size="icon-sm"
             aria-label="Move rail up"
+            disabled={!canMoveUp}
+            onClick={onMoveUp}
           >
             <ArrowUp className="size-4" aria-hidden />
           </Button>
@@ -83,6 +118,8 @@ export function DiscoveryRailCard({
             variant="ghost"
             size="icon-sm"
             aria-label="Move rail down"
+            disabled={!canMoveDown}
+            onClick={onMoveDown}
           >
             <ArrowDown className="size-4" aria-hidden />
           </Button>
@@ -91,6 +128,7 @@ export function DiscoveryRailCard({
             variant="ghost"
             size="icon-sm"
             aria-label={rail.isVisible ? "Hide rail" : "Show rail"}
+            onClick={onToggleVisible}
           >
             {rail.isVisible ? (
               <Eye className="size-4" aria-hidden />
@@ -103,6 +141,7 @@ export function DiscoveryRailCard({
             variant="ghost"
             size="icon-sm"
             aria-label="Edit rail"
+            onClick={onEdit}
           >
             <Pencil className="size-4" aria-hidden />
           </Button>
@@ -111,6 +150,7 @@ export function DiscoveryRailCard({
             variant="ghost"
             size="icon-sm"
             aria-label="Delete rail"
+            onClick={onDelete}
           >
             <Trash2 className="size-4" aria-hidden />
           </Button>
@@ -124,7 +164,15 @@ export function DiscoveryRailCard({
         )}
       >
         {rail.items.map((item) => (
-          <DiscoveryContentCard key={`${rail.id}-${item.id}`} item={item} />
+          <button
+            key={`${rail.id}-${item.id}`}
+            type="button"
+            className="text-left"
+            onClick={() => onRemoveItem?.(item.id)}
+            title="Remove from rail"
+          >
+            <DiscoveryContentCard item={item} />
+          </button>
         ))}
         <AddContentCard onClick={() => onAddContent?.(rail)} />
       </div>

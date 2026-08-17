@@ -1,10 +1,9 @@
-import {
-  DEFAULT_EPISODE_COIN_PRICE,
-  EpisodeAccessType,
-} from "@sable/contracts"
+import { DEFAULT_EPISODE_COIN_PRICE, EpisodeAccessType } from "@sable/contracts"
 import type { EpisodeAccess } from "../types"
 
-export function mapEpisodeAccessToApi(access: EpisodeAccess): EpisodeAccessType {
+export function mapEpisodeAccessToApi(
+  access: EpisodeAccess
+): EpisodeAccessType {
   switch (access) {
     case "coins":
       return EpisodeAccessType.COIN_GATED

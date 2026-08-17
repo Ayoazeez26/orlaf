@@ -12,6 +12,7 @@ export interface NotificationItem {
   timestamp: string
   icon: NotificationIcon
   read: boolean
+  href: string | null
 }
 
 export interface NotificationsData {

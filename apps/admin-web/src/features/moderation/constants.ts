@@ -32,4 +32,5 @@ export const MODERATION_STATUS_BADGE_CLASS: Record<
   pending: "bg-red-500/10 text-red-600",
   reviewed: "bg-primary/10 text-primary",
   resolved: "bg-emerald-500/10 text-emerald-600",
+  dismissed: "bg-muted text-muted-foreground",
 }

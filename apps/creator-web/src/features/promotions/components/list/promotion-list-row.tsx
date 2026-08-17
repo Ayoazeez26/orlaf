@@ -71,7 +71,7 @@ export function PromotionListRow({ promotion }: PromotionListRowProps) {
           />
         </div>
         <span className="w-24 shrink-0 text-right text-muted-foreground text-xs">
-          {promotion.impressions} impressions
+          {promotion.impressionsLabel} impressions
         </span>
       </div>
 

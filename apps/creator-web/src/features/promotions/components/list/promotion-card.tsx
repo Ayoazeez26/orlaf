@@ -59,7 +59,7 @@ export function PromotionCard({ promotion }: PromotionCardProps) {
               className="h-1.5 bg-muted"
             />
             <p className="text-muted-foreground text-xs">
-              {promotion.impressions} impressions
+              {promotion.impressionsLabel} impressions
             </p>
           </div>
         </Link>

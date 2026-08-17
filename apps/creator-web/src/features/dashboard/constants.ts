@@ -38,18 +38,3 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
     ],
   },
 ]
-
-export const MOCK_WORKSPACES = [
-  {
-    id: "lucid",
-    name: "Lucid Productions",
-    initials: "LP",
-    role: "Owner" as const,
-  },
-  {
-    id: "nova",
-    name: "Nova Studios",
-    initials: "NS",
-    role: "Member" as const,
-  },
-]

@@ -9,6 +9,7 @@ import { useState } from "react"
 import { resendVerification } from "@/features/auth/api/auth-api"
 import { useAuth } from "@/features/auth/auth-context"
 import { MfaVerifyDialog } from "@/features/auth/components/mfa-verify-dialog"
+import { toastApiError } from "@/lib/toast"
 import { useOnboarding } from "../../onboarding-context"
 import { OnboardingShell } from "../onboarding-shell"
 
@@ -24,7 +25,6 @@ export function VerifyEmailStep({ progress, onBack }: VerifyEmailStepProps) {
   const [isVerifying, setIsVerifying] = useState(false)
   const [isResending, setIsResending] = useState(false)
   const [resent, setResent] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [mfaToken, setMfaToken] = useState<string | null>(null)
 
   const emailHint = data.maskedEmail ?? data.profile.email ?? "your inbox"
@@ -33,7 +33,6 @@ export function VerifyEmailStep({ progress, onBack }: VerifyEmailStepProps) {
     if (code.length !== 6 || !data.verificationId) return
 
     setIsVerifying(true)
-    setError(null)
 
     const result = await verifyEmailAndSignIn(data.verificationId, code, {
       inviteToken: data.inviteToken ?? undefined,
@@ -52,28 +51,27 @@ export function VerifyEmailStep({ progress, onBack }: VerifyEmailStepProps) {
     }
 
     if (result.outcome === "invalid_code") {
-      setError(result.message)
+      toastApiError(result.message)
       return
     }
 
     if (result.outcome === "code_expired") {
-      setError(result.message)
+      toastApiError(result.message)
       return
     }
 
     if (result.outcome === "too_many_attempts") {
-      setError(result.message)
+      toastApiError(result.message)
       return
     }
 
-    setError(result.message)
+    toastApiError(result.message)
   }
 
   const handleResend = async () => {
     if (!data.verificationId || isResending) return
 
     setIsResending(true)
-    setError(null)
 
     const result = await resendVerification(data.verificationId)
 
@@ -86,13 +84,13 @@ export function VerifyEmailStep({ progress, onBack }: VerifyEmailStepProps) {
     }
 
     if (result.outcome === "cooldown") {
-      setError(
+      toastApiError(
         `${result.message} Try again in ${result.retryAfterSeconds} seconds.`
       )
       return
     }
 
-    setError(result.message)
+    toastApiError(result.message)
   }
 
   return (
@@ -122,12 +120,6 @@ export function VerifyEmailStep({ progress, onBack }: VerifyEmailStepProps) {
             </InputOTPGroup>
           </InputOTP>
         </div>
-
-        {error && (
-          <p className="mt-4 text-center text-destructive text-sm" role="alert">
-            {error}
-          </p>
-        )}
 
         <Button
           type="button"
@@ -167,7 +159,7 @@ export function VerifyEmailStep({ progress, onBack }: VerifyEmailStepProps) {
         onSuccess={() =>
           dispatch({ type: "SET_VERIFICATION_CODE", payload: code })
         }
-        onError={setError}
+        onError={toastApiError}
       />
     </>
   )

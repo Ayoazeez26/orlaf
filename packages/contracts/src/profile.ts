@@ -197,3 +197,47 @@ export interface UpdateCreatorNotificationSettingsRequest {
 
 export type UpdateCreatorNotificationSettingsResponse =
   CreatorNotificationSettings;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET/PATCH /profile/privacy-settings — viewer mobile app
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface UserPrivacySettings {
+  private_profile: boolean;
+  show_watch_history: boolean;
+  personalized_ads: boolean;
+  analytics_enabled: boolean;
+  updated_at: string;
+}
+
+export interface UpdateUserPrivacySettingsRequest {
+  private_profile?: boolean;
+  show_watch_history?: boolean;
+  personalized_ads?: boolean;
+  analytics_enabled?: boolean;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET/PATCH /profile/playback-settings — viewer mobile app
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type VideoQualityPreference = 'auto' | 'low' | 'medium' | 'high';
+
+export interface UserPlaybackSettings {
+  autoplay_next_episode: boolean;
+  autoplay_previews: boolean;
+  data_saver: boolean;
+  video_quality: VideoQualityPreference;
+  app_language: string;
+  subtitle_language: string;
+  updated_at: string;
+}
+
+export interface UpdateUserPlaybackSettingsRequest {
+  autoplay_next_episode?: boolean;
+  autoplay_previews?: boolean;
+  data_saver?: boolean;
+  video_quality?: VideoQualityPreference;
+  app_language?: string;
+  subtitle_language?: string;
+}

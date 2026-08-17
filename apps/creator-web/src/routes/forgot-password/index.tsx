@@ -15,6 +15,7 @@ import { AppLoadingScreen } from "@/components/app-loading-screen"
 import { requestPasswordReset } from "@/features/auth/api/password-reset-api"
 import { PasswordResetShell } from "@/features/auth/components/password-reset-shell"
 import { writePasswordResetSession } from "@/features/auth/lib/password-reset-storage"
+import { toastApiError } from "@/lib/toast"
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -37,7 +38,6 @@ function ForgotPasswordPage() {
 
 function ForgotPasswordContent() {
   const navigate = useNavigate()
-  const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const {
@@ -50,14 +50,13 @@ function ForgotPasswordContent() {
 
   const onSubmit = async (values: ForgotPasswordFormValues) => {
     setIsSubmitting(true)
-    setError(null)
 
     const result = await requestPasswordReset(values.email)
 
     setIsSubmitting(false)
 
     if (result.outcome === "error") {
-      setError(result.message)
+      toastApiError(result.message)
       return
     }
 
@@ -92,12 +91,6 @@ function ForgotPasswordContent() {
             <p className="text-destructive text-xs">{errors.email.message}</p>
           )}
         </div>
-
-        {error && (
-          <p className="text-destructive text-sm" role="alert">
-            {error}
-          </p>
-        )}
 
         <Button type="submit" className="h-12 w-full" disabled={isSubmitting}>
           {isSubmitting ? (

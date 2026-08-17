@@ -3,7 +3,9 @@ import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import { Building2, Pencil, Plus, Trash2 } from "lucide-react"
+import { useState } from "react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
+import { ConfirmDeleteDialog } from "@/features/settings/components/confirm-delete-dialog"
 import type { BankAccount } from "../../types"
 
 interface BankAccountsCardProps {
@@ -21,6 +23,11 @@ export function BankAccountsCard({
   addButtonLabel = "Add New Account",
   className,
 }: BankAccountsCardProps) {
+  const [listed, setListed] = useState(accounts)
+  const [accountToDelete, setAccountToDelete] = useState<BankAccount | null>(
+    null
+  )
+
   return (
     <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6", className)}>
       <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:space-y-0">
@@ -34,7 +41,7 @@ export function BankAccountsCard({
         </Button>
       </CardHeader>
       <CardContent className="space-y-4">
-        {accounts.map((account) => (
+        {listed.map((account) => (
           <div
             key={account.id}
             className="flex items-center justify-between gap-4 rounded-xl border border-border bg-payout-account-row-bg p-4"
@@ -79,6 +86,7 @@ export function BankAccountsCard({
                 size="icon-sm"
                 className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                 aria-label={`Delete ${account.bankName}`}
+                onClick={() => setAccountToDelete(account)}
               >
                 <Trash2 className="size-4" aria-hidden />
               </Button>
@@ -86,6 +94,25 @@ export function BankAccountsCard({
           </div>
         ))}
       </CardContent>
+      <ConfirmDeleteDialog
+        open={accountToDelete != null}
+        onOpenChange={(open) => {
+          if (!open) setAccountToDelete(null)
+        }}
+        title="Delete bank account?"
+        description={
+          accountToDelete
+            ? `Remove ${accountToDelete.bankName} ••••${accountToDelete.last4} from payouts?`
+            : ""
+        }
+        onConfirm={() => {
+          if (!accountToDelete) return
+          setListed((current) =>
+            current.filter((account) => account.id !== accountToDelete.id)
+          )
+          setAccountToDelete(null)
+        }}
+      />
     </Card>
   )
 }

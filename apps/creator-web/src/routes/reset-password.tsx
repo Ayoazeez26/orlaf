@@ -25,6 +25,7 @@ import {
 } from "@/features/auth/lib/password-reset-storage"
 import { resolvePostSignInRoute } from "@/features/auth/lib/post-sign-in-route"
 import { passwordFieldSchema } from "@/lib/password-schema"
+import { toastApiError } from "@/lib/toast"
 
 const resetPasswordSchema = z
   .object({
@@ -69,7 +70,6 @@ function ResetPasswordPage() {
 
 function ResetPasswordContent() {
   const navigate = useNavigate()
-  const [error, setError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [mfaToken, setMfaToken] = useState<string | null>(null)
 
@@ -93,12 +93,11 @@ function ResetPasswordContent() {
 
   const onSubmit = async (values: ResetPasswordFormValues) => {
     if (!resetToken) {
-      setError("Your reset session expired. Please start again.")
+      toastApiError("Your reset session expired. Please start again.")
       return
     }
 
     setIsSubmitting(true)
-    setError(null)
 
     const result = await confirmPasswordReset({
       resetToken,
@@ -117,7 +116,7 @@ function ResetPasswordContent() {
       return
     }
 
-    setError(result.message)
+    toastApiError(result.message)
   }
 
   return (
@@ -171,12 +170,6 @@ function ResetPasswordContent() {
             )}
           </div>
 
-          {error && (
-            <p className="text-destructive text-sm" role="alert">
-              {error}
-            </p>
-          )}
-
           <Button type="submit" className="h-12 w-full" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
@@ -197,7 +190,7 @@ function ResetPasswordContent() {
           if (!open) setMfaToken(null)
         }}
         onSuccess={finishReset}
-        onError={setError}
+        onError={toastApiError}
       />
     </>
   )

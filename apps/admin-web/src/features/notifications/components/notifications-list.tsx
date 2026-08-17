@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react"
 import {
   AlertTriangle,
   FolderOpen,
+  LifeBuoy,
   Megaphone,
   ShieldCheck,
   UserPlus,
@@ -16,6 +17,7 @@ import type { NotificationCategory, NotificationItem } from "../types"
 
 interface NotificationsListProps {
   notifications: NotificationItem[]
+  onOpen: (notification: NotificationItem) => void
   onToggleRead: (id: string) => void
 }
 
@@ -28,11 +30,13 @@ const CATEGORY_CONFIG: Record<
   payouts: { icon: Wallet, tone: "positive" },
   creators: { icon: UserPlus, tone: "primary" },
   projects: { icon: FolderOpen, tone: "info" },
+  support: { icon: LifeBuoy, tone: "info" },
   system: { icon: AlertTriangle, tone: "danger" },
 }
 
 export function NotificationsList({
   notifications,
+  onOpen,
   onToggleRead,
 }: NotificationsListProps) {
   if (notifications.length === 0) {
@@ -52,9 +56,13 @@ export function NotificationsList({
         return (
           <li
             key={notification.id}
-            className="flex flex-col gap-4 px-1 py-5 sm:flex-row sm:items-start sm:justify-between"
+            className="-mx-2 flex flex-col gap-4 rounded-xl px-3 py-4 transition-colors hover:bg-muted/50 sm:flex-row sm:items-start sm:justify-between"
           >
-            <div className="flex min-w-0 items-start gap-4">
+            <button
+              type="button"
+              className="flex min-w-0 flex-1 cursor-pointer items-start gap-4 rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              onClick={() => onOpen(notification)}
+            >
               <span
                 className={cn(
                   "flex size-10 shrink-0 items-center justify-center rounded-xl",
@@ -94,14 +102,17 @@ export function NotificationsList({
                   {notification.timestamp}
                 </p>
               </div>
-            </div>
+            </button>
 
             <Button
               type="button"
               variant="outline"
               size="sm"
               className="shrink-0 self-start"
-              onClick={() => onToggleRead(notification.id)}
+              onClick={(event) => {
+                event.stopPropagation()
+                onToggleRead(notification.id)
+              }}
             >
               {notification.isRead ? "Mark unread" : "Mark read"}
             </Button>

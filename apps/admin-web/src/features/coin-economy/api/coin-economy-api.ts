@@ -25,18 +25,14 @@ export function updateAdminCoinBundle(
   id: string,
   body: UpdateAdminCoinBundleRequest
 ): Promise<AdminCoinBundle> {
-  return apiRequest<AdminCoinBundle>(
-    `${BASE}/${encodeURIComponent(id)}`,
-    {
-      method: "PATCH",
-      body: JSON.stringify(body),
-    }
-  )
+  return apiRequest<AdminCoinBundle>(`${BASE}/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  })
 }
 
 export function deleteAdminCoinBundle(id: string): Promise<{ deleted: true }> {
-  return apiRequest<{ deleted: true }>(
-    `${BASE}/${encodeURIComponent(id)}`,
-    { method: "DELETE" }
-  )
+  return apiRequest<{ deleted: true }>(`${BASE}/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  })
 }

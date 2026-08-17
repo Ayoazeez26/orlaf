@@ -11,6 +11,7 @@ import { ArrowLeftRight, Copy, Download, Loader2, Trash2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { toast, toastMutationError } from "@/lib/toast"
 import { uploadStudioLogo } from "../api/profile-upload"
+import { ConfirmDeleteDialog } from "../components/confirm-delete-dialog"
 import { SettingsActionRow } from "../components/settings-action-row"
 import { SettingsField } from "../components/settings-field"
 import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
@@ -73,6 +74,7 @@ export function SettingsStudioPage() {
   const initialFormRef = useRef<typeof DEFAULT_STUDIO_FORM | null>(null)
 
   const [form, setForm] = useState(DEFAULT_STUDIO_FORM)
+  const [deleteOpen, setDeleteOpen] = useState(false)
 
   const hasInitialized = useRef(false)
 
@@ -300,6 +302,7 @@ export function SettingsStudioPage() {
             <Button
               type="button"
               className="gap-1.5 rounded-lg bg-trend-negative text-white hover:bg-trend-negative/90"
+              onClick={() => setDeleteOpen(true)}
             >
               <Trash2 className="size-3.5" aria-hidden />
               Delete
@@ -307,6 +310,15 @@ export function SettingsStudioPage() {
           }
         />
       </SettingsSectionCard>
+
+      <ConfirmDeleteDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title="Delete this studio?"
+        description="This will permanently remove the studio, all projects, and payout history. Studio deletion is not enabled yet."
+        confirmLabel="Delete studio"
+        onConfirm={() => setDeleteOpen(false)}
+      />
     </div>
   )
 }

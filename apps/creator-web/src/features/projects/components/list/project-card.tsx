@@ -7,7 +7,11 @@ import {
   DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu"
 import { MoreVertical } from "lucide-react"
+import { useState } from "react"
+import { ConfirmDeleteDialog } from "@/features/settings/components/confirm-delete-dialog"
+import { toast, toastMutationError } from "@/lib/toast"
 import { projectDetailPath } from "../../constants"
+import { useDeleteProject } from "../../hooks/use-project"
 import type { ProjectSummary } from "../../types"
 import { ProjectListThumbnail } from "../shared/project-list-thumbnail"
 import { ProjectStatusBadge } from "../shared/project-status-badge"
@@ -33,6 +37,9 @@ function buildMetaLine(project: ProjectSummary) {
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const deleteProject = useDeleteProject(project.id)
+
   return (
     <article className="group flex w-full flex-col rounded-[20px] border border-[#E2E4EB] bg-[#F9FAFE] p-3">
       <Link
@@ -73,12 +80,38 @@ export function ProjectCard({ project }: ProjectCardProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Edit series</DropdownMenuItem>
-            <DropdownMenuItem>Duplicate</DropdownMenuItem>
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link {...projectDetailPath(project.id, "settings")}>
+                Edit series
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              variant="destructive"
+              onSelect={() => setDeleteOpen(true)}
+            >
+              Delete
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      <ConfirmDeleteDialog
+        open={deleteOpen}
+        onOpenChange={(open) => {
+          if (!deleteProject.isPending) setDeleteOpen(open)
+        }}
+        title="Delete project?"
+        description={`Permanently delete “${project.title}”? This cannot be undone.`}
+        isPending={deleteProject.isPending}
+        onConfirm={async () => {
+          try {
+            await deleteProject.mutateAsync()
+            toast.success("Project deleted.")
+            setDeleteOpen(false)
+          } catch (error) {
+            toastMutationError(error, "Failed to delete project")
+          }
+        }}
+      />
     </article>
   )
 }

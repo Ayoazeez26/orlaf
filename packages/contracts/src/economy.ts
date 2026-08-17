@@ -49,6 +49,12 @@ export function isRevenueCatRefundEvent(type: string) {
 
 export const DEFAULT_EPISODE_COIN_PRICE = 50
 
+/** Max rewarded-ad episode unlocks per account per UTC day. */
+export const MAX_AD_UNLOCKS_PER_DAY = 20
+
+/** Free users see an interstitial after this many consecutive episodes. */
+export const EPISODES_BETWEEN_ADS = 2
+
 export const GiftKey = {
   ROSE: "rose",
   HEART: "heart",
@@ -137,6 +143,14 @@ export interface UnlockEpisodeResponse {
   balance: number
 }
 
+export interface UnlockEpisodeViaAdResponse extends UnlockEpisodeResponse {
+  remaining_ad_unlocks: number
+}
+
+export interface SeriesUnlocksResponse {
+  episode_ids: string[]
+}
+
 export interface SendGiftRequest {
   giftKey: GiftKey
 }
@@ -155,4 +169,21 @@ export interface CreditPurchaseResponse {
   balance?: number
   ignored?: boolean
   type?: string
+}
+
+export interface TransactionItem {
+  id: string
+  type: CoinLedgerEntryType
+  direction: CoinLedgerDirection
+  amount: number
+  label: string
+  status: "paid" | "failed" | "completed"
+  created_at: string
+  reference_id: string | null
+}
+
+export interface TransactionListResponse {
+  items: TransactionItem[]
+  total_spent_coins: number
+  transaction_count: number
 }

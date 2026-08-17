@@ -11,7 +11,7 @@ interface RejectCampaignDialogProps {
   campaignTitle: string
   creatorName: string
   variant?: "table" | "simple"
-  onConfirm?: () => void
+  onConfirm?: (note?: string) => void
 }
 
 export function RejectCampaignDialog({
@@ -107,7 +107,7 @@ export function RejectCampaignDialog({
             type="button"
             className="bg-destructive text-white hover:bg-destructive/90"
             onClick={() => {
-              onConfirm?.()
+              onConfirm?.(note.trim() || undefined)
               onOpenChange(false)
             }}
           >

@@ -29,6 +29,16 @@ function ProgressCell({ value }: { value: number }) {
 export function StreamerWatchHistoryTab({
   items,
 }: StreamerWatchHistoryTabProps) {
+  if (items.length === 0) {
+    return (
+      <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-0")}>
+        <CardContent className="flex min-h-40 items-center justify-center p-6 text-muted-foreground text-sm">
+          No watch history for this streamer yet.
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-0")}>
       <CardContent className="overflow-x-auto p-0">

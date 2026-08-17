@@ -3,25 +3,22 @@ import { cn } from "@workspace/ui/lib/utils"
 import { useMemo, useState } from "react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
-import { MOCK_PROMOTION_CAMPAIGNS } from "../data/mock-promotions"
-import type {
-  NewCampaignFormValues,
-  PromotionCampaign,
-  PromotionFilter,
-} from "../types"
+import { toast, toastMutationError } from "@/lib/toast"
+import {
+  useAdminPromotionsList,
+  useApproveAdminPromotion,
+  usePauseAdminPromotion,
+  useRejectAdminPromotion,
+  useResumeAdminPromotion,
+} from "../hooks/use-promotions"
+import type { PromotionCampaign, PromotionFilter } from "../types"
 import { ApproveCampaignDialog } from "./dialogs/approve-campaign-dialog"
-import { NewCampaignDialog } from "./dialogs/new-campaign-dialog"
 import { PauseCampaignDialog } from "./dialogs/pause-campaign-dialog"
 import { RejectCampaignDialog } from "./dialogs/reject-campaign-dialog"
 import { PromotionsPageHeader } from "./promotions-page-header"
 import { PromotionsStatCards } from "./promotions-stat-cards"
 import { PromotionsTable } from "./promotions-table"
 import { PromotionsToolbar } from "./promotions-toolbar"
-
-function matchesFilter(campaign: PromotionCampaign, filter: PromotionFilter) {
-  if (filter === "all") return true
-  return campaign.status === filter
-}
 
 type PromotionDialogState =
   | { type: "approve"; campaign: PromotionCampaign }
@@ -31,74 +28,67 @@ type PromotionDialogState =
   | null
 
 export function PromotionsPage({ role }: { role: WorkspaceRoleId }) {
-  const [campaigns, setCampaigns] = useState(MOCK_PROMOTION_CAMPAIGNS)
   const [activeFilter, setActiveFilter] = useState<PromotionFilter>("all")
   const [search, setSearch] = useState("")
   const [dialog, setDialog] = useState<PromotionDialogState>(null)
-  const [newCampaignOpen, setNewCampaignOpen] = useState(false)
 
-  const filtered = useMemo(() => {
-    const query = search.trim().toLowerCase()
-
-    return campaigns.filter((campaign) => {
-      if (!matchesFilter(campaign, activeFilter)) return false
-      if (query) {
-        const haystack =
-          `${campaign.title} ${campaign.creatorName} ${campaign.placement}`.toLowerCase()
-        if (!haystack.includes(query)) return false
-      }
-      return true
-    })
-  }, [activeFilter, campaigns, search])
-
-  function updateCampaignStatus(
-    campaignId: string,
-    status: PromotionCampaign["status"]
-  ) {
-    setCampaigns((current) =>
-      current.map((campaign) =>
-        campaign.id === campaignId ? { ...campaign, status } : campaign
-      )
-    )
-  }
-
-  function createCampaign(values: NewCampaignFormValues) {
-    const start = new Date()
-    const end = new Date()
-    end.setDate(end.getDate() + values.durationDays)
-
-    const formatDate = (date: Date) =>
-      date.toLocaleDateString("en-US", { month: "short", day: "2-digit" })
-
-    const slug =
-      values.title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "") || `campaign-${Date.now()}`
-
-    const campaign: PromotionCampaign = {
-      id: slug,
-      title: values.title.trim(),
-      creatorName: values.creatorName,
-      schedule: `${formatDate(start)} → ${formatDate(end)}`,
-      placement: values.placement,
-      spent: 0,
-      budget: values.budget,
-      impressions: 0,
-      ctr: 0,
-      status: "pending",
-    }
-
-    setCampaigns((current) => [campaign, ...current])
-    setActiveFilter("pending")
-  }
+  const { data, isLoading, isError } = useAdminPromotionsList({
+    status: activeFilter,
+    search,
+  })
 
   const activeCampaign = dialog?.campaign ?? null
+  const activeId = activeCampaign?.id ?? ""
+
+  const approvePromotion = useApproveAdminPromotion(activeId)
+  const rejectPromotion = useRejectAdminPromotion(activeId)
+  const pausePromotion = usePauseAdminPromotion(activeId)
+  const resumePromotion = useResumeAdminPromotion(activeId)
+
+  const filtered = useMemo(() => data?.campaigns ?? [], [data?.campaigns])
+
+  async function handleApprove() {
+    if (!activeCampaign) return
+    try {
+      await approvePromotion.mutateAsync(undefined)
+      toast.success("Campaign approved.")
+      setDialog(null)
+    } catch (error) {
+      toastMutationError(error, "Unable to approve campaign.")
+    }
+  }
+
+  async function handleReject(note?: string) {
+    if (!activeCampaign) return
+    try {
+      await rejectPromotion.mutateAsync(note)
+      toast.success("Campaign rejected.")
+      setDialog(null)
+    } catch (error) {
+      toastMutationError(error, "Unable to reject campaign.")
+    }
+  }
+
+  async function handlePauseOrResume() {
+    if (!activeCampaign) return
+    try {
+      if (dialog?.type === "resume") {
+        await resumePromotion.mutateAsync()
+        toast.success("Campaign resumed.")
+      } else {
+        await pausePromotion.mutateAsync(undefined)
+        toast.success("Campaign paused.")
+      }
+      setDialog(null)
+    } catch (error) {
+      toastMutationError(error, "Unable to update campaign status.")
+    }
+  }
 
   return (
     <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
-      <PromotionsPageHeader onNewCampaign={() => setNewCampaignOpen(true)} />
-      <PromotionsStatCards campaigns={campaigns} />
+      <PromotionsPageHeader onNewCampaign={() => {}} />
+      {data ? <PromotionsStatCards summary={data.summary} /> : null}
 
       <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6")}>
         <CardContent className="flex flex-col gap-5 px-4 sm:px-6">
@@ -108,14 +98,24 @@ export function PromotionsPage({ role }: { role: WorkspaceRoleId }) {
             search={search}
             onSearchChange={setSearch}
           />
-          <PromotionsTable
-            campaigns={filtered}
-            role={role}
-            onApprove={(campaign) => setDialog({ type: "approve", campaign })}
-            onReject={(campaign) => setDialog({ type: "reject", campaign })}
-            onPause={(campaign) => setDialog({ type: "pause", campaign })}
-            onResume={(campaign) => setDialog({ type: "resume", campaign })}
-          />
+          {isLoading ? (
+            <div className="flex min-h-40 items-center justify-center text-muted-foreground text-sm">
+              Loading campaigns…
+            </div>
+          ) : isError ? (
+            <div className="flex min-h-40 items-center justify-center text-destructive text-sm">
+              Could not load campaigns.
+            </div>
+          ) : (
+            <PromotionsTable
+              campaigns={filtered}
+              role={role}
+              onApprove={(campaign) => setDialog({ type: "approve", campaign })}
+              onReject={(campaign) => setDialog({ type: "reject", campaign })}
+              onPause={(campaign) => setDialog({ type: "pause", campaign })}
+              onResume={(campaign) => setDialog({ type: "resume", campaign })}
+            />
+          )}
         </CardContent>
       </Card>
 
@@ -125,9 +125,7 @@ export function PromotionsPage({ role }: { role: WorkspaceRoleId }) {
           if (!open) setDialog(null)
         }}
         campaignTitle={activeCampaign?.title ?? ""}
-        onConfirm={() => {
-          if (activeCampaign) updateCampaignStatus(activeCampaign.id, "live")
-        }}
+        onConfirm={() => void handleApprove()}
       />
 
       <RejectCampaignDialog
@@ -137,10 +135,7 @@ export function PromotionsPage({ role }: { role: WorkspaceRoleId }) {
         }}
         campaignTitle={activeCampaign?.title ?? ""}
         creatorName={activeCampaign?.creatorName ?? ""}
-        onConfirm={() => {
-          if (activeCampaign)
-            updateCampaignStatus(activeCampaign.id, "rejected")
-        }}
+        onConfirm={(note) => void handleReject(note)}
       />
 
       <PauseCampaignDialog
@@ -150,19 +145,7 @@ export function PromotionsPage({ role }: { role: WorkspaceRoleId }) {
         }}
         campaignTitle={activeCampaign?.title ?? ""}
         action={dialog?.type === "resume" ? "resume" : "pause"}
-        onConfirm={() => {
-          if (!activeCampaign) return
-          updateCampaignStatus(
-            activeCampaign.id,
-            dialog?.type === "resume" ? "live" : "paused"
-          )
-        }}
-      />
-
-      <NewCampaignDialog
-        open={newCampaignOpen}
-        onOpenChange={setNewCampaignOpen}
-        onCreate={createCampaign}
+        onConfirm={() => void handlePauseOrResume()}
       />
     </div>
   )

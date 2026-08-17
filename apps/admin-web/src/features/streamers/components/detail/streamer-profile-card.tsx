@@ -69,15 +69,24 @@ export function StreamerProfileCard({
             Favorite genres
           </p>
           <div className="flex flex-wrap gap-2">
-            {streamer.favoriteGenres.map((genre) => (
-              <span
-                key={genre}
-                className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 font-medium text-foreground text-xs"
-              >
-                <Heart className="size-3.5 text-muted-foreground" aria-hidden />
-                {genre}
-              </span>
-            ))}
+            {streamer.favoriteGenres.length === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                No genre data yet.
+              </p>
+            ) : (
+              streamer.favoriteGenres.map((genre) => (
+                <span
+                  key={genre}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 font-medium text-foreground text-xs"
+                >
+                  <Heart
+                    className="size-3.5 text-muted-foreground"
+                    aria-hidden
+                  />
+                  {genre}
+                </span>
+              ))
+            )}
           </div>
         </div>
       </CardContent>

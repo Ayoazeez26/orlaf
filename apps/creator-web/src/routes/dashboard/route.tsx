@@ -5,10 +5,16 @@ import { DashboardLayout } from "@/features/dashboard/components/layout/dashboar
 export const Route = createFileRoute("/dashboard")({
   ssr: false,
   beforeLoad: async () => {
-    const { status } = await getAuthReady()
+    const { status, session } = await getAuthReady()
     if (status === "loading") return
     if (status !== "authenticated") {
       throw redirect({ to: "/login" })
+    }
+    if (session?.account_state === "suspended") {
+      throw redirect({ to: "/auth/suspended" })
+    }
+    if (session?.account_state === "rejected") {
+      throw redirect({ to: "/auth/rejected" })
     }
   },
   component: DashboardLayout,

@@ -1,7 +1,15 @@
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
+import { DollarSign, Eye, LineChart, Megaphone } from "lucide-react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
 import type { PromotionsSummaryKpi } from "../../types"
+
+const KPI_ICONS: Record<string, typeof Megaphone> = {
+  Active: Megaphone,
+  "Total Spend": DollarSign,
+  Impressions: Eye,
+  "Avg. CTR": LineChart,
+}
 
 interface PromotionsSummaryCardsProps {
   kpis: PromotionsSummaryKpi[]
@@ -15,7 +23,7 @@ export function PromotionsSummaryCards({
   return (
     <div className={cn("grid gap-4 sm:grid-cols-2 xl:grid-cols-4", className)}>
       {kpis.map((kpi) => {
-        const Icon = kpi.icon
+        const Icon = KPI_ICONS[kpi.label] ?? Megaphone
 
         return (
           <Card

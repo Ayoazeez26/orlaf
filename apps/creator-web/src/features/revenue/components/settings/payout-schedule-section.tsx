@@ -2,8 +2,8 @@ import { Badge } from "@workspace/ui/components/badge"
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import { Calendar, Check, Info } from "lucide-react"
-import { toast, toastMutationError } from "@/lib/toast"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
+import { toast, toastMutationError } from "@/lib/toast"
 import { useUpdatePayoutFrequency } from "../../hooks/use-revenue-dashboard"
 import type { PayoutSchedule } from "../../types"
 
@@ -46,9 +46,13 @@ export function PayoutScheduleSection({
             selected={schedule.frequency === "monthly"}
             onSelect={() =>
               updateFrequency.mutate("monthly", {
-                onSuccess: () => toast.success("Payout schedule set to monthly."),
+                onSuccess: () =>
+                  toast.success("Payout schedule set to monthly."),
                 onError: (error) =>
-                  toastMutationError(error, "Unable to update payout schedule."),
+                  toastMutationError(
+                    error,
+                    "Unable to update payout schedule."
+                  ),
               })
             }
           />
@@ -61,7 +65,10 @@ export function PayoutScheduleSection({
                 onSuccess: () =>
                   toast.success("Payout schedule set to quarterly."),
                 onError: (error) =>
-                  toastMutationError(error, "Unable to update payout schedule."),
+                  toastMutationError(
+                    error,
+                    "Unable to update payout schedule."
+                  ),
               })
             }
           />

@@ -1,11 +1,9 @@
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
-import { Label } from "@workspace/ui/components/label"
-import { Textarea } from "@workspace/ui/components/textarea"
 import { cn } from "@workspace/ui/lib/utils"
 import { Plus, Search, X } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
-import { AVAILABLE_SERIES } from "../data/mock-discovery"
+import { useProjectsQuery } from "@/features/projects/api/projects-hooks"
 import type { DiscoveryRail } from "../types"
 import { useModalShell } from "./use-modal-shell"
 
@@ -13,43 +11,32 @@ interface AddContentDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   rail: DiscoveryRail | null
-  onConfirm?: () => void
+  onAddSeries?: (seriesId: string) => void
 }
 
 export function AddContentDialog({
   open,
   onOpenChange,
   rail,
-  onConfirm,
+  onAddSeries,
 }: AddContentDialogProps) {
   const [search, setSearch] = useState("")
-  const [note, setNote] = useState("")
+  const { data } = useProjectsQuery({ filter: "all", pageSize: 50, q: search })
 
   useEffect(() => {
-    if (open) {
-      setSearch("")
-      setNote("")
-    }
+    if (open) setSearch("")
   }, [open])
 
   useModalShell(open, onOpenChange)
 
-  const filteredSeries = useMemo(() => {
-    const query = search.trim().toLowerCase()
-    if (!query) return AVAILABLE_SERIES
+  const existingIds = useMemo(
+    () => new Set(rail?.items.map((item) => item.id) ?? []),
+    [rail]
+  )
 
-    return AVAILABLE_SERIES.filter((series) => {
-      const haystack = `${series.title} ${series.genre}`.toLowerCase()
-      return haystack.includes(query)
-    })
-  }, [search])
+  const series = (data?.items ?? []).filter((item) => !existingIds.has(item.id))
 
   if (!open || !rail) return null
-
-  function handleConfirm() {
-    onConfirm?.()
-    onOpenChange(false)
-  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -107,8 +94,8 @@ export function AddContentDialog({
           </div>
 
           <ul className="max-h-64 space-y-2 overflow-y-auto">
-            {filteredSeries.map((series) => (
-              <li key={series.id}>
+            {series.map((item) => (
+              <li key={item.id}>
                 <div className="flex items-center gap-3 rounded-xl border border-border px-3 py-2.5">
                   <div
                     className={cn(
@@ -117,17 +104,18 @@ export function AddContentDialog({
                   />
                   <div className="min-w-0 flex-1">
                     <p className="font-medium text-foreground text-sm">
-                      {series.title}
+                      {item.title}
                     </p>
                     <p className="text-muted-foreground text-xs">
-                      {series.genre} · {series.episodeCount} eps
+                      {item.genre} · {item.episodeCount} eps
                     </p>
                   </div>
                   <Button
                     type="button"
                     variant="ghost"
                     size="icon-sm"
-                    aria-label={`Add ${series.title}`}
+                    aria-label={`Add ${item.title}`}
+                    onClick={() => onAddSeries?.(item.id)}
                   >
                     <Plus className="size-4" aria-hidden />
                   </Button>
@@ -135,21 +123,10 @@ export function AddContentDialog({
               </li>
             ))}
           </ul>
-
-          <div className="space-y-2">
-            <Label htmlFor="curation-note">Curation note (optional)</Label>
-            <Textarea
-              id="curation-note"
-              value={note}
-              onChange={(event) => setNote(event.target.value)}
-              placeholder="Why is this rail being curated this way?"
-              rows={3}
-            />
-          </div>
         </div>
 
         <div className="flex items-center justify-end gap-3 border-border border-t px-6 py-4">
-          <Button type="button" onClick={handleConfirm}>
+          <Button type="button" onClick={() => onOpenChange(false)}>
             Done
           </Button>
         </div>

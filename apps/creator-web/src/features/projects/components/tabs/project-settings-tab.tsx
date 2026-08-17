@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 import { useEffect, useMemo, useState } from "react"
 import { SettingsModalShell } from "@/features/settings/components/settings-modal-shell"
+import { toast, toastMutationError } from "@/lib/toast"
 import { LANGUAGE_OPTIONS } from "../../constants"
 import { FROSTED_CARD_SURFACE_CLASS } from "../../constants/frosted-card"
 import {
@@ -28,7 +29,6 @@ import {
   useProject,
   useUpdateProjectSettings,
 } from "../../hooks/use-project"
-import { toast, toastMutationError } from "@/lib/toast"
 import type { ProjectDetail } from "../../types"
 
 const VISIBILITY_OPTIONS = ["Public", "Unlisted", "Private"] as const

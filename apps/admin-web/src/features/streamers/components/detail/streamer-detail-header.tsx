@@ -3,10 +3,14 @@ import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
-import { ArrowLeft, Ban, Pencil, RotateCcw } from "lucide-react"
+import { ArrowLeft, Ban, RotateCcw } from "lucide-react"
 import { useState } from "react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
+import {
+  useReactivateStreamer,
+  useSuspendStreamer,
+} from "../../api/streamers-hooks"
 import type { StreamerDetail } from "../../types"
 import { PlanBadge, StatusBadge } from "../streamer-badges"
 import { StreamerSuspendDialog } from "./streamer-suspend-dialog"
@@ -22,6 +26,9 @@ export function StreamerDetailHeader({
 }: StreamerDetailHeaderProps) {
   const [suspendOpen, setSuspendOpen] = useState(false)
   const isActive = streamer.status === "active"
+  const suspend = useSuspendStreamer(streamer.id)
+  const reactivate = useReactivateStreamer(streamer.id)
+  const isBusy = suspend.isPending || reactivate.isPending
 
   return (
     <div className="space-y-4">
@@ -65,21 +72,24 @@ export function StreamerDetailHeader({
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            <Button type="button" variant="outline" className="gap-2">
-              <Pencil className="size-4" aria-hidden />
-              Edit
-            </Button>
             {isActive ? (
               <Button
                 type="button"
                 className="gap-2 bg-destructive text-white hover:bg-destructive/90"
+                disabled={isBusy}
                 onClick={() => setSuspendOpen(true)}
               >
                 <Ban className="size-4" aria-hidden />
                 Suspend
               </Button>
             ) : (
-              <Button type="button" variant="outline" className="gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2"
+                disabled={isBusy}
+                onClick={() => reactivate.mutate()}
+              >
                 <RotateCcw className="size-4" aria-hidden />
                 Reactivate
               </Button>
@@ -92,6 +102,9 @@ export function StreamerDetailHeader({
         open={suspendOpen}
         onOpenChange={setSuspendOpen}
         streamerName={streamer.name}
+        onConfirm={({ duration, reason }) =>
+          suspend.mutate({ duration, reason: reason || undefined })
+        }
       />
     </div>
   )

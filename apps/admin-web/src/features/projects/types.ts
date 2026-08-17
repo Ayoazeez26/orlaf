@@ -51,7 +51,11 @@ export interface ProjectAnalytics {
 
 export type ModerationSeverity = "high" | "medium" | "low"
 
-export type ModerationReportStatus = "pending" | "reviewed" | "resolved"
+export type ModerationReportStatus =
+  | "pending"
+  | "reviewed"
+  | "resolved"
+  | "dismissed"
 
 export interface ModerationReport {
   id: string

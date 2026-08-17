@@ -1,10 +1,12 @@
+import { useRouter } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import { CheckCheck } from "lucide-react"
 import { NotificationsListCard } from "../components/notifications-list-card"
 import { useNotifications } from "../hooks/use-notifications"
 
 export function NotificationsPage() {
-  const { data, markAllAsRead } = useNotifications()
+  const router = useRouter()
+  const { data, isLoading, markAllAsRead, markRead } = useNotifications()
   const hasUnread = data.items.some((item) => !item.read)
 
   return (
@@ -22,7 +24,7 @@ export function NotificationsPage() {
           type="button"
           variant="outline"
           className="shrink-0 gap-2 bg-card"
-          onClick={markAllAsRead}
+          onClick={() => markAllAsRead()}
           disabled={!hasUnread}
         >
           <CheckCheck className="size-4" aria-hidden />
@@ -30,7 +32,23 @@ export function NotificationsPage() {
         </Button>
       </div>
 
-      <NotificationsListCard items={data.items} />
+      {isLoading ? (
+        <p className="text-muted-foreground text-sm">Loading notifications…</p>
+      ) : data.items.length === 0 ? (
+        <p className="text-muted-foreground text-sm">
+          You have no notifications yet.
+        </p>
+      ) : (
+        <NotificationsListCard
+          items={data.items}
+          onSelect={(item) => {
+            markRead(item.id)
+            if (item.href) {
+              router.history.push(item.href)
+            }
+          }}
+        />
+      )}
     </div>
   )
 }

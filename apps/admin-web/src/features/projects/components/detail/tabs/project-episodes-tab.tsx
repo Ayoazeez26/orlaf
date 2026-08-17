@@ -6,10 +6,7 @@ import {
 } from "../../../api/projects-hooks"
 import { formatProjectViews } from "../../../data/project-details"
 import type { ProjectDetail, ProjectEpisode } from "../../../types"
-import {
-  PublishStatusBadge,
-  ReviewStatusBadge,
-} from "../../project-badges"
+import { PublishStatusBadge, ReviewStatusBadge } from "../../project-badges"
 
 const HEAD_CLASS =
   "px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wide"

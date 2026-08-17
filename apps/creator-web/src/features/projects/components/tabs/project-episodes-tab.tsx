@@ -18,6 +18,9 @@ import {
   Plus,
 } from "lucide-react"
 import { useState } from "react"
+import { DEFAULT_ANALYTICS_DATE_RANGE } from "@/features/analytics/constants"
+import { useAnalyticsDashboard } from "@/features/analytics/hooks/use-analytics-dashboard"
+import { formatCompactCount } from "@/features/analytics/lib/map-analytics-overview"
 import { SettingsModalShell } from "@/features/settings/components/settings-modal-shell"
 import { toast, toastMutationError } from "@/lib/toast"
 import { FROSTED_CARD_SURFACE_CLASS } from "../../constants/frosted-card"
@@ -52,8 +55,15 @@ export function ProjectEpisodesTab() {
   const { projectId } = useParams({ strict: false })
   const id = projectId ?? ""
   const { data: project } = useProject(id)
+  const { data: analytics } = useAnalyticsDashboard(
+    DEFAULT_ANALYTICS_DATE_RANGE,
+    id
+  )
   const reorderEpisodes = useReorderEpisodes(id)
   const archiveEpisode = useArchiveEpisode(id)
+  const viewsByEpisode = new Map(
+    (analytics?.episodeViews ?? []).map((row) => [row.episodeId, row.views])
+  )
   const [archiveTarget, setArchiveTarget] = useState<EpisodeSummary | null>(
     null
   )
@@ -168,7 +178,9 @@ export function ProjectEpisodesTab() {
                   </Badge>
                 </div>
                 <p className="mt-1 text-muted-foreground text-sm">
-                  {episode.duration} · {episode.views} views
+                  {episode.duration} ·{" "}
+                  {formatCompactCount(viewsByEpisode.get(episode.id) ?? 0)}{" "}
+                  views
                 </p>
               </div>
 

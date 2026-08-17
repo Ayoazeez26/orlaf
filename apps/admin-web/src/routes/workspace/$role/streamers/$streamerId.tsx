@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { ArrowLeft } from "lucide-react"
+import { useStreamerQuery } from "@/features/streamers/api/streamers-hooks"
 import { StreamerDetailPage } from "@/features/streamers/components/detail/streamer-detail-page"
-import { getStreamerDetail } from "@/features/streamers/data/streamer-details"
+import { mapStreamerDetail } from "@/features/streamers/lib/map-streamer"
+import { DetailPageSkeleton } from "@/features/workspaces/components/page-skeletons"
 import { WorkspaceSectionGate } from "@/features/workspaces/components/workspace-section-gate"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
 
@@ -27,9 +29,17 @@ function StreamerDetailContent({
   role: WorkspaceRoleId
   streamerId: string
 }) {
-  const streamer = getStreamerDetail(streamerId)
+  const { data, isPending, isError, error } = useStreamerQuery(streamerId)
 
-  if (!streamer) {
+  if (isPending) {
+    return (
+      <div className="p-4 sm:p-6 lg:p-8">
+        <DetailPageSkeleton />
+      </div>
+    )
+  }
+
+  if (isError || !data) {
     return (
       <div className="space-y-4 p-4 sm:p-6 lg:p-8">
         <Link
@@ -41,7 +51,9 @@ function StreamerDetailContent({
           Back to Users
         </Link>
         <p className="text-muted-foreground text-sm">
-          We couldn&apos;t find that streamer.
+          {error instanceof Error
+            ? error.message
+            : "We couldn't find that streamer."}
         </p>
       </div>
     )
@@ -49,7 +61,7 @@ function StreamerDetailContent({
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <StreamerDetailPage streamer={streamer} role={role} />
+      <StreamerDetailPage streamer={mapStreamerDetail(data)} role={role} />
     </div>
   )
 }

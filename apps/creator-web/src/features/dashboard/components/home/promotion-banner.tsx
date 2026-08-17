@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import { Megaphone } from "lucide-react"
 
@@ -13,18 +14,19 @@ export function PromotionBanner() {
             Boost your next premiere
           </p>
           <p className="max-w-xl text-muted-foreground text-sm">
-            Run a promotion to reach up to 40k more streamers in your region.
+            Run a promotion to reach more streamers in your region.
           </p>
         </div>
       </div>
       <Button
         type="button"
-        disabled
-        title="Promotions are coming soon"
+        asChild
         className="shrink-0 gap-2 self-start sm:self-center"
       >
-        <Megaphone className="size-4" aria-hidden />
-        Coming soon
+        <Link to="/dashboard/promotions">
+          <Megaphone className="size-4" aria-hidden />
+          Create promotion
+        </Link>
       </Button>
     </div>
   )

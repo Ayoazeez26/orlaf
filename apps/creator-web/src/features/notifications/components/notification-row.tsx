@@ -7,7 +7,7 @@ import {
   Users,
   Wallet,
 } from "lucide-react"
-import type { NotificationIcon, NotificationItem } from "../../types"
+import type { NotificationIcon, NotificationItem } from "../types"
 
 const ICON_MAP: Record<NotificationIcon, LucideIcon> = {
   wallet: Wallet,

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { ArrowLeft } from "lucide-react"
+import { useModerationReportQuery } from "@/features/moderation/api/moderation-hooks"
 import { ReportDetailPage } from "@/features/moderation/components/detail/report-detail-page"
-import { getReportDetail } from "@/features/moderation/data/report-details"
 import { WorkspaceSectionGate } from "@/features/workspaces/components/workspace-section-gate"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
 
@@ -27,7 +27,11 @@ function ReportDetailContent({
   role: WorkspaceRoleId
   reportId: string
 }) {
-  const report = getReportDetail(reportId)
+  const { data: report, isLoading } = useModerationReportQuery(reportId)
+
+  if (isLoading) {
+    return <p className="p-8 text-muted-foreground text-sm">Loading report…</p>
+  }
 
   if (!report) {
     return (

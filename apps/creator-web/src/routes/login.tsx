@@ -19,6 +19,7 @@ import {
   OnboardingProvider,
   useOnboarding,
 } from "@/features/onboarding/onboarding-context"
+import { toastApiError } from "@/lib/toast"
 
 const loginSearchSchema = z.object({
   reset: z.enum(["success"]).optional(),
@@ -54,7 +55,6 @@ function LoginContent() {
   const navigate = useNavigate()
   const { reset } = Route.useSearch()
   const { dispatch } = useOnboarding()
-  const [authError, setAuthError] = useState<string | null>(null)
   const [resetSuccessVisible, setResetSuccessVisible] = useState(
     reset === "success"
   )
@@ -104,7 +104,7 @@ function LoginContent() {
         )}
 
         <div className="mt-8">
-          <GoogleSignInButton onError={setAuthError} />
+          <GoogleSignInButton onError={toastApiError} />
         </div>
 
         <div className="relative my-6">
@@ -115,15 +115,9 @@ function LoginContent() {
         </div>
 
         <EmailSignInForm
-          onError={setAuthError}
+          onError={toastApiError}
           onUnverified={handleUnverified}
         />
-
-        {authError && (
-          <p className="mt-4 text-center text-destructive text-sm" role="alert">
-            {authError}
-          </p>
-        )}
         <p className="mt-6 text-center text-muted-foreground text-sm">
           New here?{" "}
           <Link to="/onboarding" className="text-primary hover:underline">

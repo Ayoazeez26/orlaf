@@ -1,26 +1,13 @@
+import type {
+  AdminPromotionCampaign,
+  AdminPromotionStatus,
+} from "@sable/contracts"
 import type { LucideIcon } from "lucide-react"
 
-export type PromotionStatus =
-  | "pending"
-  | "live"
-  | "paused"
-  | "rejected"
-  | "ended"
-
+export type PromotionStatus = AdminPromotionStatus
 export type PromotionFilter = "all" | PromotionStatus
 
-export interface PromotionCampaign {
-  id: string
-  title: string
-  creatorName: string
-  schedule: string
-  placement: string
-  spent: number
-  budget: number
-  impressions: number
-  ctr: number
-  status: PromotionStatus
-}
+export type PromotionCampaign = AdminPromotionCampaign
 
 export interface PromotionSummaryStat {
   label: string

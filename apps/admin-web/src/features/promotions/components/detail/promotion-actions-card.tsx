@@ -15,6 +15,7 @@ interface PromotionActionsCardProps {
   onPause: () => void
   onReject: () => void
   onApprove: () => void
+  onEnd: () => void
 }
 
 export function PromotionActionsCard({
@@ -22,6 +23,7 @@ export function PromotionActionsCard({
   onPause,
   onReject,
   onApprove,
+  onEnd,
 }: PromotionActionsCardProps) {
   return (
     <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6")}>
@@ -65,7 +67,7 @@ export function PromotionActionsCard({
           type="button"
           variant="destructive"
           className="w-full gap-2"
-          onClick={onReject}
+          onClick={onEnd}
         >
           <Trash2 className="size-4" aria-hidden />
           End campaign

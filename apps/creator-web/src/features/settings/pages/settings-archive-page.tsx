@@ -10,10 +10,11 @@ import {
   Trash2,
 } from "lucide-react"
 import { useMemo, useState } from "react"
+import { toast, toastMutationError } from "@/lib/toast"
+import { ConfirmDeleteDialog } from "../components/confirm-delete-dialog"
 import { SettingsModalShell } from "../components/settings-modal-shell"
 import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
 import { SettingsSectionCard } from "../components/settings-section-card"
-import { toast, toastMutationError } from "@/lib/toast"
 import {
   type ArchiveFilter,
   useArchive,
@@ -43,6 +44,7 @@ const ICON_MAP = {
 export function SettingsArchivePage() {
   const [filter, setFilter] = useState<ArchiveFilter>("all")
   const [emptyOpen, setEmptyOpen] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState<ArchivedItem | null>(null)
   const { data, isLoading, isError } = useArchive(filter)
   const restoreItem = useRestoreArchiveItem()
   const deleteItem = useDeleteArchiveItem()
@@ -152,23 +154,7 @@ export function SettingsArchivePage() {
                       }
                     )
                   }
-                  onDelete={() =>
-                    deleteItem.mutate(
-                      {
-                        type: item.type,
-                        entityId: item.entityId,
-                      },
-                      {
-                        onSuccess: () =>
-                          toast.success(`"${item.title}" deleted.`),
-                        onError: (error) =>
-                          toastMutationError(
-                            error,
-                            "Unable to delete this item."
-                          ),
-                      }
-                    )
-                  }
+                  onDelete={() => setItemToDelete(item)}
                   isRestoring={restoreItem.isPending}
                   isDeleting={deleteItem.isPending}
                 />
@@ -216,6 +202,30 @@ export function SettingsArchivePage() {
           permanently removed.
         </p>
       </SettingsModalShell>
+
+      <ConfirmDeleteDialog
+        open={itemToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setItemToDelete(null)
+        }}
+        title={`Delete “${itemToDelete?.title ?? "item"}”?`}
+        description="This permanently removes the archived item. You will not be able to restore it."
+        confirmLabel="Delete forever"
+        isPending={deleteItem.isPending}
+        onConfirm={async () => {
+          if (!itemToDelete) return
+          try {
+            await deleteItem.mutateAsync({
+              type: itemToDelete.type,
+              entityId: itemToDelete.entityId,
+            })
+            toast.success(`"${itemToDelete.title}" deleted.`)
+            setItemToDelete(null)
+          } catch (error) {
+            toastMutationError(error, "Unable to delete this item.")
+          }
+        }}
+      />
     </>
   )
 }

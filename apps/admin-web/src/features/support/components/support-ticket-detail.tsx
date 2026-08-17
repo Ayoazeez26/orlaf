@@ -124,6 +124,22 @@ export function SupportTicketDetail({
                 {message.author} · {message.timestamp}
               </p>
               <p className="text-sm leading-relaxed">{message.body}</p>
+              {message.attachments?.length ? (
+                <ul className="mt-2 space-y-1">
+                  {message.attachments.map((attachment) => (
+                    <li key={attachment.id}>
+                      <a
+                        href={attachment.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs underline underline-offset-2 opacity-90 hover:opacity-100"
+                      >
+                        {attachment.fileName}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
           </div>
         ))}

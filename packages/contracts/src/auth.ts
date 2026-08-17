@@ -168,6 +168,12 @@ export interface SignInResponse {
   mfa_token?: string;
 }
 
+/** GET /auth/session — same fields as sign-in minus tokens */
+export type SessionResponse = Omit<
+  SignInResponse,
+  'access_token' | 'refresh_token' | 'requires_2fa' | 'mfa_token'
+>;
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Token refresh
 // ─────────────────────────────────────────────────────────────────────────────
@@ -297,6 +303,8 @@ export interface ResendVerificationBody {
 // Security — sessions, password, 2FA (creators)
 // ─────────────────────────────────────────────────────────────────────────────
 
+export type ActiveSessionSurface = "mobile" | "web" | "admin";
+
 export interface ActiveSession {
   id: string;
   device: string;
@@ -304,6 +312,7 @@ export interface ActiveSession {
   browser: string;
   lastActiveAt: string;
   current: boolean;
+  surface: ActiveSessionSurface | null;
 }
 
 export interface ActiveSessionsResponse {

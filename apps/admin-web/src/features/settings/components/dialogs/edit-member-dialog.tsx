@@ -1,3 +1,4 @@
+import { AdminRole } from "@sable/contracts"
 import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
@@ -5,6 +6,7 @@ import { Label } from "@workspace/ui/components/label"
 import { cn } from "@workspace/ui/lib/utils"
 import { X } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useUpdateAdminMember } from "../../api/team-hooks"
 import {
   TEAM_ROLE_BADGE_CLASS,
   TEAM_ROLE_LABEL,
@@ -24,17 +26,18 @@ export function EditMemberDialog({
   onOpenChange,
   member,
 }: EditMemberDialogProps) {
+  const updateMember = useUpdateAdminMember()
   const [firstName, setFirstName] = useState("")
   const [lastName, setLastName] = useState("")
   const [email, setEmail] = useState("")
-  const [role, setRole] = useState("moderator")
+  const [role, setRole] = useState<string>(AdminRole.CONTENT_ADMIN)
 
   useEffect(() => {
     if (!open || !member) return
     setFirstName(member.firstName)
     setLastName(member.lastName)
     setEmail(member.email)
-    setRole(member.role === "super-admin" ? "admin" : member.role)
+    setRole(member.role)
   }, [open, member])
 
   useModalShell(open, onOpenChange)
@@ -137,9 +140,7 @@ export function EditMemberDialog({
           <div className="space-y-3">
             <Label>Role</Label>
             <div className="space-y-2">
-              {TEAM_ROLE_OPTIONS.filter(
-                (option) => option.id !== "analyst"
-              ).map((option) => {
+              {TEAM_ROLE_OPTIONS.map((option) => {
                 const isSelected = role === option.id
 
                 return (
@@ -175,7 +176,19 @@ export function EditMemberDialog({
           >
             Cancel
           </Button>
-          <Button type="button" onClick={() => onOpenChange(false)}>
+          <Button
+            type="button"
+            disabled={updateMember.isPending}
+            onClick={() => {
+              if (!member) return
+              void updateMember
+                .mutateAsync({
+                  id: member.id,
+                  body: { role: role as AdminRole },
+                })
+                .then(() => onOpenChange(false))
+            }}
+          >
             Save changes
           </Button>
         </div>

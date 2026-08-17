@@ -1,12 +1,11 @@
 import type { CoinTransactionType, StreamerPlan, StreamerStatus } from "./types"
 
-export type StreamerFilter = "all" | "active" | "suspended" | "banned" | "new"
+export type StreamerFilter = "all" | "active" | "suspended" | "new"
 
 export const STREAMER_FILTERS: { key: StreamerFilter; label: string }[] = [
   { key: "all", label: "All Streamers" },
   { key: "active", label: "Active" },
   { key: "suspended", label: "Suspended" },
-  { key: "banned", label: "Banned" },
   { key: "new", label: "New" },
 ]
 

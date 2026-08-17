@@ -11,6 +11,7 @@ import { cn } from "@workspace/ui/lib/utils"
 import { Monitor, Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useEffect, useRef, useState } from "react"
+import { toast, toastMutationError } from "@/lib/toast"
 import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
 import { SettingsSectionCard } from "../components/settings-section-card"
 import { applyDisplayPreferences } from "../hooks/use-apply-creator-preferences"
@@ -31,7 +32,6 @@ import {
   registerSettingsReset,
   registerSettingsSave,
 } from "../lib/settings-form-actions"
-import { toast, toastMutationError } from "@/lib/toast"
 
 const COLOR_SCHEMES = [
   { value: "light", label: "Light", icon: Sun },

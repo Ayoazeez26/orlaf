@@ -2,7 +2,7 @@ import { Separator } from "@workspace/ui/components/separator"
 import { useDashboardHome } from "../../hooks/use-dashboard-home"
 import { DashboardLogo } from "./dashboard-logo"
 import { DashboardNav } from "./dashboard-nav"
-import { SidebarUserProfile } from "./sidebar-user-profile"
+import { WorkspaceSwitcher } from "./workspace-switcher"
 
 interface DashboardSidebarContentProps {
   onNavigate?: () => void
@@ -25,7 +25,7 @@ export function DashboardSidebarContent({
 
       <div className="shrink-0 pt-4">
         <Separator className="mb-4" />
-        <SidebarUserProfile user={user} />
+        <WorkspaceSwitcher user={user} />
       </div>
     </>
   )

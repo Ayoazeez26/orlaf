@@ -99,41 +99,43 @@ export const AUDIT_RETENTION_OPTIONS = [
   "1 year",
 ] as const
 
+import { AdminRole } from "@sable/contracts"
+
 export const TEAM_ROLE_OPTIONS = [
   {
-    id: "admin",
-    label: "Admin",
-    description: "Full access to every setting & action.",
+    id: AdminRole.CONTENT_ADMIN,
+    label: "Content admin",
+    description: "Manage creators, projects, discovery, and reports.",
   },
   {
-    id: "moderator",
-    label: "Moderator",
-    description: "Manage content, creators & reports.",
+    id: AdminRole.SUPPORT_ADMIN,
+    label: "Support admin",
+    description: "Creators, onboarding, and moderation.",
   },
   {
-    id: "finance-admin",
-    label: "Finance Admin",
-    description: "Role based access to Finance Dashboard.",
+    id: AdminRole.MARKETING_ADMIN,
+    label: "Marketing admin",
+    description: "Discovery rails and analytics.",
   },
   {
-    id: "analyst",
-    label: "Analyst",
-    description: "Read-only access to analytics and reports.",
+    id: AdminRole.FINANCE_ADMIN,
+    label: "Finance admin",
+    description: "Finance dashboards (when enabled).",
   },
 ] as const
 
 export const TEAM_ROLE_BADGE_CLASS: Record<string, string> = {
-  "super-admin": "bg-primary/10 text-primary",
-  admin: "bg-emerald-500/10 text-emerald-600",
-  moderator: "bg-amber-500/10 text-amber-600",
-  analyst: "bg-muted text-muted-foreground",
-  "finance-admin": "bg-blue-500/10 text-blue-600",
+  super_admin: "bg-primary/10 text-primary",
+  content_admin: "bg-emerald-500/10 text-emerald-600",
+  support_admin: "bg-amber-500/10 text-amber-600",
+  marketing_admin: "bg-blue-500/10 text-blue-600",
+  finance_admin: "bg-muted text-muted-foreground",
 }
 
 export const TEAM_ROLE_LABEL: Record<string, string> = {
-  "super-admin": "Super Admin",
-  admin: "Admin",
-  moderator: "Moderator",
-  analyst: "Analyst",
-  "finance-admin": "Finance Admin",
+  super_admin: "Super Admin",
+  content_admin: "Content Admin",
+  support_admin: "Support Admin",
+  marketing_admin: "Marketing Admin",
+  finance_admin: "Finance Admin",
 }

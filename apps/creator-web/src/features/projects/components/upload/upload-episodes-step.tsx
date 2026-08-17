@@ -26,6 +26,7 @@ import {
   X,
 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { ConfirmDeleteDialog } from "@/features/settings/components/confirm-delete-dialog"
 import { toast, toastMutationError } from "@/lib/toast"
 import { deleteEpisode } from "../../api/studio-api"
 import { useEpisodeAutosave } from "../../hooks/use-episode-autosave"
@@ -69,6 +70,8 @@ export function UploadEpisodesStep({
   const [deletingEpisodeId, setDeletingEpisodeId] = useState<string | null>(
     null
   )
+  const [episodeToDelete, setEpisodeToDelete] =
+    useState<UploadEpisodeDraft | null>(null)
 
   useEffect(() => {
     if (state.episodes.length > episodeCountRef.current) {
@@ -96,6 +99,7 @@ export function UploadEpisodesStep({
       toast.success(`"${episode.title || "Episode"}" deleted.`)
     } catch (error) {
       toastMutationError(error, "Failed to delete episode")
+      throw error
     } finally {
       setDeletingEpisodeId(null)
     }
@@ -228,7 +232,7 @@ export function UploadEpisodesStep({
                 </AccordionTrigger>
                 <button
                   type="button"
-                  onClick={() => void handleDeleteEpisode(episode)}
+                  onClick={() => setEpisodeToDelete(episode)}
                   disabled={deletingEpisodeId === episode.id}
                   aria-label={`Delete ${episode.title}`}
                   className="mr-6 flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-50"
@@ -460,6 +464,25 @@ export function UploadEpisodesStep({
           className="flex flex-col xl:hidden"
         />
       </div>
+
+      <ConfirmDeleteDialog
+        open={episodeToDelete != null}
+        onOpenChange={(open) => {
+          if (!open && !deletingEpisodeId) setEpisodeToDelete(null)
+        }}
+        title="Delete episode?"
+        description={
+          episodeToDelete
+            ? `Permanently delete “${episodeToDelete.title || "Untitled episode"}”? This cannot be undone.`
+            : ""
+        }
+        isPending={deletingEpisodeId != null}
+        onConfirm={async () => {
+          if (!episodeToDelete) return
+          await handleDeleteEpisode(episodeToDelete)
+          setEpisodeToDelete(null)
+        }}
+      />
     </div>
   )
 }

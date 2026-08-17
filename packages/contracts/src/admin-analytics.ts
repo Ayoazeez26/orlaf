@@ -51,7 +51,7 @@ export interface AdminAnalyticsSummary {
   total_creators: number
   published_series: number
   pending_review_series: number
-  /** Always 0 until moderation reports exist. */
+  /** Open pending moderation reports grouped by series. */
   flagged_series: number
   views_30d: number
   new_creators_7d: number

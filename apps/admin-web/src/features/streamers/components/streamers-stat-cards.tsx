@@ -1,14 +1,14 @@
+import type { AdminStreamerStats } from "@sable/contracts"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import type { LucideIcon } from "lucide-react"
-import { Crown, UserCheck, Users, UserX } from "lucide-react"
+import { Sparkles, UserCheck, Users, UserX } from "lucide-react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import { TONE_CHIP_CLASS } from "@/features/workspaces/lib/tones"
 import type { Tone } from "@/features/workspaces/types"
-import type { Streamer } from "../types"
 
 interface StreamersStatCardsProps {
-  streamers: Streamer[]
+  stats: AdminStreamerStats
 }
 
 interface Stat {
@@ -18,39 +18,37 @@ interface Stat {
   tone: Tone
 }
 
-export function StreamersStatCards({ streamers }: StreamersStatCardsProps) {
-  const stats: Stat[] = [
+export function StreamersStatCards({ stats }: StreamersStatCardsProps) {
+  const cards: Stat[] = [
     {
       label: "Total streamers",
-      value: streamers.length,
+      value: stats.total,
       icon: Users,
       tone: "primary",
     },
     {
       label: "Active",
-      value: streamers.filter((s) => s.status === "active").length,
+      value: stats.active,
       icon: UserCheck,
       tone: "positive",
     },
     {
-      label: "Suspended / Banned",
-      value: streamers.filter(
-        (s) => s.status === "suspended" || s.status === "banned"
-      ).length,
+      label: "Suspended",
+      value: stats.suspended,
       icon: UserX,
       tone: "danger",
     },
     {
-      label: "Paying subscribers",
-      value: streamers.filter((s) => s.plan !== "Free").length,
-      icon: Crown,
+      label: "New this month",
+      value: stats.newThisMonth,
+      icon: Sparkles,
       tone: "warning",
     },
   ]
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {stats.map((stat) => {
+      {cards.map((stat) => {
         const Icon = stat.icon
 
         return (

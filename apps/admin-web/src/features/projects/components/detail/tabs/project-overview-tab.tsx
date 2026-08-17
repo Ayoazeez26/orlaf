@@ -6,12 +6,13 @@ import {
   Calendar,
   Clapperboard,
   Eye,
-  FolderOpen,
   Globe,
+  Percent,
+  Play,
   Tag,
-  TrendingUp,
   Users,
 } from "lucide-react"
+import { useProjectAnalyticsQuery } from "@/features/projects/api/projects-hooks"
 import { MetricCardsRow } from "@/features/workspaces/components/home/metric-cards-row"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import type { MetricDef } from "@/features/workspaces/types"
@@ -38,14 +39,71 @@ function InfoFieldRow({ icon: Icon, label, value }: InfoField) {
   )
 }
 
-const OVERVIEW_METRICS: MetricDef[] = [
-  { label: "Total Users", value: "2,487", icon: Users },
-  { label: "Total Content", value: "1,204", icon: TrendingUp },
-  { label: "Platform Views", value: "88.2M", icon: Eye },
-  { label: "Active Creators", value: "342", icon: FolderOpen },
-]
+function formatWatchTime(totalSeconds: number): string {
+  const seconds = Math.max(0, Math.round(totalSeconds))
+  const mins = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${mins}:${secs.toString().padStart(2, "0")}`
+}
+
+function formatCompactCount(value: number): string {
+  if (value < 1000) return String(Math.round(value))
+  if (value < 10_000) {
+    return `${(value / 1000).toFixed(1).replace(/\.0$/, "")}K`
+  }
+  if (value < 1_000_000) return `${Math.round(value / 1000)}K`
+  return `${(value / 1_000_000).toFixed(2).replace(/\.?0+$/, "")}M`
+}
 
 export function ProjectOverviewTab({ project }: { project: ProjectDetail }) {
+  const { data: analytics, isPending } = useProjectAnalyticsQuery(project.id)
+
+  const metrics: MetricDef[] = analytics
+    ? [
+        {
+          label: "Total Views",
+          value: formatCompactCount(analytics.kpis.total_views.value),
+          icon: Eye,
+        },
+        {
+          label: "Unique Viewers",
+          value: formatCompactCount(analytics.kpis.unique_viewers.value),
+          icon: Users,
+        },
+        {
+          label: "Avg Watch Time",
+          value: formatWatchTime(analytics.kpis.avg_watch_seconds.value),
+          icon: Play,
+        },
+        {
+          label: "Completion Rate",
+          value: `${(analytics.kpis.completion_rate.value * 100).toFixed(1)}%`,
+          icon: Percent,
+        },
+      ]
+    : [
+        { label: "Total Views", value: isPending ? "…" : "0", icon: Eye },
+        { label: "Unique Viewers", value: isPending ? "…" : "0", icon: Users },
+        {
+          label: "Avg Watch Time",
+          value: isPending ? "…" : "0:00",
+          icon: Play,
+        },
+        {
+          label: "Completion Rate",
+          value: isPending ? "…" : "0%",
+          icon: Percent,
+        },
+      ]
+
+  const topEpisodes =
+    analytics?.top_episodes.map((episode) => ({
+      rank: episode.rank,
+      title: episode.episode_title,
+      duration: "—",
+      views: episode.views,
+    })) ?? []
+
   const fields: InfoField[] = [
     { icon: Tag, label: "Genre", value: project.genre },
     { icon: Globe, label: "Language", value: project.language },
@@ -59,7 +117,7 @@ export function ProjectOverviewTab({ project }: { project: ProjectDetail }) {
 
   return (
     <div className="space-y-6">
-      <MetricCardsRow metrics={OVERVIEW_METRICS} />
+      <MetricCardsRow metrics={metrics} />
 
       <div className="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
         <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6")}>
@@ -68,7 +126,7 @@ export function ProjectOverviewTab({ project }: { project: ProjectDetail }) {
               About
             </h2>
             <p className="text-foreground text-sm leading-relaxed">
-              {project.description}
+              {project.description || "No synopsis yet."}
             </p>
 
             <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
@@ -104,24 +162,31 @@ export function ProjectOverviewTab({ project }: { project: ProjectDetail }) {
               Top Performing Episodes
             </h2>
 
-            <ul className="space-y-4">
-              {project.topEpisodes.map((episode) => (
-                <li key={episode.title} className="flex items-center gap-3">
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted font-medium text-muted-foreground text-xs">
-                    {episode.rank}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-foreground text-sm">
-                      {episode.title}
-                    </p>
-                    <p className="text-muted-foreground text-xs">
-                      {episode.duration} · {formatProjectViews(episode.views)}{" "}
-                      views
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            {isPending ? (
+              <p className="text-muted-foreground text-sm">Loading…</p>
+            ) : topEpisodes.length === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                No episode view data yet.
+              </p>
+            ) : (
+              <ul className="space-y-4">
+                {topEpisodes.map((episode) => (
+                  <li key={episode.title} className="flex items-center gap-3">
+                    <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted font-medium text-muted-foreground text-xs">
+                      {episode.rank}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-foreground text-sm">
+                        {episode.title}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        {formatProjectViews(episode.views)} views
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </CardContent>
         </Card>
       </div>
