@@ -4,6 +4,8 @@ export type InboxNotificationType =
   | "moderation"
   | "support"
   | "system"
+  | "promotions"
+  | "payouts"
 
 export interface InboxNotification {
   id: string
