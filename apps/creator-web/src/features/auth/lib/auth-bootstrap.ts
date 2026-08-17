@@ -60,9 +60,15 @@ export function getAuthReady(): Promise<AuthSnapshot> {
 
   if (!clientInitialized) {
     clientInitialized = true
-    resetAuthBootstrapProgress()
-    setAuthSnapshot({ status: "loading", session: null })
     readyPromise = null
+
+    // A sign-in/sign-out flow may have already written a fresh, resolved
+    // snapshot before resetting this cache. Only force a re-bootstrap when
+    // there isn't already an up-to-date snapshot to trust.
+    if (getAuthSnapshot().status === "loading") {
+      resetAuthBootstrapProgress()
+      setAuthSnapshot({ status: "loading", session: null })
+    }
   }
 
   const current = getAuthSnapshot()
