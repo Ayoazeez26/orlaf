@@ -155,6 +155,8 @@ export interface CatalogFeedItem {
   id: string
   seriesId: string
   seriesTitle: string
+  /** Creator account id — required for gifting from For You */
+  creatorId: string
   /** Studio / creator display name when available */
   creatorName: string | null
   title: string
@@ -230,6 +232,26 @@ export interface CatalogCollectionResponse {
   description: string
   items: CatalogCollectionSeries[]
   promotedHero?: CatalogPromotedHero | null
+}
+
+/** An admin-curated row on the Featured home tab. */
+export interface CatalogHomeRail {
+  id: string
+  title: string
+  items: CatalogCollectionSeries[]
+}
+
+/** Layout of the Featured home tab. */
+export interface CatalogHomeResponse {
+  hero: {
+    /** "rail" when an admin hero rail is live, otherwise the Featured ranking. */
+    source: "rail" | "algorithm"
+    items: CatalogCollectionSeries[]
+  }
+  /** Shown before `hero.items` when a home banner promotion is active. */
+  promotedHero: CatalogPromotedHero | null
+  /** Admin rows in display order; empty when none are live. */
+  rails: CatalogHomeRail[]
 }
 
 /** Seed list for the genres table — runtime catalog reads from the database. */

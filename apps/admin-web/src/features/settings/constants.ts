@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react"
 import {
   Bell,
+  BookOpen,
   Coins,
   CreditCard,
   Palette,
@@ -18,6 +19,7 @@ export type SettingsTabId =
   | "branding"
   | "creators"
   | "moderation"
+  | "help-articles"
   | "discovery"
   | "coin-economy"
   | "payouts"
@@ -37,6 +39,7 @@ export const SETTINGS_TABS: SettingsTabDef[] = [
   { id: "branding", label: "Branding", icon: Palette },
   { id: "creators", label: "Creators", icon: UserPlus },
   { id: "moderation", label: "Moderation", icon: ShieldCheck },
+  { id: "help-articles", label: "Help articles", icon: BookOpen },
   { id: "discovery", label: "Discovery", icon: Sparkles },
   { id: "coin-economy", label: "Coin economy", icon: Coins },
   { id: "payouts", label: "Payouts", icon: Wallet },

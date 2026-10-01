@@ -17,12 +17,12 @@ import {
   ANALYTICS_TOOLTIP_CONTENT_STYLE,
 } from "@/features/analytics/constants"
 import { formatNaira } from "@/features/payouts/lib/format-naira"
-import { MRR_TREND_CHANGE_PERCENT } from "../../data/subscription-analytics"
 import type { MrrTrendPoint } from "../../types"
 import { ChartCard } from "./chart-card"
 
 interface MrrTrendChartProps {
   data: MrrTrendPoint[]
+  changePercent?: number
   className?: string
 }
 
@@ -30,17 +30,32 @@ function formatAxisValue(value: number) {
   return `₦${(value / 1_000_000).toFixed(0)}M`
 }
 
-export function MrrTrendChart({ data, className }: MrrTrendChartProps) {
+export function MrrTrendChart({
+  data,
+  changePercent = 0,
+  className,
+}: MrrTrendChartProps) {
+  const trendPositive = changePercent >= 0
+
   return (
     <ChartCard
       title="MRR trend"
-      subtitle="Last 6 months, in ₦ millions"
+      subtitle="Estimated from active VIP SKUs (last 6 months)"
       className={className}
       action={
-        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 font-medium text-emerald-600 text-xs">
-          <ArrowUpRight className="size-3.5" aria-hidden />+
-          {MRR_TREND_CHANGE_PERCENT.toFixed(1)}%
-        </span>
+        data.length > 1 ? (
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-medium text-xs ${
+              trendPositive
+                ? "bg-emerald-500/10 text-emerald-600"
+                : "bg-destructive/10 text-destructive"
+            }`}
+          >
+            <ArrowUpRight className="size-3.5" aria-hidden />
+            {trendPositive ? "+" : ""}
+            {changePercent.toFixed(1)}%
+          </span>
+        ) : null
       }
     >
       <div className="h-[280px]">

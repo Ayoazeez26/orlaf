@@ -18,6 +18,7 @@ export type AuditActionType =
   | "rail-created"
   | "rail-updated"
   | "rail-deleted"
+  | "feed-updated"
   | "member-invited"
   | "member-role-changed"
 

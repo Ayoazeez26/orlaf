@@ -87,6 +87,7 @@ export interface PublicCreatorProfile {
   following: boolean
 }
 
+/** One row per series: the most recently watched episode. */
 export interface HistoryListItem {
   seriesId: string
   episodeId: string
@@ -95,7 +96,13 @@ export interface HistoryListItem {
   episodeNumber: number
   posterUrl: string | null
   progressPercent: number
+  /** Furthest point reached in the episode, for resuming playback. */
+  positionSeconds: number
+  durationSeconds: number | null
   completed: boolean
+  /** Following episode when this one is completed; null at the series end. */
+  nextEpisodeId: string | null
+  nextEpisodeNumber: number | null
   watchedAt: string
 }
 

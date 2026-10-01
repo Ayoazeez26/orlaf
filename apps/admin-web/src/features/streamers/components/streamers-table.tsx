@@ -86,7 +86,7 @@ export function StreamersTable({
                 {streamer.watchHours} h
               </td>
               <td className="whitespace-nowrap px-4 py-3 font-medium text-foreground tabular-nums">
-                ${streamer.lifetimeSpend.toFixed(2)}
+                {streamer.lifetimeSpend.toLocaleString()} coins
               </td>
               <td className="px-4 py-3">
                 <StatusBadge status={streamer.status} />

@@ -3,6 +3,7 @@ import {
   FileText,
   Flag,
   Layers,
+  Pin,
   Plus,
   Settings,
   ShieldCheck,
@@ -26,6 +27,7 @@ export const AUDIT_ACTION_FILTERS: {
   { key: "episode-published", label: "Episode published" },
   { key: "report-resolved", label: "Report resolved" },
   { key: "rail-updated", label: "Rail updated" },
+  { key: "feed-updated", label: "For You updated" },
   { key: "member-invited", label: "Member invited" },
 ]
 
@@ -141,6 +143,11 @@ export const AUDIT_ACTION_CONFIG: Record<
     label: "Rail Deleted",
     icon: Trash2,
     badgeClass: "bg-red-500/10 text-red-600",
+  },
+  "feed-updated": {
+    label: "For You Updated",
+    icon: Pin,
+    badgeClass: "bg-primary/10 text-primary",
   },
   "member-invited": {
     label: "Member Invited",

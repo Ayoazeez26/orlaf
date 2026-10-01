@@ -16,14 +16,12 @@ import {
 
 const SAVEABLE_SERIES_STATUSES = ["published"] as const
 
-const QUALITY_MAP: Record<
-  DownloadQualityKey,
-  "standard" | "high" | "full_hd"
-> = {
-  standard: "standard",
-  high: "high",
-  full_hd: "full_hd",
-}
+const QUALITY_MAP: Record<DownloadQualityKey, "standard" | "high" | "full_hd"> =
+  {
+    standard: "standard",
+    high: "high",
+    full_hd: "full_hd",
+  }
 
 @Injectable()
 export class LibraryService {

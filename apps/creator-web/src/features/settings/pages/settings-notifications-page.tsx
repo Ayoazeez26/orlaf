@@ -42,10 +42,11 @@ export function SettingsNotificationsPage() {
 
   useEffect(() => {
     if (!groups) return
+    const currentGroups = groups
 
     function handleSave() {
       updateSettings.mutate(
-        groupsToNotificationSettingsPatch(groups, isStudioCreator),
+        groupsToNotificationSettingsPatch(currentGroups, isStudioCreator),
         {
           onSuccess: (saved) => {
             const next = notificationSettingsToGroups(saved, isStudioCreator)

@@ -6,6 +6,7 @@ import {
   toContentPatch,
   toCreatorTypePatch,
   toGetStartedPatch,
+  toRightsPatch,
   toStudioPatch,
 } from "../lib/onboarding-mappers"
 import { useOnboarding } from "../onboarding-context"
@@ -86,6 +87,12 @@ export function useOnboardingPersist() {
     [run]
   )
 
+  const saveRights = useCallback(
+    (rightsData: OnboardingData) =>
+      run(() => patchOnboarding(toRightsPatch(rightsData)).then(() => {})),
+    [run]
+  )
+
   const saveGetStarted = useCallback(
     (mode: OnboardingData["getStartedMode"]) =>
       run(() => patchOnboarding(toGetStartedPatch(mode)).then(() => {})),
@@ -116,6 +123,7 @@ export function useOnboardingPersist() {
     saveStudioSkip,
     saveContent,
     saveContentSkip,
+    saveRights,
     saveGetStarted,
     finishOnboarding,
   }

@@ -3,10 +3,8 @@ import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
 import { Switch } from "@workspace/ui/components/switch"
 import { cn } from "@workspace/ui/lib/utils"
-import { useState } from "react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
-import { DEFAULT_SUBSCRIPTION_SETTINGS } from "../../data/subscription-analytics"
-import type { SubscriptionSettings } from "../../types"
+import { useAdminSubscriptionSettings } from "../../api/subscriptions-hooks"
 
 interface SettingsFieldProps {
   label: string
@@ -32,12 +30,10 @@ function ToggleField({
   label,
   hint,
   checked,
-  onCheckedChange,
 }: {
   label: string
   hint: string
   checked: boolean
-  onCheckedChange: (checked: boolean) => void
 }) {
   return (
     <div className="flex items-center justify-between gap-4">
@@ -45,19 +41,15 @@ function ToggleField({
         <Label className="font-medium text-foreground text-sm">{label}</Label>
         <p className="mt-0.5 text-muted-foreground text-xs">{hint}</p>
       </div>
-      <Switch checked={checked} onCheckedChange={onCheckedChange} />
+      <Switch checked={checked} disabled />
     </div>
   )
 }
 
 export function SubscriptionsSettingsTab() {
-  const [settings, setSettings] = useState<SubscriptionSettings>(
-    DEFAULT_SUBSCRIPTION_SETTINGS
-  )
+  const { data: settings } = useAdminSubscriptionSettings()
 
-  function update(patch: Partial<SubscriptionSettings>) {
-    setSettings((current) => ({ ...current, ...patch }))
-  }
+  if (!settings) return null
 
   return (
     <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6")}>
@@ -67,7 +59,8 @@ export function SubscriptionsSettingsTab() {
             Trial & billing
           </h3>
           <p className="mt-0.5 text-muted-foreground text-sm">
-            Defaults applied to every subscription plan.
+            Read-only reference. Trials, grace periods, and SKUs are configured
+            in RevenueCat and the app stores — not in Sable admin.
           </p>
         </div>
 
@@ -78,11 +71,9 @@ export function SubscriptionsSettingsTab() {
           >
             <Input
               type="number"
-              min={0}
-              value={settings.freeTrialDays}
-              onChange={(event) =>
-                update({ freeTrialDays: Number(event.target.value) })
-              }
+              value={settings.free_trial_days}
+              readOnly
+              disabled
               className="h-9"
             />
           </SettingsField>
@@ -92,12 +83,9 @@ export function SubscriptionsSettingsTab() {
           >
             <Input
               type="number"
-              min={0}
-              max={100}
-              value={settings.annualDiscountPercent}
-              onChange={(event) =>
-                update({ annualDiscountPercent: Number(event.target.value) })
-              }
+              value={settings.annual_discount_percent}
+              readOnly
+              disabled
               className="h-9"
             />
           </SettingsField>
@@ -107,29 +95,21 @@ export function SubscriptionsSettingsTab() {
           >
             <Input
               type="number"
-              min={0}
-              value={settings.gracePeriodDays}
-              onChange={(event) =>
-                update({ gracePeriodDays: Number(event.target.value) })
-              }
+              value={settings.grace_period_days}
+              readOnly
+              disabled
               className="h-9"
             />
           </SettingsField>
           <ToggleField
             label="Allow plan changes mid-cycle"
             hint="Prorate the difference when viewers upgrade or downgrade."
-            checked={settings.allowPlanChangesMidCycle}
-            onCheckedChange={(checked) =>
-              update({ allowPlanChangesMidCycle: checked })
-            }
+            checked={settings.allow_plan_changes_mid_cycle}
           />
           <ToggleField
             label="Send renewal reminder email"
             hint="Notify viewers 3 days before their plan renews."
-            checked={settings.sendRenewalReminderEmail}
-            onCheckedChange={(checked) =>
-              update({ sendRenewalReminderEmail: checked })
-            }
+            checked={settings.send_renewal_reminder_email}
           />
         </div>
       </CardContent>

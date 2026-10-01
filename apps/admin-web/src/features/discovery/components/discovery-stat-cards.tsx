@@ -1,24 +1,31 @@
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
 import type { LucideIcon } from "lucide-react"
-import { Calendar, Heart, Sparkles, Star } from "lucide-react"
+import { Layers, Pin, Sparkles, Star } from "lucide-react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import { TONE_CHIP_CLASS } from "@/features/workspaces/lib/tones"
 import type { Tone } from "@/features/workspaces/types"
+import { homeRailRoles } from "../lib/rail-roles"
 import type { DiscoveryRail } from "../types"
 
 interface DiscoveryStatCardsProps {
+  /** Home rails. */
   rails?: DiscoveryRail[]
+  pinnedCount?: number
 }
 
 interface Stat {
   label: string
-  value: number
+  value: number | string
   icon: LucideIcon
   tone: Tone
 }
 
-export function DiscoveryStatCards({ rails = [] }: DiscoveryStatCardsProps) {
+export function DiscoveryStatCards({
+  rails = [],
+  pinnedCount,
+}: DiscoveryStatCardsProps) {
+  const roles = [...homeRailRoles(rails).values()]
   const stats: Stat[] = [
     {
       label: "Live rails",
@@ -27,21 +34,21 @@ export function DiscoveryStatCards({ rails = [] }: DiscoveryStatCardsProps) {
       tone: "primary",
     },
     {
-      label: "Scheduled",
-      value: rails.filter((rail) => rail.status === "scheduled").length,
-      icon: Calendar,
+      label: "Featured rows",
+      value: roles.filter((role) => role.kind === "row").length,
+      icon: Layers,
       tone: "info",
     },
     {
       label: "Featured hero",
-      value: rails.filter((rail) => rail.type === "hero").length,
+      value: roles.some((role) => role.kind === "hero") ? "Curated" : "Auto",
       icon: Star,
       tone: "warning",
     },
     {
-      label: "For You queue",
-      value: rails.filter((rail) => rail.surface === "for-you").length,
-      icon: Heart,
+      label: "For You pins",
+      value: pinnedCount ?? "–",
+      icon: Pin,
       tone: "positive",
     },
   ]

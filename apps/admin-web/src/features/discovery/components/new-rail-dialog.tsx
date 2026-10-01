@@ -15,23 +15,22 @@ import {
   RAIL_AUDIENCE_OPTIONS,
   RAIL_STATUS_OPTIONS,
   RAIL_TYPE_OPTIONS,
-  SURFACE_OPTIONS,
 } from "../constants"
+import { COLLECTION_TAB_LABEL } from "../lib/rail-roles"
 import type {
   DiscoverySurface,
   RailAudience,
   RailStatus,
   RailType,
 } from "../types"
+import { ComingSoonBadge } from "./discovery-badges"
 import { useModalShell } from "./use-modal-shell"
 
 interface NewRailDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  defaultSurface?: DiscoverySurface
   initialValues?: {
     title: string
-    surface: DiscoverySurface
     type: RailType
     status: RailStatus
     audience: RailAudience
@@ -50,12 +49,10 @@ interface NewRailDialogProps {
 export function NewRailDialog({
   open,
   onOpenChange,
-  defaultSurface = "home",
   initialValues,
   onConfirm,
 }: NewRailDialogProps) {
   const [title, setTitle] = useState("")
-  const [surface, setSurface] = useState<DiscoverySurface>(defaultSurface)
   const [type, setType] = useState<RailType>("rail")
   const [status, setStatus] = useState<RailStatus>("draft")
   const [audience, setAudience] = useState<RailAudience>("all-users")
@@ -64,12 +61,11 @@ export function NewRailDialog({
   useEffect(() => {
     if (!open) return
     setTitle(initialValues?.title ?? "")
-    setSurface(initialValues?.surface ?? defaultSurface)
     setType(initialValues?.type ?? "rail")
     setStatus(initialValues?.status ?? "draft")
     setAudience(initialValues?.audience ?? "all-users")
     setCollectionKey(initialValues?.collectionKey || "none")
-  }, [open, defaultSurface, initialValues])
+  }, [open, initialValues])
 
   useModalShell(open, onOpenChange)
 
@@ -79,7 +75,7 @@ export function NewRailDialog({
     if (!title.trim()) return
     onConfirm?.({
       title: title.trim(),
-      surface,
+      surface: "home",
       type,
       status,
       audience,
@@ -112,7 +108,7 @@ export function NewRailDialog({
                 {initialValues ? "Edit rail" : "New rail"}
               </h2>
               <p className="mt-1 text-muted-foreground text-sm">
-                Configure where and when this rail shows in the app.
+                Configure how this rail shows on Home / Discover.
               </p>
             </div>
             <Button
@@ -139,26 +135,6 @@ export function NewRailDialog({
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>Surface</Label>
-              <Select
-                value={surface}
-                onValueChange={(value) => setSurface(value as DiscoverySurface)}
-                disabled={Boolean(initialValues)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SURFACE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
               <Label>Type</Label>
               <Select
                 value={type}
@@ -176,9 +152,7 @@ export function NewRailDialog({
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Status</Label>
               <Select
@@ -190,27 +164,14 @@ export function NewRailDialog({
                 </SelectTrigger>
                 <SelectContent>
                   {RAIL_STATUS_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Audience</Label>
-              <Select
-                value={audience}
-                onValueChange={(value) => setAudience(value as RailAudience)}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {RAIL_AUDIENCE_OPTIONS.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      disabled={option.value === "scheduled"}
+                    >
+                      {option.value === "scheduled"
+                        ? `${option.label} (coming soon)`
+                        : option.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -219,20 +180,50 @@ export function NewRailDialog({
           </div>
 
           <div className="space-y-2">
-            <Label>Catalog collection override</Label>
+            <Label className="flex items-center gap-2">
+              Audience
+              <ComingSoonBadge />
+            </Label>
+            <Select
+              value={audience}
+              onValueChange={(value) => setAudience(value as RailAudience)}
+              disabled
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {RAIL_AUDIENCE_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Replace a Home tab</Label>
             <Select value={collectionKey} onValueChange={setCollectionKey}>
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">None (editorial only)</SelectItem>
+                <SelectItem value="none">
+                  None (show on the Featured tab)
+                </SelectItem>
                 {CATALOG_COLLECTION_KEYS.map((key) => (
                   <SelectItem key={key} value={key}>
-                    {key}
+                    {COLLECTION_TAB_LABEL[key]} tab
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            <p className="text-muted-foreground text-xs">
+              A linked rail replaces that tab&rsquo;s automatic list. Unlinked
+              rails appear on Featured: the first hero rail as the carousel, the
+              rest as rows in page order.
+            </p>
           </div>
         </div>
 

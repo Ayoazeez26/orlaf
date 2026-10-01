@@ -19,6 +19,7 @@ export type OnboardingStepId =
   | 'creator-type'
   | 'studio'
   | 'content'
+  | 'rights'
   | 'get-started';
 
 export interface OnboardingStudioProfile {
@@ -32,6 +33,8 @@ export interface OnboardingProfileData {
   studio: OnboardingStudioProfile | null;
   content_formats: ContentFormatId[];
   get_started_mode: GetStartedMode | null;
+  social_link: string | null;
+  rights_confirmed: boolean;
 }
 
 export interface OnboardingStatusResponse {
@@ -46,6 +49,8 @@ export interface PatchOnboardingBody {
   studio?: OnboardingStudioProfile | null;
   content_formats?: ContentFormatId[];
   get_started_mode?: GetStartedMode | null;
+  social_link?: string | null;
+  rights_confirmed?: boolean;
 }
 
 export interface CompleteOnboardingResponse {

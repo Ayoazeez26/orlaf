@@ -30,6 +30,7 @@ export function SettingsDiscoveryTab() {
       <SettingsSection
         title="Home / Discover"
         subtitle="Defaults for the curated home page on the main app."
+        comingSoon
       >
         <SettingsField label="Featured hero rotation">
           <Select value={heroRotation} onValueChange={setHeroRotation}>
@@ -63,7 +64,11 @@ export function SettingsDiscoveryTab() {
 
       <SettingsDivider />
 
-      <SettingsSection title="For You" subtitle="Personalised feed behaviour.">
+      <SettingsSection
+        title="For You"
+        subtitle="Personalised feed behaviour."
+        comingSoon
+      >
         <ToggleField
           label="Enable For You"
           hint="Turn off to show only curated content."

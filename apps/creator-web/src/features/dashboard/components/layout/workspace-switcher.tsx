@@ -120,7 +120,7 @@ export function WorkspaceSwitcher({ user, className }: WorkspaceSwitcherProps) {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link to="/dashboard/support">
+          <Link to="/dashboard/support" search={{ tab: "articles" }}>
             <CircleHelp className="size-4" aria-hidden />
             Help &amp; Support
           </Link>

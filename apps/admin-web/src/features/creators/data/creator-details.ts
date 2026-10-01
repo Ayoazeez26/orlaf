@@ -52,5 +52,5 @@ export function formatCreatorViews(views: number): string {
 }
 
 export function formatCreatorEarnings(amount: number): string {
-  return `$${amount.toLocaleString()}`
+  return `${amount.toLocaleString()} coins`
 }

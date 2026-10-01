@@ -13,7 +13,7 @@ interface ApprovePayoutDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   payout: Payout | null
-  onConfirm?: () => void
+  onConfirm?: (scheduledFor: string, internalNote?: string) => void
 }
 
 export function ApprovePayoutDialog({
@@ -22,12 +22,14 @@ export function ApprovePayoutDialog({
   payout,
   onConfirm,
 }: ApprovePayoutDialogProps) {
-  const [disbursementDate, setDisbursementDate] = useState("2026-05-25")
+  const [disbursementDate, setDisbursementDate] = useState("")
   const [internalNote, setInternalNote] = useState("")
 
   useEffect(() => {
     if (open) {
-      setDisbursementDate("2026-05-25")
+      const nextWeek = new Date()
+      nextWeek.setDate(nextWeek.getDate() + 7)
+      setDisbursementDate(nextWeek.toISOString().slice(0, 10))
       setInternalNote("")
     }
   }, [open])
@@ -143,7 +145,7 @@ export function ApprovePayoutDialog({
             type="button"
             className="gap-2"
             onClick={() => {
-              onConfirm?.()
+              onConfirm?.(disbursementDate, internalNote.trim() || undefined)
               onOpenChange(false)
             }}
           >

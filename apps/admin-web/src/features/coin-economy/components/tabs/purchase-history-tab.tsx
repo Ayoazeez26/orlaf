@@ -1,34 +1,33 @@
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
-import { useMemo, useState } from "react"
+import { useEffect, useState } from "react"
+import { AuditLogPagination } from "@/features/audit-log/components/audit-log-table"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
-import { MOCK_COIN_PURCHASES } from "../../data/mock-purchases"
-import type { CoinPurchase, PurchaseFilter } from "../../types"
+import { useAdminCoinPurchases } from "../../api/coin-economy-hooks"
+import { PURCHASE_PAGE_SIZE } from "../../constants"
+import type { PurchaseFilter } from "../../types"
 import { PurchaseHistoryTable } from "../purchase-history-table"
 import { PurchaseHistoryToolbar } from "../purchase-history-toolbar"
-
-function matchesFilter(purchase: CoinPurchase, filter: PurchaseFilter) {
-  if (filter === "all") return true
-  return purchase.status === filter
-}
 
 export function PurchaseHistoryTab() {
   const [activeFilter, setActiveFilter] = useState<PurchaseFilter>("all")
   const [search, setSearch] = useState("")
+  const [page, setPage] = useState(1)
 
-  const filtered = useMemo(() => {
-    const query = search.trim().toLowerCase()
+  const purchasesQuery = useAdminCoinPurchases({
+    filter: activeFilter,
+    q: search.trim() || undefined,
+    page,
+    pageSize: PURCHASE_PAGE_SIZE,
+  })
 
-    return MOCK_COIN_PURCHASES.filter((purchase) => {
-      if (!matchesFilter(purchase, activeFilter)) return false
-      if (query) {
-        const haystack =
-          `${purchase.receipt} ${purchase.userName} ${purchase.userEmail} ${purchase.method}`.toLowerCase()
-        if (!haystack.includes(query)) return false
-      }
-      return true
-    })
-  }, [activeFilter, search])
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset page when filters change
+  useEffect(() => {
+    setPage(1)
+  }, [search, activeFilter])
+
+  const purchases = purchasesQuery.data?.items ?? []
+  const total = purchasesQuery.data?.total ?? 0
 
   return (
     <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6")}>
@@ -39,7 +38,23 @@ export function PurchaseHistoryTab() {
           search={search}
           onSearchChange={setSearch}
         />
-        <PurchaseHistoryTable purchases={filtered} />
+        {purchasesQuery.isLoading ? (
+          <div className="flex min-h-40 items-center justify-center text-muted-foreground text-sm">
+            Loading purchase history…
+          </div>
+        ) : purchasesQuery.isError ? (
+          <div className="flex min-h-40 items-center justify-center text-destructive text-sm">
+            Could not load purchase history.
+          </div>
+        ) : (
+          <PurchaseHistoryTable purchases={purchases} />
+        )}
+        <AuditLogPagination
+          page={page}
+          pageSize={PURCHASE_PAGE_SIZE}
+          total={total}
+          onPageChange={setPage}
+        />
       </CardContent>
     </Card>
   )

@@ -4,6 +4,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  Loader2,
   MessageCircle,
   ThumbsDown,
   ThumbsUp,
@@ -11,15 +12,16 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
+import { parseGuidelinesContent } from "@/lib/parse-guidelines-content"
 import {
-  getHelpArticle,
-  HELP_ARTICLE_CATEGORY_LABEL,
-} from "../data/help-articles"
+  useHelpArticleQuery,
+  useHelpArticlesQuery,
+} from "../api/help-articles-hooks"
 
 interface ArticleDetailProps {
   articleId: string
   onBack: () => void
-  onOpenArticle: (id: string) => void
+  onOpenArticle: (slug: string) => void
   onOpenChat: () => void
   onOpenTicket: () => void
 }
@@ -31,10 +33,23 @@ export function ArticleDetail({
   onOpenChat,
   onOpenTicket,
 }: ArticleDetailProps) {
-  const article = getHelpArticle(articleId)
+  const { data: article, isLoading, isError } = useHelpArticleQuery(articleId)
+  const { data: allArticles } = useHelpArticlesQuery()
   const [helpful, setHelpful] = useState<"yes" | "no" | null>(null)
 
-  if (!article) {
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <BackLink onClick={onBack} />
+        <div className="flex items-center justify-center gap-2 py-10 text-muted-foreground text-sm">
+          <Loader2 className="size-4 animate-spin" aria-hidden />
+          Loading article…
+        </div>
+      </div>
+    )
+  }
+
+  if (isError || !article) {
     return (
       <div className="space-y-4">
         <BackLink onClick={onBack} />
@@ -43,8 +58,9 @@ export function ArticleDetail({
     )
   }
 
+  const blocks = parseGuidelinesContent(article.body)
   const related = article.relatedIds
-    .map((id) => getHelpArticle(id))
+    .map((id) => allArticles?.items.find((item) => item.id === id))
     .filter((item) => item != null)
 
   return (
@@ -53,36 +69,35 @@ export function ArticleDetail({
 
       <div className={cn(FROSTED_CARD_SURFACE_CLASS, "space-y-5 p-6")}>
         <div className="space-y-2">
-          <p className="font-medium text-primary text-sm">
-            {HELP_ARTICLE_CATEGORY_LABEL[article.category]}
+          <p className="font-medium text-primary text-sm capitalize">
+            {article.category}
           </p>
           <h2 className="font-semibold text-2xl tracking-tight">
             {article.title}
           </h2>
           <p className="flex items-center gap-1.5 text-muted-foreground text-sm">
             <Clock className="size-3.5" aria-hidden />
-            {article.minutes} min read · Updated {article.updated}
+            Updated {new Date(article.updatedAt).toLocaleDateString()}
           </p>
         </div>
 
-        {article.paragraphs.map((paragraph) => (
-          <p key={paragraph} className="text-foreground text-sm leading-6">
-            {paragraph}
-          </p>
-        ))}
-
-        {article.steps ? (
-          <ol className="space-y-4">
-            {article.steps.map((step, index) => (
-              <li key={step.title} className="text-sm leading-6">
-                <p className="font-semibold text-foreground">
-                  {index + 1}. {step.title}
-                </p>
-                <p className="mt-1 text-muted-foreground">{step.body}</p>
-              </li>
-            ))}
-          </ol>
-        ) : null}
+        {blocks.map((block) =>
+          block.type === "heading" ? (
+            <p
+              key={`h-${block.text}`}
+              className="pt-2 font-semibold text-foreground text-sm first:pt-0"
+            >
+              {block.text}
+            </p>
+          ) : (
+            <p
+              key={`p-${block.text}`}
+              className="text-foreground text-sm leading-6"
+            >
+              {block.text}
+            </p>
+          )
+        )}
       </div>
 
       <div
@@ -170,16 +185,15 @@ export function ArticleDetail({
               <button
                 key={item.id}
                 type="button"
-                onClick={() => onOpenArticle(item.id)}
+                onClick={() => onOpenArticle(item.slug)}
                 className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-muted/50"
               >
                 <span>
                   <p className="font-semibold text-foreground text-sm">
                     {item.title}
                   </p>
-                  <p className="mt-1 text-muted-foreground text-sm">
-                    {HELP_ARTICLE_CATEGORY_LABEL[item.category]} ·{" "}
-                    {item.minutes} min read
+                  <p className="mt-1 text-muted-foreground text-sm capitalize">
+                    {item.category}
                   </p>
                 </span>
                 <ChevronRight

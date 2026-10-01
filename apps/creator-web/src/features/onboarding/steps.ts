@@ -11,6 +11,7 @@ export function getStepSequence(data: OnboardingData): OnboardingStep[] {
       "creator-type",
       ...(data.creatorType === "studio" ? (["studio"] as const) : []),
       "content",
+      "rights",
       "get-started",
     ]
   }
@@ -29,7 +30,7 @@ export function getStepSequence(data: OnboardingData): OnboardingStep[] {
     steps.push("studio")
   }
 
-  steps.push("content", "get-started")
+  steps.push("content", "rights", "get-started")
   return steps
 }
 
@@ -74,8 +75,10 @@ function getStaticPrevStep(
       return "creator-type"
     case "content":
       return data.creatorType === "studio" ? "studio" : "creator-type"
-    case "get-started":
+    case "rights":
       return "content"
+    case "get-started":
+      return "rights"
     case "creator-type":
       if (data.authMethod === "email") return "consent"
       if (data.authMethod === "google" || data.authMethod === "apple") {

@@ -26,3 +26,5 @@ export const PURCHASE_STATUS_BADGE_CLASS: Record<PurchaseStatus, string> = {
 }
 
 export const COINS_SOLD_CHANGE_PERCENT = 8.5
+
+export const PURCHASE_PAGE_SIZE = 20

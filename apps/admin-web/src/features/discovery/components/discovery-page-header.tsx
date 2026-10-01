@@ -13,13 +13,16 @@ export function DiscoveryPageHeader({ onNewRail }: DiscoveryPageHeaderProps) {
           Discovery
         </h1>
         <p className="mt-1 text-muted-foreground text-sm">
-          Curate what, when, and where content appears on Home and For You.
+          Arrange Home with rails, and steer the For You ranking with pins and
+          hides.
         </p>
       </div>
-      <Button type="button" className="shrink-0 gap-2" onClick={onNewRail}>
-        <Plus className="size-4" aria-hidden />
-        New Rail
-      </Button>
+      {onNewRail ? (
+        <Button type="button" className="shrink-0 gap-2" onClick={onNewRail}>
+          <Plus className="size-4" aria-hidden />
+          New Rail
+        </Button>
+      ) : null}
     </div>
   )
 }

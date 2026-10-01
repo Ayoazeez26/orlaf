@@ -32,7 +32,7 @@ export function CreatorDetailPage({ creator, role }: CreatorDetailPageProps) {
         <CreatorAnalyticsTab creatorId={creator.id} />
       ) : null}
       {activeTab === "payouts" ? (
-        <CreatorPayoutsTab payouts={creator.payouts} />
+        <CreatorPayoutsTab creatorId={creator.id} />
       ) : null}
     </div>
   )

@@ -61,10 +61,7 @@ export class AdminAnalyticsService {
       kpis: {
         new_users: {
           value: newUsersCurrent,
-          change_percent: this.changePercent(
-            newUsersCurrent,
-            newUsersPrevious
-          ),
+          change_percent: this.changePercent(newUsersCurrent, newUsersPrevious),
         },
         new_creators: {
           value: newCreatorsCurrent,

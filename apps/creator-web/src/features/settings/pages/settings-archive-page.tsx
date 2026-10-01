@@ -11,12 +11,12 @@ import {
 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { toast, toastMutationError } from "@/lib/toast"
+import type { ArchiveFilter } from "../api/archive-api"
 import { ConfirmDeleteDialog } from "../components/confirm-delete-dialog"
 import { SettingsModalShell } from "../components/settings-modal-shell"
 import { SettingsPageSkeleton } from "../components/settings-page-skeleton"
 import { SettingsSectionCard } from "../components/settings-section-card"
 import {
-  type ArchiveFilter,
   useArchive,
   useDeleteArchiveItem,
   useEmptyArchive,

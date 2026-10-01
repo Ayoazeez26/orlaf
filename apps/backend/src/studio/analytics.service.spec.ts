@@ -57,7 +57,9 @@ describe("AnalyticsService", () => {
       .mockResolvedValueOnce(10)
       .mockResolvedValueOnce(4)
     mockPrisma.comment.count.mockResolvedValueOnce(5).mockResolvedValueOnce(2)
-    mockPrisma.shareEvent.count.mockResolvedValueOnce(5).mockResolvedValueOnce(2)
+    mockPrisma.shareEvent.count
+      .mockResolvedValueOnce(5)
+      .mockResolvedValueOnce(2)
 
     const result = await service.getOverview("creator_1", "30d")
 

@@ -1,6 +1,11 @@
 import { cn } from "@workspace/ui/lib/utils"
 import { ChevronRight } from "lucide-react"
-import type { DashboardOnboardingProgress } from "../../types"
+
+interface DashboardOnboardingProgress {
+  title: string
+  subtitle: string
+  percent: number
+}
 
 interface OnboardingProgressCardProps {
   progress: DashboardOnboardingProgress

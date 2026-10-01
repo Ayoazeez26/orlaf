@@ -25,7 +25,9 @@ export const REVENUE_SOURCE_COLORS: Record<RevenueSourceColorKey, string> = {
   commission: "var(--revenue-commission)",
 }
 
-export function revenueTabPath(tabPath: string) {
+export type RevenueTabPath = (typeof REVENUE_TABS)[number]["path"]
+
+export function revenueTabPath(tabPath: RevenueTabPath) {
   if (tabPath === "") {
     return { to: "/dashboard/revenue" as const }
   }

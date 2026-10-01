@@ -76,21 +76,35 @@ export function ToggleField({
 export function SettingsSection({
   title,
   subtitle,
+  comingSoon = false,
   children,
 }: {
   title: string
   subtitle: string
+  /** Shows a badge and disables the controls until the setting is wired up. */
+  comingSoon?: boolean
   children: React.ReactNode
 }) {
   return (
     <section className="space-y-5">
       <div>
-        <h3 className="font-semibold text-base text-foreground tracking-tight">
+        <h3 className="flex items-center gap-2 font-semibold text-base text-foreground tracking-tight">
           {title}
+          {comingSoon ? (
+            <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 font-medium text-[11px] text-muted-foreground tracking-normal">
+              Coming soon
+            </span>
+          ) : null}
         </h3>
         <p className="mt-0.5 text-muted-foreground text-sm">{subtitle}</p>
       </div>
-      <div className="space-y-5">{children}</div>
+      {comingSoon ? (
+        <fieldset disabled className="space-y-5 opacity-60">
+          {children}
+        </fieldset>
+      ) : (
+        <div className="space-y-5">{children}</div>
+      )}
     </section>
   )
 }

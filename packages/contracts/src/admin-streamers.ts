@@ -93,6 +93,8 @@ export interface AdminStreamerAnalytics {
 }
 
 export interface AdminStreamerDetail extends AdminStreamerListItem {
+  /** Current coin wallet balance. */
+  coinsBalance: number
   lastActive: string | null
   primaryDevice: string | null
   suspendedAt: string | null

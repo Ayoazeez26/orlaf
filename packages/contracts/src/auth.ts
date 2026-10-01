@@ -108,6 +108,10 @@ export interface ProviderTokenClaims {
   email_verified: boolean;
   /** Present on Google always. Present on Apple only on first sign-in. */
   name?: string;
+  /** Present on Google always. Present on Apple only on first sign-in. */
+  given_name?: string;
+  /** Present on Google always. Present on Apple only on first sign-in. */
+  family_name?: string;
   /** Apple only */
   is_private_email?: boolean;
 }
@@ -366,6 +370,8 @@ export interface VerifyMfaResponse {
 
 export interface PasswordResetRequestBody {
   email: string;
+  /** `mobile` resets viewer accounts; omitted resets creator accounts. */
+  surface?: 'mobile' | 'creator-web';
 }
 
 export interface PasswordResetRequestResponse {

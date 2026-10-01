@@ -4,7 +4,9 @@ import type {
   DiscoveryRail,
   DiscoveryRailsResponse,
   DiscoverySurface,
+  ForYouPreviewResponse,
   ReorderDiscoveryRailsRequest,
+  SetForYouOverrideRequest,
   UpdateDiscoveryRailRequest,
 } from "@sable/contracts"
 import { apiRequest } from "@/lib/http-client"
@@ -65,6 +67,31 @@ export function removeDiscoveryRailItem(
 ): Promise<void> {
   return apiRequest<void>(
     `/api/v1/admin/discovery/rails/${encodeURIComponent(railId)}/items/${encodeURIComponent(seriesId)}`,
+    { method: "DELETE" }
+  )
+}
+
+export function getForYouPreview(): Promise<ForYouPreviewResponse> {
+  return apiRequest<ForYouPreviewResponse>(
+    "/api/v1/admin/discovery/for-you/preview"
+  )
+}
+
+export function setForYouOverride(
+  seriesId: string,
+  body: SetForYouOverrideRequest
+): Promise<ForYouPreviewResponse> {
+  return apiRequest<ForYouPreviewResponse>(
+    `/api/v1/admin/discovery/for-you/overrides/${encodeURIComponent(seriesId)}`,
+    { method: "PUT", body: JSON.stringify(body) }
+  )
+}
+
+export function clearForYouOverride(
+  seriesId: string
+): Promise<ForYouPreviewResponse> {
+  return apiRequest<ForYouPreviewResponse>(
+    `/api/v1/admin/discovery/for-you/overrides/${encodeURIComponent(seriesId)}`,
     { method: "DELETE" }
   )
 }

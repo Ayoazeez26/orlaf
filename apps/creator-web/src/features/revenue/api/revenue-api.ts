@@ -1,34 +1,51 @@
-import { MOCK_REVENUE_DASHBOARD } from "../data/mock-revenue"
+import type {
+  CreateCreatorPayoutAccountRequest,
+  CreateCreatorPayoutRequestBody,
+  CreateCreatorPayoutRequestResponse,
+  CreatorPayoutAccount,
+  CreatorRevenueDashboard,
+} from "@sable/contracts"
+import { apiRequest } from "@/lib/http-client"
+import { mapRevenueDashboard } from "../lib/map-revenue-dashboard"
 import type { PayoutFrequency, RevenueDashboardData } from "../types"
 
-const MOCK_DELAY_MS = 200
+const BASE = "/api/v1/studio/revenue"
 
-let payoutFrequency: PayoutFrequency =
-  MOCK_REVENUE_DASHBOARD.payoutSchedule.frequency
+export async function fetchRevenueDashboard(): Promise<RevenueDashboardData> {
+  const data = await apiRequest<CreatorRevenueDashboard>(`${BASE}/dashboard`)
+  return mapRevenueDashboard(data)
+}
 
-function delay<T>(value: T): Promise<T> {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(value), MOCK_DELAY_MS)
+export async function createPayoutAccount(
+  body: CreateCreatorPayoutAccountRequest
+): Promise<CreatorPayoutAccount> {
+  return apiRequest<CreatorPayoutAccount>(`${BASE}/payout-accounts`, {
+    method: "POST",
+    body: JSON.stringify(body),
   })
 }
 
-function getDashboard(): RevenueDashboardData {
-  return {
-    ...MOCK_REVENUE_DASHBOARD,
-    payoutSchedule: {
-      ...MOCK_REVENUE_DASHBOARD.payoutSchedule,
-      frequency: payoutFrequency,
-    },
-  }
+export async function deletePayoutAccount(accountId: string): Promise<void> {
+  await apiRequest(`${BASE}/payout-accounts/${encodeURIComponent(accountId)}`, {
+    method: "DELETE",
+  })
 }
 
-export async function fetchRevenueDashboard(): Promise<RevenueDashboardData> {
-  return delay(getDashboard())
+export async function requestPayout(
+  body: CreateCreatorPayoutRequestBody
+): Promise<CreateCreatorPayoutRequestResponse> {
+  return apiRequest<CreateCreatorPayoutRequestResponse>(
+    `${BASE}/payout-requests`,
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    }
+  )
 }
 
 export async function updatePayoutFrequency(
   frequency: PayoutFrequency
 ): Promise<RevenueDashboardData> {
-  payoutFrequency = frequency
-  return delay(getDashboard())
+  void frequency
+  return fetchRevenueDashboard()
 }

@@ -35,3 +35,12 @@ export interface PlaybackHeartbeatResponse {
   session_id: string
   counted_as_view: boolean
 }
+
+/** Attach a device's signed-out sessions to the account that just signed in. */
+export interface ClaimPlaybackSessionsRequest {
+  anon_id: string
+}
+
+export interface ClaimPlaybackSessionsResponse {
+  claimed: number
+}

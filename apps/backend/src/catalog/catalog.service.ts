@@ -265,9 +265,7 @@ export class CatalogService {
   }
 
   private async listNew(limit: number): Promise<CatalogCollectionSeries[]> {
-    const since = new Date(
-      Date.now() - NEW_WINDOW_DAYS * 24 * 60 * 60 * 1000
-    )
+    const since = new Date(Date.now() - NEW_WINDOW_DAYS * 24 * 60 * 60 * 1000)
 
     const rows = await this.prisma.series.findMany({
       where: {

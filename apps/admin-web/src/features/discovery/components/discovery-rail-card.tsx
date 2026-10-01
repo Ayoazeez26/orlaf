@@ -14,12 +14,14 @@ import {
   Users,
 } from "lucide-react"
 import { RAIL_AUDIENCE_LABEL } from "../constants"
+import { type RailRole, railRoleLabel } from "../lib/rail-roles"
 import type { DiscoveryRail } from "../types"
 import { HeroBadge, RailStatusBadge } from "./discovery-badges"
 import { AddContentCard, DiscoveryContentCard } from "./discovery-content-card"
 
 interface DiscoveryRailCardProps {
   rail: DiscoveryRail
+  role?: RailRole
   onAddContent?: (rail: DiscoveryRail) => void
   onMoveUp?: () => void
   onMoveDown?: () => void
@@ -34,6 +36,7 @@ interface DiscoveryRailCardProps {
 
 export function DiscoveryRailCard({
   rail,
+  role,
   onAddContent,
   onMoveUp,
   onMoveDown,
@@ -81,9 +84,18 @@ export function DiscoveryRailCard({
                 <RailStatusBadge status={rail.status} />
               </button>
               {rail.type === "hero" ? <HeroBadge /> : null}
-              {rail.collectionKey ? (
-                <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 font-medium text-primary text-xs">
-                  catalog:{rail.collectionKey}
+              {role ? (
+                <span
+                  className={cn(
+                    "inline-flex items-center rounded-full px-2.5 py-0.5 font-medium text-xs",
+                    role.kind === "hero" ||
+                      role.kind === "row" ||
+                      role.kind === "tab"
+                      ? "bg-primary/10 text-primary"
+                      : "bg-muted text-muted-foreground"
+                  )}
+                >
+                  {railRoleLabel(role)}
                 </span>
               ) : null}
             </div>

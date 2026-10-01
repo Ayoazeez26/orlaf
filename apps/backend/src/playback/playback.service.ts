@@ -111,11 +111,7 @@ export class PlaybackService {
 
     // Optional auth: if the session was started by an account, only that
     // account (or anonymous heartbeats without claiming ownership) may update.
-    if (
-      session.accountId &&
-      accountId &&
-      session.accountId !== accountId
-    ) {
+    if (session.accountId && accountId && session.accountId !== accountId) {
       throw new NotFoundException("Playback session not found")
     }
 

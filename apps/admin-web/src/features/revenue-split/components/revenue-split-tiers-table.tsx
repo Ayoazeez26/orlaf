@@ -6,7 +6,7 @@ import type { RevenueSplitTier, RevenueSplitTierId } from "../types"
 
 interface RevenueSplitTiersTableProps {
   tiers: RevenueSplitTier[]
-  onChange: (id: RevenueSplitTierId, patch: Partial<RevenueSplitTier>) => void
+  onChange?: (id: RevenueSplitTierId, patch: Partial<RevenueSplitTier>) => void
 }
 
 const HEAD_CLASS =
@@ -47,7 +47,7 @@ export function RevenueSplitTiersTable({
     field: PercentField,
     value: number
   ) {
-    onChange(id, { [field]: value })
+    onChange?.(id, { [field]: value })
   }
 
   return (
@@ -81,28 +81,46 @@ export function RevenueSplitTiersTable({
                     {tier.label}
                   </td>
                   <td className="px-4 py-4">
-                    <PercentInput
-                      value={tier.creatorPercent}
-                      onChange={(value) =>
-                        updateField(tier.id, "creatorPercent", value)
-                      }
-                    />
+                    {onChange ? (
+                      <PercentInput
+                        value={tier.creatorPercent}
+                        onChange={(value) =>
+                          updateField(tier.id, "creatorPercent", value)
+                        }
+                      />
+                    ) : (
+                      <span className="tabular-nums">
+                        {tier.creatorPercent}%
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-4">
-                    <PercentInput
-                      value={tier.platformPercent}
-                      onChange={(value) =>
-                        updateField(tier.id, "platformPercent", value)
-                      }
-                    />
+                    {onChange ? (
+                      <PercentInput
+                        value={tier.platformPercent}
+                        onChange={(value) =>
+                          updateField(tier.id, "platformPercent", value)
+                        }
+                      />
+                    ) : (
+                      <span className="tabular-nums">
+                        {tier.platformPercent}%
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-4">
-                    <PercentInput
-                      value={tier.affiliatePercent}
-                      onChange={(value) =>
-                        updateField(tier.id, "affiliatePercent", value)
-                      }
-                    />
+                    {onChange ? (
+                      <PercentInput
+                        value={tier.affiliatePercent}
+                        onChange={(value) =>
+                          updateField(tier.id, "affiliatePercent", value)
+                        }
+                      />
+                    ) : (
+                      <span className="tabular-nums">
+                        {tier.affiliatePercent}%
+                      </span>
+                    )}
                   </td>
                 </tr>
               ))}

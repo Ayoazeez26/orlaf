@@ -35,7 +35,7 @@ export interface AdminCreatorListItem {
   location: string;
   /** Lifetime counted playback views across the creator's series. */
   views: number;
-  /** Lifetime earnings in USD. 0 until payouts is wired (Phase 2). */
+  /** Lifetime gift coins received (virtual creator wallet). */
   earnings: number;
   status: AdminCreatorStatus;
   isVerified: boolean;

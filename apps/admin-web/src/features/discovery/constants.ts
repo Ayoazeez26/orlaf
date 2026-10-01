@@ -37,8 +37,3 @@ export const RAIL_AUDIENCE_OPTIONS = [
   { value: "all-users", label: "All users" },
   { value: "new-users", label: "New users" },
 ] as const
-
-export const SURFACE_OPTIONS = [
-  { value: "home", label: "Home / Discover" },
-  { value: "for-you", label: "For You" },
-] as const

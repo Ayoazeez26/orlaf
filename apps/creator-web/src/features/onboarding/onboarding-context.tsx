@@ -30,7 +30,12 @@ const STORAGE_KEY = "orlaf.onboarding.progress.v1"
 
 type PersistedOnboarding = Pick<
   OnboardingData,
-  "creatorType" | "studio" | "contentFormats" | "getStartedMode"
+  | "creatorType"
+  | "studio"
+  | "contentFormats"
+  | "socialLink"
+  | "rightsConfirmed"
+  | "getStartedMode"
 >
 
 function readPersisted(): Partial<OnboardingData> {
@@ -45,6 +50,8 @@ function readPersisted(): Partial<OnboardingData> {
       contentFormats: Array.isArray(parsed.contentFormats)
         ? parsed.contentFormats
         : [],
+      socialLink: parsed.socialLink ?? "",
+      rightsConfirmed: parsed.rightsConfirmed ?? false,
       getStartedMode: parsed.getStartedMode ?? null,
     }
   } catch {
@@ -59,6 +66,8 @@ function writePersisted(data: OnboardingData) {
       creatorType: data.creatorType,
       studio: data.studio,
       contentFormats: data.contentFormats,
+      socialLink: data.socialLink,
+      rightsConfirmed: data.rightsConfirmed,
       getStartedMode: data.getStartedMode,
     }
     window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(subset))
@@ -89,6 +98,8 @@ type OnboardingAction =
   | { type: "SET_STUDIO"; payload: Partial<OnboardingStudio> }
   | { type: "SET_TEAM_SIZE"; payload: TeamSize }
   | { type: "TOGGLE_CONTENT_FORMAT"; payload: string }
+  | { type: "SET_SOCIAL_LINK"; payload: string }
+  | { type: "SET_RIGHTS_CONFIRMED"; payload: boolean }
   | { type: "SET_GET_STARTED_MODE"; payload: GetStartedMode }
   | {
       type: "SET_INVITE"
@@ -140,6 +151,10 @@ function onboardingReducer(
           : [...state.contentFormats, id],
       }
     }
+    case "SET_SOCIAL_LINK":
+      return { ...state, socialLink: action.payload }
+    case "SET_RIGHTS_CONFIRMED":
+      return { ...state, rightsConfirmed: action.payload }
     case "SET_GET_STARTED_MODE":
       return { ...state, getStartedMode: action.payload }
     case "SET_INVITE":

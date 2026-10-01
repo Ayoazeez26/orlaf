@@ -163,7 +163,7 @@ self.onmessage = async (event: MessageEvent<WorkerConvertRequest>) => {
       height,
     }
 
-    self.postMessage(done, [buffer])
+    self.postMessage(done, { transfer: [buffer] })
   } catch (error) {
     const message: WorkerErrorMessage = {
       type: "error",

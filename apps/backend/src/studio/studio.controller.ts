@@ -22,6 +22,8 @@ import {
 import type { AccessTokenClaims } from "@sable/contracts"
 import type { Request } from "express"
 import { JwtAuthGuard } from "../auth/jwt-auth.guard"
+import { AnalyticsService } from "./analytics.service"
+import { AnalyticsOverviewQueryDto } from "./dto/analytics.dto"
 import {
   CreateEpisodeDto,
   CreateSeriesDto,
@@ -30,9 +32,7 @@ import {
   UpdateSeriesDto,
   UpdateSeriesSettingsDto,
 } from "./dto/studio.dto"
-import { AnalyticsOverviewQueryDto } from "./dto/analytics.dto"
 import { GetImageUploadUrlDto, GetVideoUploadUrlDto } from "./dto/upload.dto"
-import { AnalyticsService } from "./analytics.service"
 import { EpisodeService } from "./episode.service"
 import { SeriesService } from "./series.service"
 
@@ -64,10 +64,7 @@ export class StudioController {
     @Req() req: Request & { user: AccessTokenClaims },
     @Query() query: AnalyticsOverviewQueryDto
   ) {
-    return this.analyticsService.getOverview(
-      req.user.sub,
-      query.range ?? "30d"
-    )
+    return this.analyticsService.getOverview(req.user.sub, query.range ?? "30d")
   }
 
   // ---------------------------------------------------------------------------

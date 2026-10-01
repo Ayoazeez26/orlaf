@@ -376,7 +376,7 @@ export class EngagementService {
       throw new BadRequestException("Comment is too long")
     }
 
-    let parentId: string | null = dto.parent_id ?? null
+    const parentId: string | null = dto.parent_id ?? null
 
     if (parentId) {
       const parent = await this.prisma.comment.findFirst({

@@ -68,7 +68,7 @@ export function StreamerBillingTab({
         />
         <BillingStatCard
           label="Lifetime spend"
-          value={`$${lifetimeSpend.toFixed(2)}`}
+          value={`${lifetimeSpend.toLocaleString()} coins`}
           icon={Wallet}
         />
       </div>

@@ -9,7 +9,12 @@ export function fromApiProfile(
   profile: OnboardingProfileData
 ): Pick<
   OnboardingData,
-  "creatorType" | "studio" | "contentFormats" | "getStartedMode"
+  | "creatorType"
+  | "studio"
+  | "contentFormats"
+  | "socialLink"
+  | "rightsConfirmed"
+  | "getStartedMode"
 > {
   return {
     creatorType: profile.creator_type,
@@ -21,6 +26,8 @@ export function fromApiProfile(
         }
       : { name: "", teamSize: null, website: "" },
     contentFormats: profile.content_formats,
+    socialLink: profile.social_link ?? "",
+    rightsConfirmed: profile.rights_confirmed,
     getStartedMode: profile.get_started_mode,
   }
 }
@@ -46,6 +53,14 @@ export function toContentPatch(
   formats: ContentFormatId[]
 ): PatchOnboardingBody {
   return { step: "content", content_formats: formats }
+}
+
+export function toRightsPatch(data: OnboardingData): PatchOnboardingBody {
+  return {
+    step: "rights",
+    social_link: data.socialLink.trim() || null,
+    rights_confirmed: data.rightsConfirmed,
+  }
 }
 
 export function toGetStartedPatch(

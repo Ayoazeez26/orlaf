@@ -8,6 +8,7 @@ import { SettingsCoinEconomyTab } from "./tabs/settings-coin-economy-tab"
 import { SettingsCreatorsTab } from "./tabs/settings-creators-tab"
 import { SettingsDiscoveryTab } from "./tabs/settings-discovery-tab"
 import { SettingsGeneralTab } from "./tabs/settings-general-tab"
+import { SettingsHelpArticlesTab } from "./tabs/settings-help-articles-tab"
 import { SettingsModerationTab } from "./tabs/settings-moderation-tab"
 import { SettingsNotificationsTab } from "./tabs/settings-notifications-tab"
 import { SettingsPayoutsTab } from "./tabs/settings-payouts-tab"
@@ -25,6 +26,8 @@ function renderSettingsTab(tab: SettingsTabId) {
       return <SettingsCreatorsTab />
     case "moderation":
       return <SettingsModerationTab />
+    case "help-articles":
+      return <SettingsHelpArticlesTab />
     case "discovery":
       return <SettingsDiscoveryTab />
     case "coin-economy":

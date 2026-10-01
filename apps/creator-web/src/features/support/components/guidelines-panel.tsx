@@ -1,14 +1,18 @@
 import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
-import { Shield } from "lucide-react"
+import { Loader2, Shield } from "lucide-react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/projects/constants/frosted-card"
-import { GUIDELINE_RULES } from "../data/help-articles"
+import { parseGuidelinesContent } from "@/lib/parse-guidelines-content"
+import { useGuidelinesQuery } from "../api/guidelines-hooks"
 
 interface GuidelinesPanelProps {
   onReport: () => void
 }
 
 export function GuidelinesPanel({ onReport }: GuidelinesPanelProps) {
+  const { data, isLoading } = useGuidelinesQuery()
+  const blocks = data ? parseGuidelinesContent(data.content) : []
+
   return (
     <div className="space-y-4">
       <div
@@ -23,27 +27,38 @@ export function GuidelinesPanel({ onReport }: GuidelinesPanelProps) {
         <div>
           <p className="font-semibold text-foreground">Community guidelines</p>
           <p className="text-muted-foreground text-sm">
-            Last updated May 12, 2026
+            {data
+              ? `Last updated ${new Date(data.updatedAt).toLocaleDateString()}`
+              : "Loading…"}
           </p>
         </div>
       </div>
 
-      <div className={cn(FROSTED_CARD_SURFACE_CLASS, "space-y-5 p-6")}>
-        {GUIDELINE_RULES.map((rule) => (
-          <div key={rule.n} className="flex gap-3">
-            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted font-medium text-muted-foreground text-xs">
-              {rule.n}
-            </span>
-            <div>
-              <p className="font-semibold text-foreground text-sm">
-                {rule.title}
-              </p>
-              <p className="mt-1 text-muted-foreground text-sm leading-6">
-                {rule.body}
-              </p>
-            </div>
+      <div className={cn(FROSTED_CARD_SURFACE_CLASS, "space-y-4 p-6")}>
+        {isLoading ? (
+          <div className="flex items-center justify-center gap-2 py-6 text-muted-foreground text-sm">
+            <Loader2 className="size-4 animate-spin" aria-hidden />
+            Loading guidelines…
           </div>
-        ))}
+        ) : (
+          blocks.map((block) =>
+            block.type === "heading" ? (
+              <p
+                key={`h-${block.text}`}
+                className="pt-2 font-semibold text-foreground text-sm first:pt-0"
+              >
+                {block.text}
+              </p>
+            ) : (
+              <p
+                key={`p-${block.text}`}
+                className="text-muted-foreground text-sm leading-6"
+              >
+                {block.text}
+              </p>
+            )
+          )
+        )}
       </div>
 
       <div

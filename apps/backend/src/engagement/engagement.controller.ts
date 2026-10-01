@@ -11,11 +11,7 @@ import {
   Req,
   UseGuards,
 } from "@nestjs/common"
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiTags,
-} from "@nestjs/swagger"
+import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger"
 import type { AccessTokenClaims } from "@sable/contracts"
 import type { Request } from "express"
 import { JwtAuthGuard } from "../auth/jwt-auth.guard"
@@ -37,7 +33,9 @@ export class EngagementController {
 
   @Get("series/:seriesId/summary")
   @UseGuards(OptionalJwtAuthGuard)
-  @ApiOperation({ summary: "Series engagement counts (likes, comments, shares)" })
+  @ApiOperation({
+    summary: "Series engagement counts (likes, comments, shares)",
+  })
   async getSummary(
     @Req() req: OptionalAuthRequest,
     @Param("seriesId") seriesId: string
@@ -82,7 +80,9 @@ export class EngagementController {
 
   @Get("series/:seriesId/comments")
   @UseGuards(OptionalJwtAuthGuard)
-  @ApiOperation({ summary: "List series comments (nested replies on top-level)" })
+  @ApiOperation({
+    summary: "List series comments (nested replies on top-level)",
+  })
   async listComments(
     @Req() req: OptionalAuthRequest,
     @Param("seriesId") seriesId: string,

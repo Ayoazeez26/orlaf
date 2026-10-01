@@ -10,7 +10,10 @@ export function RevenueOverviewPage() {
 
   return (
     <div className="space-y-6">
-      <WalletBalanceCard wallet={data.wallet} />
+      <WalletBalanceCard
+        wallet={data.wallet}
+        bankAccounts={data.bankAccounts}
+      />
       <PayoutProcessSteps />
       <RecentActivityCard activities={data.walletActivity} />
     </div>

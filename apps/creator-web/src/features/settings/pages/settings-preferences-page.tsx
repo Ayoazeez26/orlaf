@@ -79,9 +79,10 @@ export function SettingsPreferencesPage() {
 
   useEffect(() => {
     if (!form) return
+    const currentForm = form
 
     function handleSave() {
-      updatePreferences.mutate(formToPreferencesPatch(form), {
+      updatePreferences.mutate(formToPreferencesPatch(currentForm), {
         onSuccess: (saved) => {
           const next = preferencesToForm(saved)
           initialFormRef.current = next

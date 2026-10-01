@@ -5,7 +5,7 @@ import type { WorkspaceRoleId } from "../../types"
 interface PanelHeaderProps {
   title: string
   actionLabel?: string
-  actionTo?: "/workspace/$role/audit-log/"
+  actionTo?: "/workspace/$role/audit-log"
   role?: WorkspaceRoleId
 }
 

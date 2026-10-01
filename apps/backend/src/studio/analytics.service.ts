@@ -17,13 +17,15 @@ const RANGE_DAYS: Record<AnalyticsRangeKey, number> = {
 }
 
 const DEVICE_ORDER = ["mobile", "desktop", "tablet", "tv"] as const
-const DEVICE_LABEL: Record<(typeof DEVICE_ORDER)[number], AnalyticsDeviceSegment["name"]> =
-  {
-    mobile: "Mobile",
-    desktop: "Desktop",
-    tablet: "Tablet",
-    tv: "TV",
-  }
+const DEVICE_LABEL: Record<
+  (typeof DEVICE_ORDER)[number],
+  AnalyticsDeviceSegment["name"]
+> = {
+  mobile: "Mobile",
+  desktop: "Desktop",
+  tablet: "Tablet",
+  tv: "TV",
+}
 
 type WindowBounds = {
   from: Date
@@ -76,8 +78,7 @@ export class AnalyticsService {
       this.buildTopEpisodes(creatorId, current, previous),
     ])
 
-    const avgWatchCurrent =
-      currentViews > 0 ? currentWatch / currentViews : 0
+    const avgWatchCurrent = currentViews > 0 ? currentWatch / currentViews : 0
     const avgWatchPrevious =
       previousViews > 0 ? previousWatch / previousViews : 0
 
@@ -271,15 +272,14 @@ export class AnalyticsService {
     )
     const total = [...counts.values()].reduce((sum, n) => sum + n, 0)
 
-    return DEVICE_ORDER.filter((key) => key !== "tv")
-      .map((key) => {
-        const value = counts.get(key) ?? 0
-        return {
-          name: DEVICE_LABEL[key],
-          value,
-          percent: total > 0 ? Math.round((value / total) * 100) : 0,
-        }
-      })
+    return DEVICE_ORDER.filter((key) => key !== "tv").map((key) => {
+      const value = counts.get(key) ?? 0
+      return {
+        name: DEVICE_LABEL[key],
+        value,
+        percent: total > 0 ? Math.round((value / total) * 100) : 0,
+      }
+    })
   }
 
   private async buildEngagement(
@@ -416,7 +416,10 @@ export class AnalyticsService {
     if (grain === "day") {
       cursor.setUTCHours(0, 0, 0, 0)
       while (cursor < window.to) {
-        buckets.push({ key: this.bucketKey(cursor, grain), start: new Date(cursor) })
+        buckets.push({
+          key: this.bucketKey(cursor, grain),
+          start: new Date(cursor),
+        })
         cursor.setUTCDate(cursor.getUTCDate() + 1)
       }
       return buckets
@@ -429,7 +432,10 @@ export class AnalyticsService {
     cursor.setUTCHours(0, 0, 0, 0)
 
     while (cursor < window.to) {
-      buckets.push({ key: this.bucketKey(cursor, grain), start: new Date(cursor) })
+      buckets.push({
+        key: this.bucketKey(cursor, grain),
+        start: new Date(cursor),
+      })
       cursor.setUTCDate(cursor.getUTCDate() + 7)
     }
     return buckets
@@ -453,7 +459,9 @@ export class AnalyticsService {
     index: number
   ): string {
     if (grain === "day") {
-      return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][start.getUTCDay()]!
+      return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][
+        start.getUTCDay()
+      ]!
     }
     return `W${index + 1}`
   }

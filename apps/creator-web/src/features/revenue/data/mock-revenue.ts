@@ -7,6 +7,10 @@ export const MOCK_REVENUE_DASHBOARD: RevenueDashboardData = {
     statusText: "Available now",
     nextAutoPayout: "Apr 1",
     autoPayoutEnabled: false,
+    availableMinor: 380_000,
+    pendingMinor: 0,
+    minimumPayoutMinor: 5_000,
+    currency: "USD",
   },
   walletActivity: [
     {

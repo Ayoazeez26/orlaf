@@ -11,6 +11,7 @@ interface SubscriptionPlanCardProps {
   onLiveChange: (isLive: boolean) => void
   onEdit: () => void
   onDelete?: () => void
+  readOnly?: boolean
 }
 
 function formatInterval(interval: PlanTier["interval"]) {
@@ -31,6 +32,7 @@ export function SubscriptionPlanCard({
   onLiveChange,
   onEdit,
   onDelete,
+  readOnly = false,
 }: SubscriptionPlanCardProps) {
   const isPremium = plan.id !== "free"
   const featureColumnLabel = isPremium ? "PRO" : "FREE"
@@ -135,36 +137,42 @@ export function SubscriptionPlanCard({
           </table>
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-border border-t pt-4">
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={plan.isLive}
-              onCheckedChange={onLiveChange}
-              aria-label={`${plan.name} live status`}
-            />
-            <span className="font-medium text-foreground text-sm">Live</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={onEdit}
-              className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              aria-label={`Edit ${plan.name}`}
-            >
-              <Pencil className="size-4" aria-hidden />
-            </button>
-            {plan.canDelete && onDelete ? (
+        {readOnly ? (
+          <p className="border-border border-t pt-4 text-muted-foreground text-xs">
+            Managed in RevenueCat / app stores — not editable here.
+          </p>
+        ) : (
+          <div className="flex items-center justify-between gap-3 border-border border-t pt-4">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={plan.isLive}
+                onCheckedChange={onLiveChange}
+                aria-label={`${plan.name} live status`}
+              />
+              <span className="font-medium text-foreground text-sm">Live</span>
+            </div>
+            <div className="flex items-center gap-1">
               <button
                 type="button"
-                onClick={onDelete}
-                className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-600"
-                aria-label={`Delete ${plan.name}`}
+                onClick={onEdit}
+                className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                aria-label={`Edit ${plan.name}`}
               >
-                <Trash2 className="size-4" aria-hidden />
+                <Pencil className="size-4" aria-hidden />
               </button>
-            ) : null}
+              {plan.canDelete && onDelete ? (
+                <button
+                  type="button"
+                  onClick={onDelete}
+                  className="flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-red-500/10 hover:text-red-600"
+                  aria-label={`Delete ${plan.name}`}
+                >
+                  <Trash2 className="size-4" aria-hidden />
+                </button>
+              ) : null}
+            </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   )

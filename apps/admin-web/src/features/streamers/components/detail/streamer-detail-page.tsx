@@ -39,7 +39,7 @@ export function StreamerDetailPage({
     },
     {
       label: "Lifetime spend",
-      value: `$${streamer.lifetimeSpend.toFixed(2)}`,
+      value: `${streamer.lifetimeSpend.toLocaleString()} coins`,
       icon: Wallet,
     },
   ]

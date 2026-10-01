@@ -1,4 +1,5 @@
 import type { SignInResponse } from "@sable/contracts"
+import { useQueryClient } from "@tanstack/react-query"
 import {
   createContext,
   useCallback,
@@ -15,6 +16,7 @@ import {
   setAccessToken,
   setOnSessionExpired,
 } from "@/lib/http-client"
+import { setActiveStudioId } from "@/lib/studio-id"
 import { getRouter } from "@/router"
 import type {
   SignInEmailResult,
@@ -83,6 +85,7 @@ function syncSnapshot(status: AuthStatus, session: SignInResponse | null) {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<SignInResponse | null>(null)
   const [status, setStatus] = useState<AuthStatus>("loading")
+  const queryClient = useQueryClient()
 
   const applyAuthenticated = useCallback((nextSession: SignInResponse) => {
     setSession(nextSession)
@@ -95,7 +98,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setStatus("unauthenticated")
     setAccessToken(null)
     syncSnapshot("unauthenticated", null)
-  }, [])
+    // Studio id and cached queries (workspace list, studio-scoped data) are
+    // per-account — leaving them behind leaks the previous account's studio
+    // into whichever account signs in next.
+    setActiveStudioId(null)
+    queryClient.clear()
+  }, [queryClient])
 
   const updateSession = useCallback((patch: Partial<SignInResponse>) => {
     setSession((prev) => {
@@ -122,7 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const destination = resolvePostSignInRoute(nextSession, onboardingStep)
-      if (destination.search?.step) {
+      if (destination.to === "/onboarding" && destination.search?.step) {
         void getRouter().navigate({
           to: destination.to,
           search: destination.search,

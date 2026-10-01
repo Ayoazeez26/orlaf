@@ -54,6 +54,10 @@ export interface WalletSummary {
   statusText: string
   nextAutoPayout: string
   autoPayoutEnabled: boolean
+  availableMinor: number
+  pendingMinor: number
+  minimumPayoutMinor: number
+  currency: string
 }
 
 export interface BankAccount {

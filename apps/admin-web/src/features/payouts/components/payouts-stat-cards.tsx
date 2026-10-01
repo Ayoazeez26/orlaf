@@ -1,35 +1,24 @@
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
-import { AlertTriangle, CheckCircle2, Clock, Wallet } from "lucide-react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import { TONE_CHIP_CLASS } from "@/features/workspaces/lib/tones"
 import type { Tone } from "@/features/workspaces/types"
-import type { PayoutSummaryStat } from "../types"
+import { useAdminPayoutStats } from "../api/payouts-hooks"
+import { mapPayoutStats } from "../lib/map-payout-stats"
 
-const STATS: { stat: PayoutSummaryStat; tone: Tone }[] = [
-  {
-    stat: { label: "Paid (30d)", value: "₦42.6M", icon: Wallet },
-    tone: "primary",
-  },
-  {
-    stat: { label: "Pending this cycle", value: "₦8.9M", icon: Clock },
-    tone: "warning",
-  },
-  {
-    stat: { label: "Creators paid (30d)", value: "1,284", icon: CheckCircle2 },
-    tone: "positive",
-  },
-  {
-    stat: { label: "On hold", value: "17", icon: AlertTriangle },
-    tone: "danger",
-  },
-]
+const STAT_TONES: Tone[] = ["primary", "warning", "positive", "danger"]
 
 export function PayoutsStatCards() {
+  const { data } = useAdminPayoutStats()
+  const stats = data ? mapPayoutStats(data) : []
+
+  if (stats.length === 0) return null
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {STATS.map(({ stat, tone }) => {
+      {stats.map((stat, index) => {
         const Icon = stat.icon
+        const tone = STAT_TONES[index] ?? "primary"
 
         return (
           <Card

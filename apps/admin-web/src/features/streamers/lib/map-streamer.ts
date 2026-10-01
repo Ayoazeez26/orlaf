@@ -25,7 +25,7 @@ export function mapStreamerDetail(item: AdminStreamerDetail): StreamerDetail {
     ...mapStreamerListItem(item),
     tags: [],
     episodesWatched: item.episodesWatched,
-    coinsBalance: 0,
+    coinsBalance: item.coinsBalance,
     joined: formatJoined(item.joinedAt),
     primaryDevice: item.primaryDevice ?? "—",
     lastActive: item.lastActive ? formatRelative(item.lastActive) : "—",
@@ -38,7 +38,10 @@ export function mapStreamerDetail(item: AdminStreamerDetail): StreamerDetail {
       progress: row.progress,
       watched: formatRelative(row.watchedAt),
     })),
-    billing: { lifetimeCoinsSpent: 0, transactions: [] },
+    billing: {
+      lifetimeCoinsSpent: item.lifetimeSpend,
+      transactions: [],
+    },
     analytics: item.analytics,
   }
 }

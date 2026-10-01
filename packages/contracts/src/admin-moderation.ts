@@ -5,11 +5,14 @@ export type ModerationReportStatus =
   | "resolved"
   | "dismissed"
 export type ModerationSeverity = "high" | "medium" | "low"
-export type ModerationListFilter =
-  | "all"
-  | "pending"
-  | "reviewed"
-  | "resolved"
+export type ModerationReportReason =
+  | "copyright"
+  | "nudity"
+  | "impersonation"
+  | "scam"
+  | "bullying"
+  | "harassment"
+export type ModerationListFilter = "all" | "pending" | "reviewed" | "resolved"
 
 export interface ModerationReportListItem {
   id: string
@@ -19,6 +22,7 @@ export interface ModerationReportListItem {
   parent: string | null
   severity: ModerationSeverity
   reason: string
+  reasonCategory: ModerationReportReason | null
   status: ModerationReportStatus
   reported: string
   seriesId: string | null

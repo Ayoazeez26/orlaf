@@ -20,7 +20,7 @@ export function PrimaryPanelCard({ panel, role }: PrimaryPanelCardProps) {
           actionLabel={panel.actionLabel}
           actionTo={
             panel.title === "Recent Activity"
-              ? "/workspace/$role/audit-log/"
+              ? "/workspace/$role/audit-log"
               : undefined
           }
           role={role}

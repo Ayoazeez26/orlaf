@@ -17,6 +17,7 @@ import { ConsentStep } from "./components/steps/consent-step"
 import { ContentFormatStep } from "./components/steps/content-format-step"
 import { CreatorTypeStep } from "./components/steps/creator-type-step"
 import { GetStartedStep } from "./components/steps/get-started-step"
+import { RightsStep } from "./components/steps/rights-step"
 import { SignupStep } from "./components/steps/signup-step"
 import { StudioStep } from "./components/steps/studio-step"
 import { VerifyEmailStep } from "./components/steps/verify-email-step"
@@ -30,6 +31,7 @@ const AUTH_ONLY_STEPS: OnboardingStep[] = [
   "creator-type",
   "studio",
   "content",
+  "rights",
   "get-started",
 ]
 
@@ -42,6 +44,7 @@ function parseInitialStep(step?: string): OnboardingStep {
     "creator-type",
     "studio",
     "content",
+    "rights",
     "get-started",
   ]
   if (step && valid.includes(step as OnboardingStep)) {
@@ -169,15 +172,7 @@ export function OnboardingFlow() {
 
     const destination = resolvePostSignInRoute(session)
     if (destination.to !== "/onboarding") {
-      if (destination.search?.step) {
-        void navigate({
-          to: destination.to,
-          search: destination.search,
-          replace: true,
-        })
-      } else {
-        void navigate({ to: destination.to, replace: true })
-      }
+      void navigate({ to: destination.to, replace: true })
       return
     }
 
@@ -300,6 +295,10 @@ export function OnboardingFlow() {
             onNext={goNext}
             onSkip={goNext}
           />
+        )
+      case "rights":
+        return (
+          <RightsStep progress={progress} onBack={goBack} onNext={goNext} />
         )
       case "get-started":
         return (

@@ -3,15 +3,20 @@ import { cn } from "@workspace/ui/lib/utils"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import { TONE_CHIP_CLASS } from "@/features/workspaces/lib/tones"
 import type { Tone } from "@/features/workspaces/types"
-import { SUBSCRIPTION_SUMMARY_STATS } from "../data/subscription-analytics"
+import { useAdminSubscriptionStats } from "../api/subscriptions-hooks"
 import type { SubscriptionSummaryStat } from "../types"
 
 const STAT_TONES: Tone[] = ["primary", "primary", "positive", "warning"]
 
 export function SubscriptionsStatCards() {
+  const { data } = useAdminSubscriptionStats()
+  const stats = data?.summary ?? []
+
+  if (stats.length === 0) return null
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {SUBSCRIPTION_SUMMARY_STATS.map((stat, index) => (
+      {stats.map((stat, index) => (
         <StatCard
           key={stat.label}
           stat={stat}

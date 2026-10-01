@@ -14,6 +14,7 @@ export type OnboardingStep =
   | "creator-type"
   | "studio"
   | "content"
+  | "rights"
   | "get-started"
 
 export interface OnboardingProfile {
@@ -42,6 +43,8 @@ export interface OnboardingData {
   creatorType: CreatorType | null
   studio: OnboardingStudio
   contentFormats: string[]
+  socialLink: string
+  rightsConfirmed: boolean
   getStartedMode: GetStartedMode | null
 }
 
@@ -67,6 +70,8 @@ export const initialOnboardingData: OnboardingData = {
     website: "",
   },
   contentFormats: [],
+  socialLink: "",
+  rightsConfirmed: false,
   getStartedMode: null,
 }
 

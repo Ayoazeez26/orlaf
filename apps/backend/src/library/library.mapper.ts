@@ -57,8 +57,7 @@ export function estimateBytesForQuality(
   quality: DownloadQualityKey
 ): number | null {
   if (durationSeconds == null || durationSeconds <= 0) return null
-  const mbps =
-    quality === "standard" ? 1.2 : quality === "high" ? 2.5 : 4.5
+  const mbps = quality === "standard" ? 1.2 : quality === "high" ? 2.5 : 4.5
   return Math.round((durationSeconds * mbps * 1_000_000) / 8)
 }
 

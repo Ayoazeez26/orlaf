@@ -4,11 +4,13 @@ import { Search } from "lucide-react"
 interface DiscoveryToolbarProps {
   search: string
   onSearchChange: (value: string) => void
+  placeholder?: string
 }
 
 export function DiscoveryToolbar({
   search,
   onSearchChange,
+  placeholder = "Search rails...",
 }: DiscoveryToolbarProps) {
   return (
     <div className="relative ml-auto w-full sm:w-64">
@@ -20,8 +22,8 @@ export function DiscoveryToolbar({
         type="search"
         value={search}
         onChange={(event) => onSearchChange(event.target.value)}
-        placeholder="Search rails..."
-        aria-label="Search rails"
+        placeholder={placeholder}
+        aria-label={placeholder.replace(/\.+$/, "")}
         className="h-9 pl-9"
       />
     </div>

@@ -10,10 +10,20 @@ import {
 } from "lucide-react"
 import type { SettingsTabId } from "./types"
 
+export type SettingsTabPath =
+  | ""
+  | "studio"
+  | "team"
+  | "preferences"
+  | "notifications"
+  | "earnings"
+  | "security"
+  | "archive"
+
 export const SETTINGS_TABS: Array<{
   id: SettingsTabId
   label: string
-  path: string
+  path: SettingsTabPath
   icon: typeof User
 }> = [
   { id: "profile", label: "Profile", path: "", icon: User },
@@ -78,7 +88,7 @@ export const PAYOUT_THRESHOLD_OPTIONS = [
   "₦ 50,000",
 ] as const
 
-export function settingsTabPath(path: string) {
+export function settingsTabPath(path: SettingsTabPath) {
   if (path === "") {
     return { to: "/dashboard/settings" as const }
   }

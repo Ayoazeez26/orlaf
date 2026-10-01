@@ -7,12 +7,17 @@ import { PayoutStatusBadge } from "./payout-badges"
 interface PayoutsTableProps {
   payouts: Payout[]
   onApprove?: (payout: Payout) => void
+  onMarkPaid?: (payout: Payout) => void
 }
 
 const HEAD_CLASS =
   "px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wide"
 
-export function PayoutsTable({ payouts, onApprove }: PayoutsTableProps) {
+export function PayoutsTable({
+  payouts,
+  onApprove,
+  onMarkPaid,
+}: PayoutsTableProps) {
   if (payouts.length === 0) {
     return (
       <div className="flex min-h-40 items-center justify-center p-6 text-center text-muted-foreground text-sm">
@@ -78,17 +83,29 @@ export function PayoutsTable({ payouts, onApprove }: PayoutsTableProps) {
                 {payout.date}
               </td>
               <td className="px-4 py-3">
-                {payout.status === "pending" && onApprove ? (
-                  <Button
-                    type="button"
-                    size="sm"
-                    className="gap-1.5"
-                    onClick={() => onApprove(payout)}
-                  >
-                    <CheckCircle2 className="size-3.5" aria-hidden />
-                    Approve
-                  </Button>
-                ) : null}
+                <div className="flex flex-wrap gap-2">
+                  {payout.status === "pending" && onApprove ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => onApprove(payout)}
+                    >
+                      <CheckCircle2 className="size-3.5" aria-hidden />
+                      Approve
+                    </Button>
+                  ) : null}
+                  {payout.status === "scheduled" && onMarkPaid ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => onMarkPaid(payout)}
+                    >
+                      Mark paid
+                    </Button>
+                  ) : null}
+                </div>
               </td>
             </tr>
           ))}

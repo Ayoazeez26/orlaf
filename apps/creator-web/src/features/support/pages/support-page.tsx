@@ -122,7 +122,11 @@ export function SupportPage({ search, onSearchChange }: SupportPageProps) {
         )
       ) : null}
 
-      {search.tab === "chat" ? <LiveChatPanel /> : null}
+      {search.tab === "chat" ? (
+        <LiveChatPanel
+          onOpenTicket={() => onSearchChange({ tab: "ticket", compose: true })}
+        />
+      ) : null}
 
       {search.tab === "guidelines" ? (
         <GuidelinesPanel

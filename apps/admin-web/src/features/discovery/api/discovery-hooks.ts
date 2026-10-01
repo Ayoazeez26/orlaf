@@ -1,21 +1,58 @@
 import type {
   CreateDiscoveryRailRequest,
   DiscoverySurface,
+  ForYouPreviewResponse,
+  SetForYouOverrideRequest,
   UpdateDiscoveryRailRequest,
 } from "@sable/contracts"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   addDiscoveryRailItem,
+  clearForYouOverride,
   createDiscoveryRail,
   deleteDiscoveryRail,
+  getForYouPreview,
   listDiscoveryRails,
   removeDiscoveryRailItem,
   reorderDiscoveryRails,
+  setForYouOverride,
   updateDiscoveryRail,
 } from "./discovery-api"
 
 export const discoveryKeys = {
   all: ["admin", "discovery"] as const,
+  forYouPreview: ["admin", "discovery-for-you-preview"] as const,
+}
+
+export function useForYouPreviewQuery() {
+  return useQuery({
+    queryKey: discoveryKeys.forYouPreview,
+    queryFn: getForYouPreview,
+  })
+}
+
+export function useSetForYouOverride() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({
+      seriesId,
+      body,
+    }: {
+      seriesId: string
+      body: SetForYouOverrideRequest
+    }) => setForYouOverride(seriesId, body),
+    onSuccess: (preview: ForYouPreviewResponse) =>
+      queryClient.setQueryData(discoveryKeys.forYouPreview, preview),
+  })
+}
+
+export function useClearForYouOverride() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: clearForYouOverride,
+    onSuccess: (preview: ForYouPreviewResponse) =>
+      queryClient.setQueryData(discoveryKeys.forYouPreview, preview),
+  })
 }
 
 export function useDiscoveryRailsQuery() {
