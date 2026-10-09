@@ -1,5 +1,6 @@
 import { Button } from "@workspace/ui/components/button"
 import { Save } from "lucide-react"
+import { triggerSettingsSave } from "../lib/settings-form-actions"
 
 export function SettingsPageHeader() {
   return (
@@ -13,7 +14,11 @@ export function SettingsPageHeader() {
           security.
         </p>
       </div>
-      <Button type="button" className="shrink-0 gap-2">
+      <Button
+        type="button"
+        className="shrink-0 gap-2"
+        onClick={() => triggerSettingsSave()}
+      >
         <Save className="size-4" aria-hidden />
         Save changes
       </Button>

@@ -1,10 +1,13 @@
-import type { AdminNotificationPreferences } from "@sable/contracts"
+import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
-import { useEffect, useState } from "react"
+import { Loader2 } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
+import { toast, toastMutationError } from "@/lib/toast"
 import {
-  useAdminNotificationSettings,
-  useUpdateAdminNotificationSettings,
-} from "@/features/notifications/api/notifications-hooks"
+  useNotificationSettingsQuery,
+  useUpdateNotificationSettings,
+} from "../../api/notification-settings-hooks"
+import { registerSettingsSave } from "../../lib/settings-form-actions"
 import {
   SettingsField,
   SettingsPanel,
@@ -12,66 +15,56 @@ import {
   ToggleField,
 } from "../settings-shared"
 
-const DEFAULT_ADMIN_PREFERENCES: Required<
-  Omit<AdminNotificationPreferences, "alerts_email">
-> & { alerts_email: string } = {
-  creator_applications_enabled: true,
-  content_review_enabled: true,
-  thumbnail_flagged_enabled: true,
-  payout_completed_enabled: true,
-  weekly_digest_enabled: false,
-  alerts_email: "",
-}
-
-function resolveAdminPreferences(
-  prefs?: AdminNotificationPreferences
-): typeof DEFAULT_ADMIN_PREFERENCES {
-  return {
-    creator_applications_enabled:
-      prefs?.creator_applications_enabled ??
-      DEFAULT_ADMIN_PREFERENCES.creator_applications_enabled,
-    content_review_enabled:
-      prefs?.content_review_enabled ??
-      DEFAULT_ADMIN_PREFERENCES.content_review_enabled,
-    thumbnail_flagged_enabled:
-      prefs?.thumbnail_flagged_enabled ??
-      DEFAULT_ADMIN_PREFERENCES.thumbnail_flagged_enabled,
-    payout_completed_enabled:
-      prefs?.payout_completed_enabled ??
-      DEFAULT_ADMIN_PREFERENCES.payout_completed_enabled,
-    weekly_digest_enabled:
-      prefs?.weekly_digest_enabled ??
-      DEFAULT_ADMIN_PREFERENCES.weekly_digest_enabled,
-    alerts_email: prefs?.alerts_email ?? DEFAULT_ADMIN_PREFERENCES.alerts_email,
-  }
-}
-
 export function SettingsNotificationsTab() {
-  const settingsQuery = useAdminNotificationSettings()
-  const updateSettings = useUpdateAdminNotificationSettings()
-  const [prefs, setPrefs] = useState(DEFAULT_ADMIN_PREFERENCES)
+  const { data, isLoading } = useNotificationSettingsQuery()
+  const updateSettings = useUpdateNotificationSettings()
+
+  const [creatorApplications, setCreatorApplications] = useState(true)
+  const [contentReview, setContentReview] = useState(true)
+  const [thumbnailFlagged, setThumbnailFlagged] = useState(true)
+  const [payoutCompleted, setPayoutCompleted] = useState(true)
+  const [weeklyDigest, setWeeklyDigest] = useState(false)
+  const [alertsEmail, setAlertsEmail] = useState("")
 
   useEffect(() => {
-    if (!settingsQuery.data) return
-    setPrefs(resolveAdminPreferences(settingsQuery.data.admin_preferences))
-  }, [settingsQuery.data])
+    if (!data) return
+    setCreatorApplications(data.adminAlertCreatorApplications)
+    setContentReview(data.adminAlertContentReview)
+    setThumbnailFlagged(data.adminAlertThumbnailFlagged)
+    setPayoutCompleted(data.adminAlertPayoutCompleted)
+    setWeeklyDigest(data.adminAlertWeeklyDigest)
+    setAlertsEmail(data.adminAlertsEmail)
+  }, [data])
 
-  function patchPreferences(patch: Partial<typeof DEFAULT_ADMIN_PREFERENCES>) {
-    const next = { ...prefs, ...patch }
-    setPrefs(next)
-    updateSettings.mutate({
-      admin_preferences: {
-        creator_applications_enabled: next.creator_applications_enabled,
-        content_review_enabled: next.content_review_enabled,
-        thumbnail_flagged_enabled: next.thumbnail_flagged_enabled,
-        payout_completed_enabled: next.payout_completed_enabled,
-        weekly_digest_enabled: next.weekly_digest_enabled,
-        alerts_email: next.alerts_email || undefined,
+  const handleSave = useCallback(() => {
+    updateSettings.mutate(
+      {
+        adminAlertCreatorApplications: creatorApplications,
+        adminAlertContentReview: contentReview,
+        adminAlertThumbnailFlagged: thumbnailFlagged,
+        adminAlertPayoutCompleted: payoutCompleted,
+        adminAlertWeeklyDigest: weeklyDigest,
+        adminAlertsEmail: alertsEmail,
       },
-    })
-  }
+      {
+        onSuccess: () => toast.success("Notification settings saved"),
+        onError: (error) =>
+          toastMutationError(error, "Unable to save notification settings"),
+      }
+    )
+  }, [
+    creatorApplications,
+    contentReview,
+    thumbnailFlagged,
+    payoutCompleted,
+    weeklyDigest,
+    alertsEmail,
+    updateSettings,
+  ])
 
-  if (settingsQuery.isLoading) {
+  useEffect(() => registerSettingsSave(handleSave), [handleSave])
+
+  if (isLoading) {
     return (
       <SettingsPanel>
         <p className="text-muted-foreground text-sm">
@@ -81,80 +74,69 @@ export function SettingsNotificationsTab() {
     )
   }
 
-  if (settingsQuery.isError) {
-    return (
-      <SettingsPanel>
-        <p className="text-destructive text-sm">
-          Could not load notification settings.
-        </p>
-      </SettingsPanel>
-    )
-  }
-
   return (
     <SettingsPanel>
       <SettingsSection
         title="Admin alerts"
-        subtitle="What the team gets pinged about."
+        subtitle="Platform-wide — shared by every admin, not a personal preference. Each admin still gets their own inbox entry; the email below is sent once per alert."
       >
         <ToggleField
           label="New creator applications"
-          hint=""
-          checked={prefs.creator_applications_enabled}
-          onCheckedChange={(checked) =>
-            patchPreferences({ creator_applications_enabled: checked })
-          }
+          checked={creatorApplications}
+          onCheckedChange={setCreatorApplications}
         />
         <ToggleField
           label="Content awaiting review"
-          hint=""
-          checked={prefs.content_review_enabled}
-          onCheckedChange={(checked) =>
-            patchPreferences({ content_review_enabled: checked })
-          }
+          checked={contentReview}
+          onCheckedChange={setContentReview}
         />
         <ToggleField
           label="Thumbnail flagged by auto-moderation"
-          hint=""
-          checked={prefs.thumbnail_flagged_enabled}
-          onCheckedChange={(checked) =>
-            patchPreferences({ thumbnail_flagged_enabled: checked })
-          }
+          checked={thumbnailFlagged}
+          onCheckedChange={setThumbnailFlagged}
         />
         <ToggleField
           label="Payout cycle completed"
-          hint=""
-          checked={prefs.payout_completed_enabled}
-          onCheckedChange={(checked) =>
-            patchPreferences({ payout_completed_enabled: checked })
-          }
+          checked={payoutCompleted}
+          onCheckedChange={setPayoutCompleted}
         />
         <ToggleField
           label="Weekly platform digest"
-          hint=""
-          checked={prefs.weekly_digest_enabled}
-          onCheckedChange={(checked) =>
-            patchPreferences({ weekly_digest_enabled: checked })
-          }
+          hint="Not wired to anything yet — no digest job exists in the product."
+          checked={weeklyDigest}
+          onCheckedChange={setWeeklyDigest}
         />
-        <SettingsField label="Send alerts to">
+        <SettingsField
+          label="Send alerts to"
+          hint="Leave blank to only show alerts in the admin notifications page."
+        >
           <Input
             type="email"
-            value={prefs.alerts_email}
-            onChange={(event) =>
-              setPrefs((current) => ({
-                ...current,
-                alerts_email: event.target.value,
-              }))
-            }
-            onBlur={() =>
-              patchPreferences({ alerts_email: prefs.alerts_email })
-            }
+            value={alertsEmail}
+            onChange={(event) => setAlertsEmail(event.target.value)}
             placeholder="admins@sable.tv"
+            disabled={isLoading}
             className="h-9"
           />
         </SettingsField>
       </SettingsSection>
+
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          onClick={handleSave}
+          disabled={isLoading || updateSettings.isPending}
+        >
+          {updateSettings.isPending ? (
+            <>
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+              Saving…
+            </>
+          ) : (
+            "Save changes"
+          )}
+        </Button>
+      </div>
     </SettingsPanel>
   )
 }

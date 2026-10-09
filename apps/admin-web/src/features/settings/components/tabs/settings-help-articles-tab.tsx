@@ -221,7 +221,10 @@ export function SettingsHelpArticlesTab() {
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <Badge variant={article.isPublished ? "default" : "outline"}>
+                  <Badge
+                    className="leading-relaxed pt-0.5"
+                    variant={article.isPublished ? "default" : "outline"}
+                  >
                     {article.isPublished ? "Published" : "Draft"}
                   </Badge>
                   <Button

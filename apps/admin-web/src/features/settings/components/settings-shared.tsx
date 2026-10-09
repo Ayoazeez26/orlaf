@@ -38,16 +38,19 @@ export function SettingsField({
 export function SwitchField({
   checked,
   onCheckedChange,
+  disabled,
   "aria-label": ariaLabel,
 }: {
   checked: boolean
   onCheckedChange: (checked: boolean) => void
+  disabled?: boolean
   "aria-label"?: string
 }) {
   return (
     <Switch
       checked={checked}
       onCheckedChange={onCheckedChange}
+      disabled={disabled}
       aria-label={ariaLabel}
     />
   )
@@ -58,16 +61,22 @@ export function ToggleField({
   hint,
   checked,
   onCheckedChange,
+  disabled,
 }: {
   label: string
   hint?: string
   checked: boolean
   onCheckedChange: (checked: boolean) => void
+  disabled?: boolean
 }) {
   return (
     <SettingsField label={label} hint={hint}>
       <div className="flex justify-end">
-        <SwitchField checked={checked} onCheckedChange={onCheckedChange} />
+        <SwitchField
+          checked={checked}
+          onCheckedChange={onCheckedChange}
+          disabled={disabled}
+        />
       </div>
     </SettingsField>
   )

@@ -1,4 +1,3 @@
-import { useState } from "react"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
 import type { SettingsTabId } from "../constants"
 import { SettingsNav } from "./settings-nav"
@@ -47,15 +46,21 @@ function renderSettingsTab(tab: SettingsTabId) {
   }
 }
 
-export function SettingsPage({ role: _role }: { role: WorkspaceRoleId }) {
-  const [activeTab, setActiveTab] = useState<SettingsTabId>("general")
-
+export function SettingsPage({
+  role: _role,
+  activeTab,
+  onTabChange,
+}: {
+  role: WorkspaceRoleId
+  activeTab: SettingsTabId
+  onTabChange: (tab: SettingsTabId) => void
+}) {
   return (
     <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
       <SettingsPageHeader />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,220px)_minmax(0,1fr)] lg:items-start">
-        <SettingsNav active={activeTab} onChange={setActiveTab} />
+        <SettingsNav active={activeTab} onChange={onTabChange} />
         <div className="min-w-0">{renderSettingsTab(activeTab)}</div>
       </div>
     </div>

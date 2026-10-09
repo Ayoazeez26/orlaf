@@ -1,3 +1,4 @@
+import type { ReviewMode } from "@sable/contracts"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 import {
@@ -15,6 +16,10 @@ import {
   useGuidelinesQuery,
   useUpdateGuidelines,
 } from "../../api/guidelines-hooks"
+import {
+  useModerationSettingsQuery,
+  useUpdateModerationSettings,
+} from "../../api/moderation-settings-hooks"
 import { REVIEW_MODE_OPTIONS, SUSPENSION_LENGTH_OPTIONS } from "../../constants"
 import {
   SettingsDivider,
@@ -24,12 +29,82 @@ import {
   ToggleField,
 } from "../settings-shared"
 
+const REVIEW_MODE_TO_VALUE: Record<
+  (typeof REVIEW_MODE_OPTIONS)[number],
+  ReviewMode
+> = {
+  "Manual review before publish": "manual",
+  "Auto-publish with spot checks": "auto_spot_check",
+  "Auto-publish": "auto_publish",
+}
+
+const VALUE_TO_REVIEW_MODE: Record<
+  ReviewMode,
+  (typeof REVIEW_MODE_OPTIONS)[number]
+> = {
+  manual: "Manual review before publish",
+  auto_spot_check: "Auto-publish with spot checks",
+  auto_publish: "Auto-publish",
+}
+
+const SUSPENSION_LENGTH_DAYS: Record<
+  (typeof SUSPENSION_LENGTH_OPTIONS)[number],
+  number
+> = {
+  "7 days": 7,
+  "14 days": 14,
+  "30 days": 30,
+  Permanent: 0,
+}
+
+function daysToSuspensionLength(
+  days: number
+): (typeof SUSPENSION_LENGTH_OPTIONS)[number] {
+  const entry = Object.entries(SUSPENSION_LENGTH_DAYS).find(
+    ([, value]) => value === days
+  )
+  return (entry?.[0] as (typeof SUSPENSION_LENGTH_OPTIONS)[number]) ?? "7 days"
+}
+
 export function SettingsModerationTab() {
-  const [reviewMode, setReviewMode] = useState("Manual review before publish")
+  const { data, isLoading } = useModerationSettingsQuery()
+  const updateSettings = useUpdateModerationSettings()
+
+  const [reviewMode, setReviewMode] = useState<
+    (typeof REVIEW_MODE_OPTIONS)[number]
+  >("Manual review before publish")
   const [thumbnailApproval, setThumbnailApproval] = useState(true)
   const [autoFlagAdult, setAutoFlagAdult] = useState(true)
   const [strikesBeforeSuspend, setStrikesBeforeSuspend] = useState("3")
-  const [suspensionLength, setSuspensionLength] = useState("7 days")
+  const [suspensionLength, setSuspensionLength] =
+    useState<(typeof SUSPENSION_LENGTH_OPTIONS)[number]>("7 days")
+
+  useEffect(() => {
+    if (!data) return
+    setReviewMode(VALUE_TO_REVIEW_MODE[data.reviewMode])
+    setThumbnailApproval(data.requireThumbnailApproval)
+    setAutoFlagAdult(data.autoFlagAdultContent)
+    setStrikesBeforeSuspend(String(data.strikesBeforeSuspension))
+    setSuspensionLength(daysToSuspensionLength(data.suspensionLengthDays))
+  }, [data])
+
+  const handleSaveModeration = () => {
+    const strikes = Number.parseInt(strikesBeforeSuspend, 10)
+    updateSettings.mutate(
+      {
+        reviewMode: REVIEW_MODE_TO_VALUE[reviewMode],
+        requireThumbnailApproval: thumbnailApproval,
+        autoFlagAdultContent: autoFlagAdult,
+        strikesBeforeSuspension: Number.isFinite(strikes) ? strikes : 3,
+        suspensionLengthDays: SUSPENSION_LENGTH_DAYS[suspensionLength],
+      },
+      {
+        onSuccess: () => toast.success("Moderation settings saved"),
+        onError: (error) =>
+          toastMutationError(error, "Unable to save moderation settings"),
+      }
+    )
+  }
 
   const guidelinesQuery = useGuidelinesQuery()
   const updateGuidelines = useUpdateGuidelines()
@@ -60,8 +135,16 @@ export function SettingsModerationTab() {
         title="Content review"
         subtitle="How submitted series and episodes are reviewed."
       >
-        <SettingsField label="Default review mode">
-          <Select value={reviewMode} onValueChange={setReviewMode}>
+        <SettingsField
+          label="Default review mode"
+          hint="Controls whether new series submissions skip manual review."
+        >
+          <Select
+            value={reviewMode}
+            onValueChange={(value) =>
+              setReviewMode(value as (typeof REVIEW_MODE_OPTIONS)[number])
+            }
+          >
             <SelectTrigger className="h-9">
               <SelectValue />
             </SelectTrigger>
@@ -76,13 +159,13 @@ export function SettingsModerationTab() {
         </SettingsField>
         <ToggleField
           label="Require thumbnail approval"
-          hint="Block new thumbnails from going live until an admin approves."
+          hint="Forces manual review even under an auto-publish mode whenever a poster is set — there's no separate thumbnail-only approval flow yet."
           checked={thumbnailApproval}
           onCheckedChange={setThumbnailApproval}
         />
         <ToggleField
           label="Auto-flag adult content"
-          hint="Run an automatic safety check on new uploads."
+          hint="Not wired to anything yet — no content classifier exists in the product."
           checked={autoFlagAdult}
           onCheckedChange={setAutoFlagAdult}
         />
@@ -97,13 +180,22 @@ export function SettingsModerationTab() {
         <SettingsField label="Strikes before suspension">
           <Input
             type="number"
+            min={1}
+            max={20}
             value={strikesBeforeSuspend}
             onChange={(event) => setStrikesBeforeSuspend(event.target.value)}
             className="h-9"
           />
         </SettingsField>
         <SettingsField label="Default suspension length">
-          <Select value={suspensionLength} onValueChange={setSuspensionLength}>
+          <Select
+            value={suspensionLength}
+            onValueChange={(value) =>
+              setSuspensionLength(
+                value as (typeof SUSPENSION_LENGTH_OPTIONS)[number]
+              )
+            }
+          >
             <SelectTrigger className="h-9">
               <SelectValue />
             </SelectTrigger>
@@ -116,6 +208,25 @@ export function SettingsModerationTab() {
             </SelectContent>
           </Select>
         </SettingsField>
+
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleSaveModeration}
+            disabled={isLoading || updateSettings.isPending}
+          >
+            {updateSettings.isPending ? (
+              <>
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+                Saving…
+              </>
+            ) : (
+              "Save moderation settings"
+            )}
+          </Button>
+        </div>
+
         <SettingsField
           label="Community guidelines"
           hint="Shown to creators during onboarding and in the Guidelines tab. Supports ## for section headings."

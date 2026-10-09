@@ -1,13 +1,13 @@
+import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
+import { Loader2 } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
+import { toast, toastMutationError } from "@/lib/toast"
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/ui/components/select"
-import { useState } from "react"
-import { LANGUAGE_OPTIONS, REGION_OPTIONS } from "../../constants"
+  useGeneralSettingsQuery,
+  useUpdateGeneralSettings,
+} from "../../api/general-settings-hooks"
+import { registerSettingsSave } from "../../lib/settings-form-actions"
 import {
   SettingsDivider,
   SettingsField,
@@ -17,13 +17,34 @@ import {
 } from "../settings-shared"
 
 export function SettingsGeneralTab() {
-  const [platformName, setPlatformName] = useState("Sable TV")
-  const [tagline, setTagline] = useState("Short-form series, big stories.")
-  const [supportEmail, setSupportEmail] = useState("help@sable.tv")
-  const [region, setRegion] = useState("Nigeria (NGN)")
-  const [language, setLanguage] = useState("English")
+  const { data, isLoading } = useGeneralSettingsQuery()
+  const updateSettings = useUpdateGeneralSettings()
+
+  const [tagline, setTagline] = useState("")
+  const [supportEmail, setSupportEmail] = useState("")
   const [maintenanceMode, setMaintenanceMode] = useState(false)
   const [pauseSignups, setPauseSignups] = useState(false)
+
+  useEffect(() => {
+    if (!data) return
+    setTagline(data.tagline)
+    setSupportEmail(data.supportEmail)
+    setMaintenanceMode(data.maintenanceMode)
+    setPauseSignups(data.pauseSignups)
+  }, [data])
+
+  const handleSave = useCallback(() => {
+    updateSettings.mutate(
+      { tagline, supportEmail, maintenanceMode, pauseSignups },
+      {
+        onSuccess: () => toast.success("General settings saved"),
+        onError: (error) =>
+          toastMutationError(error, "Unable to save general settings"),
+      }
+    )
+  }, [tagline, supportEmail, maintenanceMode, pauseSignups, updateSettings])
+
+  useEffect(() => registerSettingsSave(handleSave), [handleSave])
 
   return (
     <SettingsPanel>
@@ -31,12 +52,11 @@ export function SettingsGeneralTab() {
         title="Platform"
         subtitle="The basics shown across the admin and main app."
       >
-        <SettingsField label="Platform name">
-          <Input
-            value={platformName}
-            onChange={(event) => setPlatformName(event.target.value)}
-            className="h-9"
-          />
+        <SettingsField
+          label="Platform name"
+          hint="Not editable here — contact engineering to change."
+        >
+          <Input value={data?.platformName ?? ""} disabled className="h-9" />
         </SettingsField>
         <SettingsField
           label="Tagline"
@@ -45,6 +65,7 @@ export function SettingsGeneralTab() {
           <Input
             value={tagline}
             onChange={(event) => setTagline(event.target.value)}
+            disabled={isLoading}
             className="h-9"
           />
         </SettingsField>
@@ -53,39 +74,21 @@ export function SettingsGeneralTab() {
             type="email"
             value={supportEmail}
             onChange={(event) => setSupportEmail(event.target.value)}
+            disabled={isLoading}
             className="h-9"
           />
         </SettingsField>
         <SettingsField
           label="Primary region"
-          hint="Used for default scheduling and currency."
+          hint="Not editable here — contact engineering to change."
         >
-          <Select value={region} onValueChange={setRegion}>
-            <SelectTrigger className="h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {REGION_OPTIONS.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Input value={data?.primaryRegion ?? ""} disabled className="h-9" />
         </SettingsField>
-        <SettingsField label="Default language">
-          <Select value={language} onValueChange={setLanguage}>
-            <SelectTrigger className="h-9">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {LANGUAGE_OPTIONS.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <SettingsField
+          label="Default language"
+          hint="Not editable here — contact engineering to change."
+        >
+          <Input value={data?.defaultLanguage ?? ""} disabled className="h-9" />
         </SettingsField>
       </SettingsSection>
 
@@ -97,7 +100,7 @@ export function SettingsGeneralTab() {
       >
         <ToggleField
           label="Maintenance mode"
-          hint="Main app shows a friendly maintenance page. Admin stays online."
+          hint="Creator web and mobile show a maintenance page. Admin stays online."
           checked={maintenanceMode}
           onCheckedChange={setMaintenanceMode}
         />
@@ -108,6 +111,23 @@ export function SettingsGeneralTab() {
           onCheckedChange={setPauseSignups}
         />
       </SettingsSection>
+
+      <div className="flex justify-end">
+        <Button
+          type="button"
+          onClick={handleSave}
+          disabled={isLoading || updateSettings.isPending}
+        >
+          {updateSettings.isPending ? (
+            <>
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+              Saving…
+            </>
+          ) : (
+            "Save changes"
+          )}
+        </Button>
+      </div>
     </SettingsPanel>
   )
 }

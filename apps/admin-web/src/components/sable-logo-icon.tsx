@@ -1,4 +1,5 @@
 import { cn } from "@workspace/ui/lib/utils"
+import { useBranding } from "@/features/branding/use-branding"
 
 interface SableLogoIconProps {
   className?: string
@@ -13,6 +14,18 @@ const SIZE_CLASS = {
 
 export function SableLogoIcon({ className, size = "md" }: SableLogoIconProps) {
   const sizeClass = SIZE_CLASS[size]
+  const { logoUrl } = useBranding()
+
+  if (logoUrl) {
+    return (
+      <img
+        src={logoUrl}
+        alt=""
+        aria-hidden
+        className={cn("w-auto shrink-0 object-contain", sizeClass, className)}
+      />
+    )
+  }
 
   return (
     <>
