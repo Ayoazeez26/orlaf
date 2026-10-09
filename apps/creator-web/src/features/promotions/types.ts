@@ -54,7 +54,7 @@ export function mapPromotionsListResponse(
       { label: "Active", value: String(response.summary.activeCount) },
       {
         label: "Total Spend",
-        value: `$${response.summary.totalSpend.toLocaleString("en-US")}`,
+        value: `₦${response.summary.totalSpend.toLocaleString("en-US")}`,
       },
       {
         label: "Impressions",

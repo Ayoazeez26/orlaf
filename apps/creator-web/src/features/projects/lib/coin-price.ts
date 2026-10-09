@@ -3,7 +3,7 @@ export const COINS_PER_USD = 10
 
 export function formatCoinUsdHint(coins: number): string {
   const usd = coins / COINS_PER_USD
-  return `${coins} coin${coins === 1 ? "" : "s"} = $${usd.toFixed(2)}`
+  return `${coins} coin${coins === 1 ? "" : "s"} = ₦${usd.toFixed(2)}`
 }
 
 export function formatCoinAccessLabel(coins?: number | null): string {

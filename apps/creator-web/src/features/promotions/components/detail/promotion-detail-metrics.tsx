@@ -39,8 +39,8 @@ export function PromotionMetricCards({
   className,
 }: PromotionMetricCardsProps) {
   const metrics = [
-    { label: "Budget", value: `$${budget}`, icon: "dollar" as const },
-    { label: "Spent", value: `$${spent}`, icon: "megaphone" as const },
+    { label: "Budget", value: `₦${budget}`, icon: "dollar" as const },
+    { label: "Spent", value: `₦${spent}`, icon: "megaphone" as const },
     { label: "Impressions", value: impressionsLabel, icon: "eye" as const },
     { label: "CTR", value: ctr, icon: "cursor" as const },
   ]

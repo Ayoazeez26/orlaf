@@ -54,15 +54,6 @@ export interface DashboardNavGroup {
   items: DashboardNavItem[]
 }
 
-export interface DashboardEarnMoreCard {
-  id: string
-  title: string
-  description: string
-  icon: LucideIcon
-  iconClassName: string
-  iconBackgroundClassName: string
-}
-
 export interface DashboardHomeData {
   user: DashboardUser
   kpis: AnalyticsKpi[]

@@ -11,7 +11,7 @@ function formatMinor(amountMinor: number, currency: string): string {
   if (currency === "NGN") {
     return `₦${major.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
   }
-  return `$${major.toFixed(2)}`
+  return `₦${major.toFixed(2)}`
 }
 
 interface WithdrawDialogProps {

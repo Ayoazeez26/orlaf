@@ -20,7 +20,7 @@ function formatMinor(amountMinor: number, currency: string): string {
       maximumFractionDigits: 2,
     })}`
   }
-  return `$${major.toFixed(2)}`
+  return `₦${major.toFixed(2)}`
 }
 
 export function SettingsEarningsPage() {

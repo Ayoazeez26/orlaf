@@ -66,7 +66,7 @@ export function EarningsOverTimeChart({
               tickLine={ANALYTICS_CHART_AXIS_LINE}
               tick={{ ...ANALYTICS_CHART_TICK, fontSize: 11 }}
               tickFormatter={(v) =>
-                v >= 1000 ? `$${Math.round(v / 1000)}k` : `$${v}`
+                v >= 1000 ? `₦${Math.round(v / 1000)}k` : `₦${v}`
               }
             />
             <Tooltip
@@ -75,7 +75,7 @@ export function EarningsOverTimeChart({
                 border: "1px solid var(--border)",
                 background: "var(--card)",
               }}
-              formatter={(value) => [`$${value}`, "Earnings"]}
+              formatter={(value) => [`₦${value}`, "Earnings"]}
             />
             <Area
               type="monotone"

@@ -392,7 +392,7 @@ export function UploadEpisodesStep({
                           <p className="text-sm text-text-subtle">
                             {episode.coinPrice != null
                               ? formatCoinUsdHint(episode.coinPrice)
-                              : "10 coins = $1.00"}
+                              : "10 coins = ₦1.00"}
                           </p>
                         </div>
                       ) : null}

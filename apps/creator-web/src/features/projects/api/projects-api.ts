@@ -119,7 +119,7 @@ export async function fetchProject(id: string): Promise<ProjectDetail> {
     ...summary,
     description: series.synopsis ?? "",
     totalViews: "0",
-    revenue: "$0",
+    revenue: "₦0",
     subscribers: "0",
     avgWatchTime: "0m",
     tags: series.tags,
@@ -131,7 +131,7 @@ export async function fetchProject(id: string): Promise<ProjectDetail> {
     },
     monetization: {
       tippingEnabled: series.tippingEnabled,
-      seriesRevenue: "$0",
+      seriesRevenue: "₦0",
     },
     subtitleTracks:
       series.subtitleLanguages.length > 0

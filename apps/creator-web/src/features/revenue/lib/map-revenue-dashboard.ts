@@ -10,7 +10,7 @@ function formatMinor(amountMinor: number, currency: string): string {
       maximumFractionDigits: 2,
     })}`
   }
-  return `$${major.toLocaleString("en-US", {
+  return `₦${major.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })}`

@@ -90,7 +90,7 @@ export function NewPromotionDialog({
       !Number.isFinite(budgetValue) ||
       budgetValue < 1
     ) {
-      toast.error("Enter a title, project, and budget of at least $1.")
+      toast.error("Enter a title, project, and budget of at least ₦1.")
       return
     }
 

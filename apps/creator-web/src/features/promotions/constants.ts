@@ -54,5 +54,5 @@ export const DEFAULT_ESTIMATED_REACH = {
   uniqueReach: "16.3k–24.4k",
   clicks: "2.0k",
   footnote:
-    "Based on a $8 CPM for home banner and all viewers. Actual results vary with creative and timing.",
+    "Based on a ₦8 CPM for home banner and all viewers. Actual results vary with creative and timing.",
 }

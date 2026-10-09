@@ -35,5 +35,5 @@ export function formatPromotionMeta(promotion: PromotionSummary) {
 }
 
 export function formatCurrency(amount: number) {
-  return `$${amount}`
+  return `₦${amount}`
 }

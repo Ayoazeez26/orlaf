@@ -160,12 +160,13 @@ export function ProjectSettingsTab() {
     }
   }
 
+  const { subtitleTracks } = form
+
   function toggleSubtitleTrack(track: string) {
-    if (!form) return
     updateForm({
-      subtitleTracks: form.subtitleTracks.includes(track)
-        ? form.subtitleTracks.filter((item) => item !== track)
-        : [...form.subtitleTracks, track],
+      subtitleTracks: subtitleTracks.includes(track)
+        ? subtitleTracks.filter((item) => item !== track)
+        : [...subtitleTracks, track],
     })
   }
 
