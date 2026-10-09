@@ -25,8 +25,8 @@ interface RevenueAnalyticsChartProps {
 }
 
 function formatCurrency(value: number) {
-  if (value === 0) return "$0"
-  return `$${(value / 1000).toFixed(1)}K`
+  if (value === 0) return "₦0"
+  return `₦${(value / 1000).toFixed(1)}K`
 }
 
 export function RevenueAnalyticsChart({

@@ -3,11 +3,20 @@ import { Avatar, AvatarFallback } from "@workspace/ui/components/avatar"
 import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { cn } from "@workspace/ui/lib/utils"
-import { ArrowLeft, Ban, RotateCcw, ShieldCheck, ShieldX } from "lucide-react"
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Ban,
+  RotateCcw,
+  ShieldCheck,
+  ShieldX,
+} from "lucide-react"
 import { useState } from "react"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
 import type { WorkspaceRoleId } from "@/features/workspaces/types"
+import { toast, toastMutationError } from "@/lib/toast"
 import {
+  useIssueCreatorStrike,
   useReactivateCreator,
   useSuspendCreator,
   useUnverifyCreator,
@@ -15,6 +24,7 @@ import {
 } from "../../api/creators-hooks"
 import type { CreatorDetail } from "../../types"
 import { CreatorStatusBadge } from "../creator-badges"
+import { CreatorStrikeDialog } from "./creator-strike-dialog"
 import { CreatorSuspendDialog } from "./creator-suspend-dialog"
 import { CreatorVerifyDialog } from "./creator-verify-dialog"
 
@@ -29,18 +39,21 @@ export function CreatorDetailHeader({
 }: CreatorDetailHeaderProps) {
   const [suspendOpen, setSuspendOpen] = useState(false)
   const [verifyOpen, setVerifyOpen] = useState(false)
+  const [strikeOpen, setStrikeOpen] = useState(false)
   const isActive = creator.status === "active"
 
   const verify = useVerifyCreator(creator.id)
   const unverify = useUnverifyCreator(creator.id)
   const suspend = useSuspendCreator(creator.id)
   const reactivate = useReactivateCreator(creator.id)
+  const issueStrike = useIssueCreatorStrike(creator.id)
 
   const isBusy =
     verify.isPending ||
     unverify.isPending ||
     suspend.isPending ||
-    reactivate.isPending
+    reactivate.isPending ||
+    issueStrike.isPending
 
   return (
     <div className="space-y-4">
@@ -107,6 +120,18 @@ export function CreatorDetailHeader({
             {isActive ? (
               <Button
                 type="button"
+                variant="outline"
+                className="gap-2"
+                disabled={isBusy}
+                onClick={() => setStrikeOpen(true)}
+              >
+                <AlertTriangle className="size-4" aria-hidden />
+                Issue strike
+              </Button>
+            ) : null}
+            {isActive ? (
+              <Button
+                type="button"
                 className="gap-2 bg-destructive text-white hover:bg-destructive/90"
                 disabled={isBusy}
                 onClick={() => setSuspendOpen(true)}
@@ -146,6 +171,34 @@ export function CreatorDetailHeader({
         creatorEmail={creator.email}
         creatorUsername={creator.username}
         onConfirm={() => verify.mutate(undefined)}
+      />
+
+      <CreatorStrikeDialog
+        open={strikeOpen}
+        onOpenChange={setStrikeOpen}
+        creatorName={creator.name}
+        isSubmitting={issueStrike.isPending}
+        onConfirm={(reason) =>
+          issueStrike.mutate(
+            { reason },
+            {
+              onSuccess: (result) => {
+                setStrikeOpen(false)
+                if (result.autoSuspended) {
+                  toast.success(
+                    `Strike issued — ${creator.name} reached ${result.strikeCount}/${result.strikesBeforeSuspension} strikes and was auto-suspended.`
+                  )
+                } else {
+                  toast.success(
+                    `Strike issued — ${result.strikeCount}/${result.strikesBeforeSuspension} strikes.`
+                  )
+                }
+              },
+              onError: (error) =>
+                toastMutationError(error, "Unable to issue strike"),
+            }
+          )
+        }
       />
     </div>
   )

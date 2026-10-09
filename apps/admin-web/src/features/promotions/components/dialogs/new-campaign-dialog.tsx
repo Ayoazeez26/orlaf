@@ -1,3 +1,4 @@
+import type { PromotionGoal, PromotionPlacement } from "@sable/contracts"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
@@ -9,11 +10,12 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select"
 import { cn } from "@workspace/ui/lib/utils"
-import { Check, ChevronLeft, ChevronRight, X } from "lucide-react"
+import { Check, ChevronLeft, ChevronRight, Search, X } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useProjectsQuery } from "@/features/projects/api/projects-hooks"
 import {
-  PROMOTION_CREATOR_OPTIONS,
-  PROMOTION_PLACEMENT_OPTIONS,
+  PROMOTION_GOAL_LABELS,
+  PROMOTION_PLACEMENT_LABELS,
 } from "../../constants"
 import type { NewCampaignFormValues } from "../../types"
 import { useModalShell } from "../use-modal-shell"
@@ -27,8 +29,12 @@ const STEPS: { id: WizardStep; label: string; number: number }[] = [
 
 const EMPTY_VALUES: NewCampaignFormValues = {
   title: "",
-  creatorName: PROMOTION_CREATOR_OPTIONS[0],
-  placement: PROMOTION_PLACEMENT_OPTIONS[0],
+  seriesId: "",
+  seriesTitle: "",
+  creatorId: "",
+  creatorName: "",
+  goal: "views",
+  placement: "home_banner",
   budget: 100_000,
   durationDays: 14,
 }
@@ -37,19 +43,29 @@ interface NewCampaignDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onCreate?: (values: NewCampaignFormValues) => void
+  isSubmitting?: boolean
 }
 
 export function NewCampaignDialog({
   open,
   onOpenChange,
   onCreate,
+  isSubmitting,
 }: NewCampaignDialogProps) {
   const [step, setStep] = useState<WizardStep>("basics")
   const [values, setValues] = useState<NewCampaignFormValues>(EMPTY_VALUES)
+  const [seriesSearch, setSeriesSearch] = useState("")
+
+  const { data: seriesData } = useProjectsQuery({
+    filter: "all",
+    pageSize: 20,
+    q: seriesSearch,
+  })
 
   useEffect(() => {
     if (!open) return
     setValues(EMPTY_VALUES)
+    setSeriesSearch("")
     setStep("basics")
   }, [open])
 
@@ -69,7 +85,6 @@ export function NewCampaignDialog({
       return
     }
     onCreate?.(values)
-    onOpenChange(false)
   }
 
   function handleBack() {
@@ -78,7 +93,7 @@ export function NewCampaignDialog({
 
   const canContinue =
     step === "basics"
-      ? values.title.trim().length > 0 && values.creatorName.length > 0
+      ? values.title.trim().length > 0 && values.seriesId.length > 0
       : values.budget > 0 && values.durationDays > 0
 
   return (
@@ -106,8 +121,8 @@ export function NewCampaignDialog({
               </h2>
               <p className="mt-1 text-muted-foreground text-sm">
                 {step === "basics"
-                  ? "Name the campaign and assign a creator."
-                  : "Choose placement, budget, and run length."}
+                  ? "Name the campaign and pick the series to promote."
+                  : "Choose the goal, placement, budget, and run length."}
               </p>
             </div>
             <Button
@@ -178,41 +193,126 @@ export function NewCampaignDialog({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="campaign-creator">Creator</Label>
-                <Select
-                  value={values.creatorName}
-                  onValueChange={(creatorName) => update({ creatorName })}
-                >
-                  <SelectTrigger id="campaign-creator">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PROMOTION_CREATOR_OPTIONS.map((creator) => (
-                      <SelectItem key={creator} value={creator}>
-                        {creator}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="campaign-series">Series</Label>
+                {values.seriesId ? (
+                  <div className="flex items-center justify-between rounded-xl border border-border px-3 py-2.5">
+                    <div>
+                      <p className="font-medium text-foreground text-sm">
+                        {values.seriesTitle}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        {values.creatorName}
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        update({
+                          seriesId: "",
+                          seriesTitle: "",
+                          creatorId: "",
+                          creatorName: "",
+                        })
+                      }
+                    >
+                      Change
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Search
+                        className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+                        aria-hidden
+                      />
+                      <Input
+                        id="campaign-series"
+                        type="search"
+                        value={seriesSearch}
+                        onChange={(event) =>
+                          setSeriesSearch(event.target.value)
+                        }
+                        placeholder="Search series..."
+                        className="pl-9"
+                      />
+                    </div>
+                    <ul className="max-h-48 space-y-1.5 overflow-y-auto">
+                      {(seriesData?.items ?? []).map((item) => (
+                        <li key={item.id}>
+                          <button
+                            type="button"
+                            className="flex w-full items-center justify-between rounded-xl border border-border px-3 py-2.5 text-left hover:bg-muted/40"
+                            onClick={() =>
+                              update({
+                                seriesId: item.id,
+                                seriesTitle: item.title,
+                                creatorId: item.creatorId,
+                                creatorName: item.creatorName,
+                              })
+                            }
+                          >
+                            <div>
+                              <p className="font-medium text-foreground text-sm">
+                                {item.title}
+                              </p>
+                              <p className="text-muted-foreground text-xs">
+                                {item.creatorName}
+                              </p>
+                            </div>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
+                <Label htmlFor="campaign-goal">Goal</Label>
+                <Select
+                  value={values.goal}
+                  onValueChange={(goal) =>
+                    update({ goal: goal as PromotionGoal })
+                  }
+                >
+                  <SelectTrigger id="campaign-goal">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(PROMOTION_GOAL_LABELS).map(
+                      ([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="campaign-placement">Placement</Label>
                 <Select
                   value={values.placement}
-                  onValueChange={(placement) => update({ placement })}
+                  onValueChange={(placement) =>
+                    update({ placement: placement as PromotionPlacement })
+                  }
                 >
                   <SelectTrigger id="campaign-placement">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {PROMOTION_PLACEMENT_OPTIONS.map((placement) => (
-                      <SelectItem key={placement} value={placement}>
-                        {placement}
-                      </SelectItem>
-                    ))}
+                    {Object.entries(PROMOTION_PLACEMENT_LABELS).map(
+                      ([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
                 <p className="text-muted-foreground text-xs">
@@ -275,9 +375,13 @@ export function NewCampaignDialog({
               type="button"
               className="gap-1"
               onClick={handleNext}
-              disabled={!canContinue}
+              disabled={!canContinue || isSubmitting}
             >
-              {stepIndex === STEPS.length - 1 ? "Create campaign" : "Next"}
+              {stepIndex === STEPS.length - 1
+                ? isSubmitting
+                  ? "Creating…"
+                  : "Create campaign"
+                : "Next"}
               {stepIndex < STEPS.length - 1 ? (
                 <ChevronRight className="size-4" aria-hidden />
               ) : null}

@@ -1,3 +1,4 @@
+import { Button } from "@workspace/ui/components/button"
 import { Card, CardContent } from "@workspace/ui/components/card"
 import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
@@ -10,8 +11,13 @@ import {
 } from "@workspace/ui/components/select"
 import { Switch } from "@workspace/ui/components/switch"
 import { cn } from "@workspace/ui/lib/utils"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import {
+  useAdminRevenueSplit,
+  useUpdatePlatformPayoutSettings,
+} from "@/features/revenue-split/api/revenue-split-hooks"
 import { FROSTED_CARD_SURFACE_CLASS } from "@/features/workspaces/lib/frosted-card"
+import { toast, toastMutationError } from "@/lib/toast"
 import { PAYOUT_CADENCE_OPTIONS } from "../../constants"
 import { DEFAULT_PAYOUT_SETTINGS } from "../../data/payout-analytics"
 import type { PayoutSettings } from "../../types"
@@ -59,12 +65,39 @@ function SettingsSection({
 }
 
 export function PayoutsSettingsTab() {
+  const { data, isLoading } = useAdminRevenueSplit()
+  const updateSettings = useUpdatePlatformPayoutSettings()
   const [settings, setSettings] = useState<PayoutSettings>(
     DEFAULT_PAYOUT_SETTINGS
   )
 
+  useEffect(() => {
+    if (!data) return
+    setSettings((current) => ({
+      ...current,
+      minimumPayoutThreshold: data.settings.minimumPayoutMinor / 100,
+      holdPeriodDays: data.settings.holdPeriodDays,
+      autoPayoutsEnabled: data.settings.autoPayoutsEnabled,
+    }))
+  }, [data])
+
   function update(patch: Partial<PayoutSettings>) {
     setSettings((current) => ({ ...current, ...patch }))
+  }
+
+  function handleSave() {
+    updateSettings.mutate(
+      {
+        holdPeriodDays: settings.holdPeriodDays,
+        minimumPayoutMinor: Math.round(settings.minimumPayoutThreshold * 100),
+        autoPayoutsEnabled: settings.autoPayoutsEnabled,
+      },
+      {
+        onSuccess: () => toast.success("Payout settings saved"),
+        onError: (error) =>
+          toastMutationError(error, "Unable to save payout settings"),
+      }
+    )
   }
 
   return (
@@ -74,7 +107,10 @@ export function PayoutsSettingsTab() {
           title="Revenue share"
           subtitle="How earnings split between Sable TV and creators."
         >
-          <SettingsField label="Default creator share (%)">
+          <SettingsField
+            label="Default creator share (%)"
+            hint="Not yet connected — manage verified/top/exclusive tiers in Revenue Split instead."
+          >
             <Input
               type="number"
               min={0}
@@ -84,11 +120,12 @@ export function PayoutsSettingsTab() {
                 update({ defaultCreatorShare: Number(event.target.value) })
               }
               className="h-9"
+              disabled
             />
           </SettingsField>
           <SettingsField
             label="Verified creator share (%)"
-            hint="Bonus share for verified creators."
+            hint="Not yet connected — manage in the Revenue Split tab."
           >
             <Input
               type="number"
@@ -99,6 +136,7 @@ export function PayoutsSettingsTab() {
                 update({ verifiedCreatorShare: Number(event.target.value) })
               }
               className="h-9"
+              disabled
             />
           </SettingsField>
           <SettingsField label="Minimum payout threshold">
@@ -122,10 +160,14 @@ export function PayoutsSettingsTab() {
           title="Schedule"
           subtitle="When earnings are paid out."
         >
-          <SettingsField label="Payout cadence">
+          <SettingsField
+            label="Payout cadence"
+            hint="Not yet connected — no backend field exists for this yet."
+          >
             <Select
               value={settings.payoutCadence}
               onValueChange={(value) => update({ payoutCadence: value })}
+              disabled
             >
               <SelectTrigger className="h-9">
                 <SelectValue />
@@ -155,14 +197,26 @@ export function PayoutsSettingsTab() {
           </SettingsField>
         </SettingsSection>
 
-        <div className="flex justify-end border-border border-t pt-6">
-          <Switch
-            checked={settings.autoPayoutsEnabled}
-            onCheckedChange={(checked) =>
-              update({ autoPayoutsEnabled: checked })
-            }
-            aria-label="Enable automatic payouts"
-          />
+        <div className="flex items-center justify-between border-border border-t pt-6">
+          <SettingsField
+            label="Automatic payouts"
+            hint="Disburse eligible payouts automatically each cycle."
+          >
+            <Switch
+              checked={settings.autoPayoutsEnabled}
+              onCheckedChange={(checked) =>
+                update({ autoPayoutsEnabled: checked })
+              }
+              aria-label="Enable automatic payouts"
+            />
+          </SettingsField>
+          <Button
+            type="button"
+            onClick={handleSave}
+            disabled={isLoading || updateSettings.isPending}
+          >
+            {updateSettings.isPending ? "Saving…" : "Save changes"}
+          </Button>
         </div>
       </CardContent>
     </Card>

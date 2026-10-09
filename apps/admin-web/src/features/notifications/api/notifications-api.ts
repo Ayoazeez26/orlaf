@@ -2,8 +2,6 @@ import type {
   NotificationListResponse,
   NotificationUnreadCountResponse,
   UpdateNotificationReadRequest,
-  UpdateUserNotificationSettingsRequest,
-  UserNotificationSettings,
 } from "@sable/contracts"
 import { apiRequest } from "@/lib/http-client"
 
@@ -39,17 +37,4 @@ export function setNotificationRead(
 
 export function markAllNotificationsRead() {
   return apiRequest<{ read: true }>(`${BASE}/read-all`, { method: "POST" })
-}
-
-export function fetchNotificationSettings(): Promise<UserNotificationSettings> {
-  return apiRequest<UserNotificationSettings>(`${BASE}/settings`)
-}
-
-export function updateNotificationSettings(
-  body: UpdateUserNotificationSettingsRequest
-): Promise<UserNotificationSettings> {
-  return apiRequest<UserNotificationSettings>(`${BASE}/settings`, {
-    method: "PATCH",
-    body: JSON.stringify(body),
-  })
 }

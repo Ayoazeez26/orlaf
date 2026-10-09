@@ -1,4 +1,14 @@
+import type { PromotionGoal } from "@sable/contracts"
+import { PROMOTION_PLACEMENT_LABELS } from "@sable/contracts"
 import type { PromotionFilter, PromotionStatus } from "./types"
+
+export { PROMOTION_PLACEMENT_LABELS }
+
+export const PROMOTION_GOAL_LABELS: Record<PromotionGoal, string> = {
+  views: "Views",
+  subscribers: "Subscribers",
+  watch_time: "Watch time",
+}
 
 export const PROMOTION_FILTERS: { key: PromotionFilter; label: string }[] = [
   { key: "all", label: "All Campaigns" },
@@ -30,19 +40,4 @@ export const PROMOTION_TIME_RANGES = [
   "Last 30 days",
   "Last 90 days",
   "This year",
-] as const
-
-export const PROMOTION_PLACEMENT_OPTIONS = [
-  "Home banner",
-  "For You feed",
-  "Pre-roll",
-  "Search top",
-] as const
-
-export const PROMOTION_CREATOR_OPTIONS = [
-  "Ada Obi",
-  "Tunde Bello",
-  "Kemi Adeyemi",
-  "Ifeoma Eze",
-  "Chinedu Okafor",
 ] as const

@@ -1,12 +1,14 @@
 import type {
   CreatorRevenueSplitTier,
   UpdateAdminRevenueSplitTierRequest,
+  UpdatePlatformPayoutSettingsRequest,
 } from "@sable/contracts"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { mapRevenueSplitDashboard } from "../lib/map-revenue-split-dashboard"
 import {
   fetchAdminRevenueSplit,
   updateAdminRevenueSplitTier,
+  updatePlatformPayoutSettings,
 } from "./revenue-split-api"
 
 export const revenueSplitKeys = {
@@ -35,6 +37,20 @@ export function useUpdateRevenueSplitTier() {
       tierId: CreatorRevenueSplitTier
       body: UpdateAdminRevenueSplitTierRequest
     }) => updateAdminRevenueSplitTier(tierId, body),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: revenueSplitKeys.dashboard(),
+      })
+    },
+  })
+}
+
+export function useUpdatePlatformPayoutSettings() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (body: UpdatePlatformPayoutSettingsRequest) =>
+      updatePlatformPayoutSettings(body),
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: revenueSplitKeys.dashboard(),

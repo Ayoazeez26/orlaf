@@ -24,6 +24,7 @@ export const AUDIT_ACTION_FILTERS: {
   { key: "series-published", label: "Series published" },
   { key: "series-rejected", label: "Series rejected" },
   { key: "user-suspended", label: "User suspended" },
+  { key: "creator-strike-issued", label: "Strike issued" },
   { key: "episode-published", label: "Episode published" },
   { key: "report-resolved", label: "Report resolved" },
   { key: "rail-updated", label: "Rail updated" },
@@ -98,6 +99,11 @@ export const AUDIT_ACTION_CONFIG: Record<
     label: "Creator Reactivated",
     icon: UserCheck,
     badgeClass: "bg-emerald-500/10 text-emerald-600",
+  },
+  "creator-strike-issued": {
+    label: "Creator Strike Issued",
+    icon: Flag,
+    badgeClass: "bg-amber-500/10 text-amber-600",
   },
   "application-approved": {
     label: "Application Approved",

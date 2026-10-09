@@ -4,6 +4,8 @@ import type {
   AdminCreatorListResponse,
   AdminSuspendCreatorRequest,
   AdminVerifyCreatorRequest,
+  IssueCreatorStrikeRequest,
+  IssueCreatorStrikeResponse,
 } from "@sable/contracts"
 import { apiRequest } from "@/lib/http-client"
 
@@ -70,5 +72,15 @@ export function reactivateCreator(id: string): Promise<AdminCreatorDetail> {
   return apiRequest<AdminCreatorDetail>(
     `/api/v1/admin/creators/${encodeURIComponent(id)}/reactivate`,
     { method: "POST" }
+  )
+}
+
+export function issueCreatorStrike(
+  id: string,
+  body: IssueCreatorStrikeRequest
+): Promise<IssueCreatorStrikeResponse> {
+  return apiRequest<IssueCreatorStrikeResponse>(
+    `/api/v1/admin/creators/${encodeURIComponent(id)}/strike`,
+    { method: "POST", body: JSON.stringify(body) }
   )
 }

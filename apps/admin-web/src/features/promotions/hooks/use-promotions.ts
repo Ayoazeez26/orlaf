@@ -1,7 +1,11 @@
-import type { AdminListPromotionsQuery } from "@sable/contracts"
+import type {
+  AdminCreatePromotionRequest,
+  AdminListPromotionsQuery,
+} from "@sable/contracts"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   approveAdminPromotion,
+  createAdminPromotion,
   endAdminPromotion,
   fetchAdminPromotionDetail,
   fetchAdminPromotionsList,
@@ -28,6 +32,15 @@ export function useAdminPromotionsList(query: AdminListPromotionsQuery) {
         campaigns: response.campaigns,
       }
     },
+  })
+}
+
+export function useCreateAdminPromotion() {
+  const invalidate = useInvalidatePromotions()
+  return useMutation({
+    mutationFn: (body: AdminCreatePromotionRequest) =>
+      createAdminPromotion(body),
+    onSuccess: () => invalidate(),
   })
 }
 

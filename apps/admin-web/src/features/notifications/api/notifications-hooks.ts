@@ -1,19 +1,15 @@
-import type { UpdateUserNotificationSettingsRequest } from "@sable/contracts"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { mapAdminNotifications } from "../lib/map-admin-notification"
 import type { NotificationItem } from "../types"
 import {
-  fetchNotificationSettings,
   fetchNotifications,
   markAllNotificationsRead,
   setNotificationRead,
-  updateNotificationSettings,
 } from "./notifications-api"
 
 export const adminNotificationKeys = {
   all: ["admin", "notifications"] as const,
   list: () => [...adminNotificationKeys.all, "list"] as const,
-  settings: () => [...adminNotificationKeys.all, "settings"] as const,
 }
 
 export function useAdminNotifications() {
@@ -43,26 +39,6 @@ export function useSetAdminNotificationRead() {
       setNotificationRead(id, { read }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: adminNotificationKeys.all })
-    },
-  })
-}
-
-export function useAdminNotificationSettings() {
-  return useQuery({
-    queryKey: adminNotificationKeys.settings(),
-    queryFn: fetchNotificationSettings,
-  })
-}
-
-export function useUpdateAdminNotificationSettings() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (body: UpdateUserNotificationSettingsRequest) =>
-      updateNotificationSettings(body),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: adminNotificationKeys.settings(),
-      })
     },
   })
 }

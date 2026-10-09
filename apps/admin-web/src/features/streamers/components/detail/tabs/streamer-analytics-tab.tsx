@@ -30,7 +30,7 @@ export function StreamerAnalyticsTab({ analytics }: StreamerAnalyticsTabProps) {
     },
     {
       label: "ARPU",
-      value: `$${analytics.arpu.toFixed(2)}`,
+      value: `₦${analytics.arpu.toFixed(2)}`,
       icon: Wallet,
     },
   ]

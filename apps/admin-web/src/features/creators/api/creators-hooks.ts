@@ -1,6 +1,7 @@
 import type {
   AdminCreatorListResponse,
   AdminSuspendCreatorRequest,
+  IssueCreatorStrikeRequest,
 } from "@sable/contracts"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
@@ -9,6 +10,7 @@ import {
 } from "./creator-analytics-api"
 import {
   getCreator,
+  issueCreatorStrike,
   type ListCreatorsParams,
   listCreators,
   reactivateCreator,
@@ -89,6 +91,18 @@ export function useReactivateCreator(id: string) {
     mutationFn: () => reactivateCreator(id),
     onSuccess: (detail) => {
       queryClient.setQueryData(creatorsKeys.detail(id), detail)
+      queryClient.invalidateQueries({ queryKey: creatorsKeys.all })
+    },
+  })
+}
+
+export function useIssueCreatorStrike(id: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (body: IssueCreatorStrikeRequest) =>
+      issueCreatorStrike(id, body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: creatorsKeys.detail(id) })
       queryClient.invalidateQueries({ queryKey: creatorsKeys.all })
     },
   })

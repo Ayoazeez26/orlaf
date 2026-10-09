@@ -39,7 +39,7 @@ const STAT_DEFS: {
     label: "Ad spend (30d)",
     icon: CircleDollarSign,
     tone: "positive",
-    getValue: (summary) => `$${summary.totalSpend30d.toLocaleString("en-US")}`,
+    getValue: (summary) => `₦${summary.totalSpend30d.toLocaleString("en-US")}`,
   },
 ]
 

@@ -10,6 +10,7 @@ import {
   useMarkAllInboxRead,
   useMarkInboxRead,
 } from "../api/inbox-hooks"
+import { useAdminNotificationsRealtime } from "../api/notifications-socket"
 import {
   resolveAdminInboxHref,
   withSupportTicketHint,
@@ -32,6 +33,7 @@ function matchesFilter(
 
 export function NotificationsPage({ role }: { role: WorkspaceRoleId }) {
   const router = useRouter()
+  useAdminNotificationsRealtime()
   const inboxQuery = useAdminInboxQuery()
   const notifications = useInboxItems()
   const markRead = useMarkInboxRead()

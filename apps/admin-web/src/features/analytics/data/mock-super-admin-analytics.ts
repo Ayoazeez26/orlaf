@@ -5,7 +5,7 @@ export const MOCK_SUPER_ADMIN_ANALYTICS: SuperAdminAnalytics = {
   kpis: [
     {
       label: "Revenue",
-      value: "$62.3K",
+      value: "₦62.3K",
       changePercent: 12.4,
       icon: DollarSign,
     },

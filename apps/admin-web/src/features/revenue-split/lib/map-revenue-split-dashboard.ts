@@ -16,9 +16,17 @@ function formatMinor(amountMinor: number): string {
 
 const KPI_ICONS = [DollarSign, TrendingUp, Split, Clock] as const
 
+export interface PayoutGeneralSettings {
+  currency: string
+  holdPeriodDays: number
+  minimumPayoutMinor: number
+  autoPayoutsEnabled: boolean
+}
+
 export function mapRevenueSplitDashboard(data: AdminRevenueSplitDashboard): {
   kpis: RevenueSplitKpi[]
   tiers: RevenueSplitTier[]
+  settings: PayoutGeneralSettings
 } {
   return {
     kpis: data.kpis.map((kpi, index) => ({
@@ -34,5 +42,11 @@ export function mapRevenueSplitDashboard(data: AdminRevenueSplitDashboard): {
       platformPercent: tier.platform_percent,
       affiliatePercent: tier.affiliate_percent,
     })),
+    settings: {
+      currency: data.settings.currency,
+      holdPeriodDays: data.settings.hold_period_days,
+      minimumPayoutMinor: data.settings.minimum_payout_minor,
+      autoPayoutsEnabled: data.settings.auto_payouts_enabled,
+    },
   }
 }

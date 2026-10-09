@@ -1,6 +1,8 @@
 import type {
   AdminPromotionCampaign,
   AdminPromotionStatus,
+  PromotionGoal,
+  PromotionPlacement,
 } from "@sable/contracts"
 import type { LucideIcon } from "lucide-react"
 
@@ -30,8 +32,12 @@ export interface PromotionCampaignDetail extends PromotionCampaign {
 
 export interface NewCampaignFormValues {
   title: string
+  seriesId: string
+  seriesTitle: string
+  creatorId: string
   creatorName: string
-  placement: string
+  goal: PromotionGoal
+  placement: PromotionPlacement
   budget: number
   durationDays: number
 }

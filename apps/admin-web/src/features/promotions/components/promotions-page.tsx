@@ -7,12 +7,18 @@ import { toast, toastMutationError } from "@/lib/toast"
 import {
   useAdminPromotionsList,
   useApproveAdminPromotion,
+  useCreateAdminPromotion,
   usePauseAdminPromotion,
   useRejectAdminPromotion,
   useResumeAdminPromotion,
 } from "../hooks/use-promotions"
-import type { PromotionCampaign, PromotionFilter } from "../types"
+import type {
+  NewCampaignFormValues,
+  PromotionCampaign,
+  PromotionFilter,
+} from "../types"
 import { ApproveCampaignDialog } from "./dialogs/approve-campaign-dialog"
+import { NewCampaignDialog } from "./dialogs/new-campaign-dialog"
 import { PauseCampaignDialog } from "./dialogs/pause-campaign-dialog"
 import { RejectCampaignDialog } from "./dialogs/reject-campaign-dialog"
 import { PromotionsPageHeader } from "./promotions-page-header"
@@ -31,6 +37,7 @@ export function PromotionsPage({ role }: { role: WorkspaceRoleId }) {
   const [activeFilter, setActiveFilter] = useState<PromotionFilter>("all")
   const [search, setSearch] = useState("")
   const [dialog, setDialog] = useState<PromotionDialogState>(null)
+  const [newCampaignOpen, setNewCampaignOpen] = useState(false)
 
   const { data, isLoading, isError } = useAdminPromotionsList({
     status: activeFilter,
@@ -44,6 +51,7 @@ export function PromotionsPage({ role }: { role: WorkspaceRoleId }) {
   const rejectPromotion = useRejectAdminPromotion(activeId)
   const pausePromotion = usePauseAdminPromotion(activeId)
   const resumePromotion = useResumeAdminPromotion(activeId)
+  const createPromotion = useCreateAdminPromotion()
 
   const filtered = useMemo(() => data?.campaigns ?? [], [data?.campaigns])
 
@@ -85,9 +93,27 @@ export function PromotionsPage({ role }: { role: WorkspaceRoleId }) {
     }
   }
 
+  async function handleCreate(values: NewCampaignFormValues) {
+    try {
+      await createPromotion.mutateAsync({
+        title: values.title,
+        creatorId: values.creatorId,
+        seriesId: values.seriesId,
+        goal: values.goal,
+        placement: values.placement,
+        budget: values.budget,
+        durationDays: values.durationDays,
+      })
+      toast.success("Campaign created.")
+      setNewCampaignOpen(false)
+    } catch (error) {
+      toastMutationError(error, "Unable to create campaign.")
+    }
+  }
+
   return (
     <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
-      <PromotionsPageHeader onNewCampaign={() => {}} />
+      <PromotionsPageHeader onNewCampaign={() => setNewCampaignOpen(true)} />
       {data ? <PromotionsStatCards summary={data.summary} /> : null}
 
       <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6")}>
@@ -146,6 +172,13 @@ export function PromotionsPage({ role }: { role: WorkspaceRoleId }) {
         campaignTitle={activeCampaign?.title ?? ""}
         action={dialog?.type === "resume" ? "resume" : "pause"}
         onConfirm={() => void handlePauseOrResume()}
+      />
+
+      <NewCampaignDialog
+        open={newCampaignOpen}
+        onOpenChange={setNewCampaignOpen}
+        onCreate={(values) => void handleCreate(values)}
+        isSubmitting={createPromotion.isPending}
       />
     </div>
   )
