@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as Setup2faRouteImport } from './routes/setup-2fa'
 import { Route as WorkspaceRoleRouteRouteImport } from './routes/workspace/$role/route'
 import { Route as WorkspaceRoleIndexRouteImport } from './routes/workspace/$role/index'
 import { Route as WorkspaceRoleSplatRouteImport } from './routes/workspace/$role/$'
@@ -51,6 +52,11 @@ const ChangePasswordRoute = ChangePasswordRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Setup2faRoute = Setup2faRouteImport.update({
+  id: '/setup-2fa',
+  path: '/setup-2fa',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorkspaceRoleRouteRoute = WorkspaceRoleRouteRouteImport.update({
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
+  '/setup-2fa': typeof Setup2faRoute
   '/workspace/$role': typeof WorkspaceRoleRouteRouteWithChildren
   '/workspace/$role/$': typeof WorkspaceRoleSplatRoute
   '/workspace/$role/analytics': typeof WorkspaceRoleAnalyticsRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
+  '/setup-2fa': typeof Setup2faRoute
   '/workspace/$role/$': typeof WorkspaceRoleSplatRoute
   '/workspace/$role/analytics': typeof WorkspaceRoleAnalyticsRoute
   '/workspace/$role': typeof WorkspaceRoleIndexRoute
@@ -264,6 +272,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
+  '/setup-2fa': typeof Setup2faRoute
   '/workspace/$role': typeof WorkspaceRoleRouteRouteWithChildren
   '/workspace/$role/$': typeof WorkspaceRoleSplatRoute
   '/workspace/$role/analytics': typeof WorkspaceRoleAnalyticsRoute
@@ -296,6 +305,7 @@ export interface FileRouteTypes {
     | '/'
     | '/change-password'
     | '/login'
+    | '/setup-2fa'
     | '/workspace/$role'
     | '/workspace/$role/$'
     | '/workspace/$role/analytics'
@@ -326,6 +336,7 @@ export interface FileRouteTypes {
     | '/'
     | '/change-password'
     | '/login'
+    | '/setup-2fa'
     | '/workspace/$role/$'
     | '/workspace/$role/analytics'
     | '/workspace/$role'
@@ -355,6 +366,7 @@ export interface FileRouteTypes {
     | '/'
     | '/change-password'
     | '/login'
+    | '/setup-2fa'
     | '/workspace/$role'
     | '/workspace/$role/$'
     | '/workspace/$role/analytics'
@@ -386,6 +398,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ChangePasswordRoute: typeof ChangePasswordRoute
   LoginRoute: typeof LoginRoute
+  Setup2faRoute: typeof Setup2faRoute
   WorkspaceRoleRouteRoute: typeof WorkspaceRoleRouteRouteWithChildren
 }
 
@@ -410,6 +423,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/setup-2fa': {
+      id: '/setup-2fa'
+      path: '/setup-2fa'
+      fullPath: '/setup-2fa'
+      preLoaderRoute: typeof Setup2faRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/workspace/$role': {
@@ -653,6 +673,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ChangePasswordRoute: ChangePasswordRoute,
   LoginRoute: LoginRoute,
+  Setup2faRoute: Setup2faRoute,
   WorkspaceRoleRouteRoute: WorkspaceRoleRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport

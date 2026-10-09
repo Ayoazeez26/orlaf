@@ -14,11 +14,12 @@ import {
   setOnSessionExpired,
 } from "@/lib/http-client"
 import { getRouter } from "@/router"
-import type { SignInAdminResult } from "./api/auth-api"
+import type { SignInAdminResult, VerifyAdminMfaResult } from "./api/auth-api"
 import {
   changeAdminPassword as changeAdminPasswordApi,
   logout as logoutApi,
   signInAdmin as signInAdminApi,
+  verifyAdminMfa as verifyAdminMfaApi,
 } from "./api/auth-api"
 import { useAuthBootstrapProgress } from "./hooks/use-auth-bootstrap-progress"
 import type { AdminSession } from "./lib/admin-session"
@@ -37,6 +38,10 @@ interface AuthContextValue {
   signInWithEmail: (
     input: Parameters<typeof signInAdminApi>[0]
   ) => Promise<SignInAdminResult>
+  verifyMfaAndSignIn: (
+    mfaToken: string,
+    code: string
+  ) => Promise<VerifyAdminMfaResult>
   changePassword: (
     input: Parameters<typeof changeAdminPasswordApi>[0]
   ) => Promise<void>
@@ -142,6 +147,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [completeSignIn]
   )
 
+  const verifyMfaAndSignIn = useCallback(
+    async (mfaToken: string, code: string) => {
+      const result = await verifyAdminMfaApi({ mfa_token: mfaToken, code })
+
+      if (result.outcome === "success") {
+        await completeSignIn(result.data)
+      }
+
+      return result
+    },
+    [completeSignIn]
+  )
+
   const changePassword = useCallback(
     async (input: Parameters<typeof changeAdminPasswordApi>[0]) => {
       await changeAdminPasswordApi(input)
@@ -174,11 +192,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isLoading: status === "loading",
       session,
       signInWithEmail,
+      verifyMfaAndSignIn,
       changePassword,
       updateSession,
       signOut,
     }),
-    [status, session, signInWithEmail, changePassword, updateSession, signOut]
+    [
+      status,
+      session,
+      signInWithEmail,
+      verifyMfaAndSignIn,
+      changePassword,
+      updateSession,
+      signOut,
+    ]
   )
 
   if (status === "loading") {

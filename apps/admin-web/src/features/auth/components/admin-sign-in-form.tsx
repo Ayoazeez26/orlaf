@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { PasswordInput } from "@/components/password-input"
 import { useAuth } from "@/features/auth/auth-context"
+import { AdminMfaVerifyDialog } from "./admin-mfa-verify-dialog"
 
 const signInSchema = z.object({
   email: z.string().email("Enter a valid email address"),
@@ -22,6 +23,7 @@ interface AdminSignInFormProps {
 export function AdminSignInForm({ onError }: AdminSignInFormProps) {
   const { signInWithEmail } = useAuth()
   const [submitting, setSubmitting] = useState(false)
+  const [mfaToken, setMfaToken] = useState<string | null>(null)
 
   const form = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
@@ -34,6 +36,11 @@ export function AdminSignInForm({ onError }: AdminSignInFormProps) {
 
     try {
       const result = await signInWithEmail(values)
+
+      if (result.outcome === "requires_2fa") {
+        setMfaToken(result.mfaToken)
+        return
+      }
 
       if (result.outcome === "invalid_credentials") {
         onError(result.message)
@@ -49,41 +56,52 @@ export function AdminSignInForm({ onError }: AdminSignInFormProps) {
   })
 
   return (
-    <form className="space-y-4" onSubmit={onSubmit}>
-      <div className="space-y-2">
-        <Label htmlFor="admin-email">Email</Label>
-        <Input
-          id="admin-email"
-          type="email"
-          autoComplete="email"
-          disabled={submitting}
-          {...form.register("email")}
-        />
-        {form.formState.errors.email ? (
-          <p className="text-destructive text-sm">
-            {form.formState.errors.email.message}
-          </p>
-        ) : null}
-      </div>
+    <>
+      <form className="space-y-4" onSubmit={onSubmit}>
+        <div className="space-y-2">
+          <Label htmlFor="admin-email">Email</Label>
+          <Input
+            id="admin-email"
+            type="email"
+            autoComplete="email"
+            disabled={submitting}
+            {...form.register("email")}
+          />
+          {form.formState.errors.email ? (
+            <p className="text-destructive text-sm">
+              {form.formState.errors.email.message}
+            </p>
+          ) : null}
+        </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="admin-password">Password</Label>
-        <PasswordInput
-          id="admin-password"
-          autoComplete="current-password"
-          disabled={submitting}
-          {...form.register("password")}
-        />
-        {form.formState.errors.password ? (
-          <p className="text-destructive text-sm">
-            {form.formState.errors.password.message}
-          </p>
-        ) : null}
-      </div>
+        <div className="space-y-2">
+          <Label htmlFor="admin-password">Password</Label>
+          <PasswordInput
+            id="admin-password"
+            autoComplete="current-password"
+            disabled={submitting}
+            {...form.register("password")}
+          />
+          {form.formState.errors.password ? (
+            <p className="text-destructive text-sm">
+              {form.formState.errors.password.message}
+            </p>
+          ) : null}
+        </div>
 
-      <Button type="submit" className="w-full" disabled={submitting}>
-        {submitting ? "Signing in…" : "Sign in"}
-      </Button>
-    </form>
+        <Button type="submit" className="w-full" disabled={submitting}>
+          {submitting ? "Signing in…" : "Sign in"}
+        </Button>
+      </form>
+
+      <AdminMfaVerifyDialog
+        open={mfaToken !== null}
+        mfaToken={mfaToken ?? ""}
+        onOpenChange={(open) => {
+          if (!open) setMfaToken(null)
+        }}
+        onError={onError}
+      />
+    </>
   )
 }
