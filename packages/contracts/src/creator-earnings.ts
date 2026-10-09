@@ -174,3 +174,10 @@ export interface UpdateAdminRevenueSplitTierRequest {
   platform_percent: number
   affiliate_percent: number
 }
+
+export interface UpdatePlatformPayoutSettingsRequest {
+  currency?: string
+  holdPeriodDays?: number
+  minimumPayoutMinor?: number
+  autoPayoutsEnabled?: boolean
+}

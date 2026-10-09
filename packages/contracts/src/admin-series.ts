@@ -23,6 +23,7 @@ export interface AdminSeriesListItem {
   type: SeriesType
   genre: string
   language: string
+  creatorId: string
   creatorName: string
   episodeCount: number
   pendingEpisodeCount: number
@@ -67,7 +68,6 @@ export interface AdminSeriesEpisode {
 
 export interface AdminSeriesDetail extends AdminSeriesListItem {
   synopsis: string | null
-  creatorId: string
   creatorEmail: string
   creatorUsername: string
   creatorInitials: string

@@ -9,6 +9,7 @@ export type AuditActionType =
   | "user-suspended"
   | "user-reactivated"
   | "creator-reactivated"
+  | "creator-strike-issued"
   | "application-approved"
   | "application-rejected"
   | "report-created"
