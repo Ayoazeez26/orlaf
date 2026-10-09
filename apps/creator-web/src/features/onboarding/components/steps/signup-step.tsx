@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { PasswordInput } from "@/components/password-input"
 import { PasswordStrengthBar } from "@/components/password-strength-bar"
+import { SignupsPausedModal } from "@/components/signups-paused-modal"
 import { useAuth } from "@/features/auth/auth-context"
 import { passwordFieldSchema } from "@/lib/password-schema"
 import { useOnboarding } from "../../onboarding-context"
@@ -33,6 +34,7 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
   const { signUpWithEmail } = useAuth()
   const [apiError, setApiError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [signupsPaused, setSignupsPaused] = useState(false)
   const emailLocked = Boolean(data.inviteToken)
 
   const {
@@ -89,6 +91,11 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
       } else {
         setApiError("This email is already registered. Please log in instead.")
       }
+      return
+    }
+
+    if (result.outcome === "signups_paused") {
+      setSignupsPaused(true)
       return
     }
 
@@ -200,6 +207,11 @@ export function SignupStep({ progress, onBack, onNext }: SignupStepProps) {
           </p>
         )}
       </form>
+
+      <SignupsPausedModal
+        open={signupsPaused}
+        onOpenChange={setSignupsPaused}
+      />
     </OnboardingShell>
   )
 }

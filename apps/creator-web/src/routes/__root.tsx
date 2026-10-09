@@ -2,10 +2,12 @@ import { GoogleOAuthProvider } from "@react-oauth/google"
 import { createRootRoute, HeadContent, Scripts } from "@tanstack/react-router"
 
 import appCss from "@workspace/ui/globals.css?url"
+import { MaintenanceGate } from "@/components/maintenance-gate"
 import { QueryProvider } from "@/components/query-provider"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/toaster"
 import { AuthProvider } from "@/features/auth/auth-context"
+import { BrandingStyleInjector } from "@/features/branding/branding-style-injector"
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ""
 const tawkSrc = import.meta.env.VITE_TAWK_SRC ?? ""
@@ -45,6 +47,27 @@ const tawkBootstrapScript = tawkSrc
     })();
   `
   : ""
+
+/**
+ * Applies the last-fetched branding colors before first paint, straight from
+ * localStorage — avoids a flash of the default purple theme on repeat
+ * visits. BrandingStyleInjector (mounted inside QueryProvider) re-applies
+ * with a freshly-fetched value shortly after and keeps the cache warm.
+ */
+const brandingBootstrapScript = `
+  (function () {
+    try {
+      var cached = JSON.parse(localStorage.getItem("sable:branding") || "null");
+      if (!cached) return;
+      var root = document.documentElement;
+      if (cached.primaryColor) {
+        root.style.setProperty("--primary", cached.primaryColor);
+        root.style.setProperty("--sidebar-primary", cached.primaryColor);
+      }
+      if (cached.accentColor) root.style.setProperty("--accent", cached.accentColor);
+    } catch (e) {}
+  })();
+`
 
 export const Route = createRootRoute({
   head: () => ({
@@ -90,17 +113,22 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static, no user input */}
+        <script dangerouslySetInnerHTML={{ __html: brandingBootstrapScript }} />
       </head>
       <body suppressHydrationWarning>
         <QueryProvider>
-          <AuthProvider>
-            <GoogleOAuthProvider clientId={googleClientId}>
-              <ThemeProvider>
-                {children}
-                <Toaster position="top-right" richColors closeButton />
-              </ThemeProvider>
-            </GoogleOAuthProvider>
-          </AuthProvider>
+          <BrandingStyleInjector />
+          <ThemeProvider>
+            <MaintenanceGate>
+              <AuthProvider>
+                <GoogleOAuthProvider clientId={googleClientId}>
+                  {children}
+                </GoogleOAuthProvider>
+              </AuthProvider>
+            </MaintenanceGate>
+            <Toaster position="top-right" richColors closeButton />
+          </ThemeProvider>
         </QueryProvider>
         {tawkBootstrapScript && (
           // biome-ignore lint/security/noDangerouslySetInnerHtml: vendor embed snippet, no user input

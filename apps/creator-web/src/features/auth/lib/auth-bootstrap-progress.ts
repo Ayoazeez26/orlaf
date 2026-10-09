@@ -24,7 +24,5 @@ export function subscribeAuthBootstrapProgress(
 ) {
   listeners.add(listener)
   listener(currentProgress)
-  return () => {
-    listeners.delete(listener)
-  }
+  return () => listeners.delete(listener)
 }

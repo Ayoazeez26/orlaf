@@ -130,7 +130,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const destination = resolvePostSignInRoute(nextSession, onboardingStep)
-      if (destination.to === "/onboarding" && destination.search?.step) {
+      if (destination.to === "/onboarding") {
         void getRouter().navigate({
           to: destination.to,
           search: destination.search,

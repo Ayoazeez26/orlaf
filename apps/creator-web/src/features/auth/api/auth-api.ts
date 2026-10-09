@@ -1,13 +1,14 @@
-import type {
-  ConsentRequest,
-  EmailSignInBody,
-  EmailSignUpBody,
-  EmailSignUpResponse,
-  GoogleSignInBody,
-  PolicyVersions,
-  SignInResponse,
-  VerifyEmailBody,
-  VerifyMfaRequest,
+import {
+  type ConsentRequest,
+  type EmailSignInBody,
+  type EmailSignUpBody,
+  type EmailSignUpResponse,
+  type GoogleSignInBody,
+  PLATFORM_SIGNUPS_PAUSED_ERROR_CODE,
+  type PolicyVersions,
+  type SignInResponse,
+  type VerifyEmailBody,
+  type VerifyMfaRequest,
 } from "@sable/contracts"
 import { ApiError, apiFetch, apiRequest } from "@/lib/http-client"
 
@@ -147,6 +148,7 @@ export type SignUpEmailResult =
       provider?: string
       message: string
     }
+  | { outcome: "signups_paused"; message: string }
   | { outcome: "error"; message: string }
 
 export async function signUpWithEmail(
@@ -167,6 +169,19 @@ export async function signUpWithEmail(
         errorCode: data.error_code ?? "email_already_registered",
         provider: (data as { provider?: string }).provider,
         message: parseErrorMessage(data, "This email is already registered."),
+      }
+    }
+
+    if (
+      response.status === 503 &&
+      data.error_code === PLATFORM_SIGNUPS_PAUSED_ERROR_CODE
+    ) {
+      return {
+        outcome: "signups_paused",
+        message: parseErrorMessage(
+          data,
+          "New sign-ups are not allowed at the moment."
+        ),
       }
     }
 

@@ -3,6 +3,7 @@
  * Uses httpOnly refresh cookie (sable_rt_creator) + in-memory access token.
  */
 
+import { PLATFORM_MAINTENANCE_ERROR_CODE } from "@sable/contracts"
 import { getApiBaseUrl } from "./api-base-url"
 import { getActiveStudioId } from "./studio-id"
 
@@ -13,9 +14,14 @@ const REFRESH_EXPIRY_BUFFER_SECONDS = 60
 let inMemoryAccessToken: string | null = null
 let refreshPromise: Promise<string | null> | null = null
 let onSessionExpired: (() => void) | null = null
+let onMaintenanceDetected: (() => void) | null = null
 
 export function setOnSessionExpired(handler: (() => void) | null) {
   onSessionExpired = handler
+}
+
+export function setOnMaintenanceDetected(handler: (() => void) | null) {
+  onMaintenanceDetected = handler
 }
 
 export function getAccessToken(): string | null {
@@ -133,6 +139,13 @@ export async function apiRequest<T = unknown>(
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}))
+    if (
+      response.status === 503 &&
+      (body as { error_code?: string })?.error_code ===
+        PLATFORM_MAINTENANCE_ERROR_CODE
+    ) {
+      onMaintenanceDetected?.()
+    }
     throw new ApiError(
       response.status,
       (body as { message?: string })?.message ?? "Request failed",

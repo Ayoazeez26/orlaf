@@ -33,7 +33,7 @@ export const Route = createFileRoute("/login")({
     if (status === "loading" || status !== "authenticated" || !session) return
 
     const destination = resolvePostSignInRoute(session)
-    if (destination.to === "/onboarding" && destination.search?.step) {
+    if (destination.to === "/onboarding") {
       throw redirect({ to: destination.to, search: destination.search })
     }
     throw redirect({ to: destination.to })
