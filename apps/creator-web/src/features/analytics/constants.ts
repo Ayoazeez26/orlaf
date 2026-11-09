@@ -14,7 +14,7 @@ export const DATE_RANGE_SELECT_TRIGGER_CLASS =
 export const DATE_RANGE_SELECT_TRIGGER_HEADER_CLASS =
   "w-fit min-w-[8.25rem] shrink-0 rounded-[10px] border-border bg-transparent px-4 py-4 dark:bg-transparent"
 
-/** Mobile #7C51C8 · Desktop #C285E0 · Tablet #E0B8E0 (see globals.css) */
+/** Brand primary and two lighter tints of it (see globals.css) */
 export const DEVICE_CHART_COLORS = {
   mobile: "var(--chart-device-mobile)",
   desktop: "var(--chart-device-desktop)",

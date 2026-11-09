@@ -162,7 +162,7 @@ export function ProjectEpisodesTab() {
               key={episode.id}
               className="flex items-center gap-4 border-border border-t px-6 py-4"
             >
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#EDEBFF] text-primary">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                 <Play className="size-4" strokeWidth={1.75} aria-hidden />
               </span>
               <div className="min-w-0 flex-1">

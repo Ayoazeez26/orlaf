@@ -130,7 +130,7 @@ export function MobileSeriesPreview({
             className="absolute inset-0 size-full object-cover"
           />
         ) : (
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,#7c3aed_0%,#111827_100%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,var(--primary)_0%,#111827_100%)]" />
         )}
         <div className="absolute inset-0 bg-linear-to-t from-black/88 via-black/28 to-transparent" />
         <div className="relative flex h-full flex-col justify-end p-4 text-white">
@@ -189,7 +189,7 @@ export function MobileSeriesPreview({
                     onToggle={player.togglePlayback}
                   />
                 ) : (
-                  <span className="flex size-11 items-center justify-center rounded-full bg-primary shadow-[0_8px_20px_rgba(124,58,237,0.35)]">
+                  <span className="flex size-11 items-center justify-center rounded-full bg-primary shadow-[0_8px_20px_color-mix(in_oklch,var(--primary)_35%,transparent)]">
                     <Play
                       className="ml-0.5 size-5 fill-current text-white"
                       aria-hidden

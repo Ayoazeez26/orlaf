@@ -1,4 +1,5 @@
 import type {
+  AdminEpisodePlaybackResponse,
   AdminSeriesDetail,
   AdminSeriesListItem,
   AdminSeriesListResponse,
@@ -79,6 +80,15 @@ export function unpublishProject(
   return apiRequest<AdminSeriesDetail>(
     `/api/v1/admin/series/${encodeURIComponent(id)}/unpublish`,
     { method: "POST", body: JSON.stringify(body) }
+  )
+}
+
+export function getEpisodePlayback(
+  seriesId: string,
+  episodeId: string
+): Promise<AdminEpisodePlaybackResponse> {
+  return apiRequest<AdminEpisodePlaybackResponse>(
+    `/api/v1/admin/series/${encodeURIComponent(seriesId)}/episodes/${encodeURIComponent(episodeId)}/playback`
   )
 }
 

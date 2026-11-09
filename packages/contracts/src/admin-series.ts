@@ -64,6 +64,15 @@ export interface AdminSeriesEpisode {
   views: number | null
   reviewStatus: AdminSeriesReviewStatus
   status: "published" | "draft" | "processing" | "failed" | "pending_review"
+  /** Video finished processing — `GET .../episodes/:id/playback` will succeed. */
+  playable: boolean
+}
+
+/** Short-lived signed HLS URL for previewing an episode during review. */
+export interface AdminEpisodePlaybackResponse {
+  url: string
+  /** ISO timestamp after which `url` stops working. */
+  expiresAt: string
 }
 
 export interface AdminSeriesDetail extends AdminSeriesListItem {

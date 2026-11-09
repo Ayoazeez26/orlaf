@@ -7,7 +7,7 @@ const PROJECT_ICON_STYLES: Record<
   { color: string; icon: LucideIcon }
 > = {
   purple: {
-    color: "#7C3AED",
+    color: "var(--primary)",
     icon: Clapperboard,
   },
   pink: {

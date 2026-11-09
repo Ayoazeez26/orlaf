@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Link } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
@@ -75,7 +76,15 @@ export function AdminSignInForm({ onError }: AdminSignInFormProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="admin-password">Password</Label>
+          <div className="flex items-center justify-between gap-2">
+            <Label htmlFor="admin-password">Password</Label>
+            <Link
+              to="/forgot-password"
+              className="text-primary text-sm hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <PasswordInput
             id="admin-password"
             autoComplete="current-password"

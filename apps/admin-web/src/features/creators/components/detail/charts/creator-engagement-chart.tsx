@@ -21,8 +21,8 @@ import type { EngagementPoint } from "../../../types"
 
 const ENGAGEMENT_COLORS = [
   ANALYTICS_SERIES_COLORS.primary,
-  "#a78bfa",
-  "#ddd6fe",
+  "var(--chart-device-desktop)",
+  "var(--chart-device-tablet)",
 ]
 
 interface CreatorEngagementChartProps {

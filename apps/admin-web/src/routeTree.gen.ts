@@ -11,8 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ChangePasswordRouteImport } from './routes/change-password'
+import { Route as ForgotPasswordRouteRouteImport } from './routes/forgot-password/route'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as Setup2faRouteImport } from './routes/setup-2fa'
+import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password/index'
+import { Route as ForgotPasswordVerifyRouteImport } from './routes/forgot-password/verify'
 import { Route as WorkspaceRoleRouteRouteImport } from './routes/workspace/$role/route'
 import { Route as WorkspaceRoleIndexRouteImport } from './routes/workspace/$role/index'
 import { Route as WorkspaceRoleSplatRouteImport } from './routes/workspace/$role/$'
@@ -49,15 +53,35 @@ const ChangePasswordRoute = ChangePasswordRouteImport.update({
   path: '/change-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordRouteRoute = ForgotPasswordRouteRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Setup2faRoute = Setup2faRouteImport.update({
   id: '/setup-2fa',
   path: '/setup-2fa',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordIndexRoute = ForgotPasswordIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ForgotPasswordRouteRoute,
+} as any)
+const ForgotPasswordVerifyRoute = ForgotPasswordVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => ForgotPasswordRouteRoute,
 } as any)
 const WorkspaceRoleRouteRoute = WorkspaceRoleRouteRouteImport.update({
   id: '/workspace/$role',
@@ -208,10 +232,14 @@ const WorkspaceRoleSupportIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/forgot-password': typeof ForgotPasswordRouteRouteWithChildren
   '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/setup-2fa': typeof Setup2faRoute
   '/workspace/$role': typeof WorkspaceRoleRouteRouteWithChildren
+  '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
+  '/forgot-password/': typeof ForgotPasswordIndexRoute
   '/workspace/$role/$': typeof WorkspaceRoleSplatRoute
   '/workspace/$role/analytics': typeof WorkspaceRoleAnalyticsRoute
   '/workspace/$role/': typeof WorkspaceRoleIndexRoute
@@ -241,7 +269,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/setup-2fa': typeof Setup2faRoute
+  '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
+  '/forgot-password': typeof ForgotPasswordIndexRoute
   '/workspace/$role/$': typeof WorkspaceRoleSplatRoute
   '/workspace/$role/analytics': typeof WorkspaceRoleAnalyticsRoute
   '/workspace/$role': typeof WorkspaceRoleIndexRoute
@@ -270,10 +301,14 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/forgot-password': typeof ForgotPasswordRouteRouteWithChildren
   '/change-password': typeof ChangePasswordRoute
   '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/setup-2fa': typeof Setup2faRoute
   '/workspace/$role': typeof WorkspaceRoleRouteRouteWithChildren
+  '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
+  '/forgot-password/': typeof ForgotPasswordIndexRoute
   '/workspace/$role/$': typeof WorkspaceRoleSplatRoute
   '/workspace/$role/analytics': typeof WorkspaceRoleAnalyticsRoute
   '/workspace/$role/': typeof WorkspaceRoleIndexRoute
@@ -303,10 +338,14 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/forgot-password'
     | '/change-password'
     | '/login'
+    | '/reset-password'
     | '/setup-2fa'
     | '/workspace/$role'
+    | '/forgot-password/verify'
+    | '/forgot-password/'
     | '/workspace/$role/$'
     | '/workspace/$role/analytics'
     | '/workspace/$role/'
@@ -336,7 +375,10 @@ export interface FileRouteTypes {
     | '/'
     | '/change-password'
     | '/login'
+    | '/reset-password'
     | '/setup-2fa'
+    | '/forgot-password/verify'
+    | '/forgot-password'
     | '/workspace/$role/$'
     | '/workspace/$role/analytics'
     | '/workspace/$role'
@@ -364,10 +406,14 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/forgot-password'
     | '/change-password'
     | '/login'
+    | '/reset-password'
     | '/setup-2fa'
     | '/workspace/$role'
+    | '/forgot-password/verify'
+    | '/forgot-password/'
     | '/workspace/$role/$'
     | '/workspace/$role/analytics'
     | '/workspace/$role/'
@@ -396,8 +442,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ForgotPasswordRouteRoute: typeof ForgotPasswordRouteRouteWithChildren
   ChangePasswordRoute: typeof ChangePasswordRoute
   LoginRoute: typeof LoginRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   Setup2faRoute: typeof Setup2faRoute
   WorkspaceRoleRouteRoute: typeof WorkspaceRoleRouteRouteWithChildren
 }
@@ -418,11 +466,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChangePasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/setup-2fa': {
@@ -431,6 +493,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/setup-2fa'
       preLoaderRoute: typeof Setup2faRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password/': {
+      id: '/forgot-password/'
+      path: '/'
+      fullPath: '/forgot-password/'
+      preLoaderRoute: typeof ForgotPasswordIndexRouteImport
+      parentRoute: typeof ForgotPasswordRouteRoute
+    }
+    '/forgot-password/verify': {
+      id: '/forgot-password/verify'
+      path: '/verify'
+      fullPath: '/forgot-password/verify'
+      preLoaderRoute: typeof ForgotPasswordVerifyRouteImport
+      parentRoute: typeof ForgotPasswordRouteRoute
     }
     '/workspace/$role': {
       id: '/workspace/$role'
@@ -610,6 +686,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ForgotPasswordRouteRouteChildren {
+  ForgotPasswordVerifyRoute: typeof ForgotPasswordVerifyRoute
+  ForgotPasswordIndexRoute: typeof ForgotPasswordIndexRoute
+}
+
+const ForgotPasswordRouteRouteChildren: ForgotPasswordRouteRouteChildren = {
+  ForgotPasswordVerifyRoute: ForgotPasswordVerifyRoute,
+  ForgotPasswordIndexRoute: ForgotPasswordIndexRoute,
+}
+
+const ForgotPasswordRouteRouteWithChildren =
+  ForgotPasswordRouteRoute._addFileChildren(ForgotPasswordRouteRouteChildren)
+
 interface WorkspaceRoleRouteRouteChildren {
   WorkspaceRoleSplatRoute: typeof WorkspaceRoleSplatRoute
   WorkspaceRoleAnalyticsRoute: typeof WorkspaceRoleAnalyticsRoute
@@ -671,8 +760,10 @@ const WorkspaceRoleRouteRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ForgotPasswordRouteRoute: ForgotPasswordRouteRouteWithChildren,
   ChangePasswordRoute: ChangePasswordRoute,
   LoginRoute: LoginRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   Setup2faRoute: Setup2faRoute,
   WorkspaceRoleRouteRoute: WorkspaceRoleRouteRouteWithChildren,
 }

@@ -2,6 +2,7 @@ import type { AdminSeriesStats } from "@sable/contracts"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   deleteProject,
+  getEpisodePlayback,
   getProject,
   getProjectAnalytics,
   type ListProjectsParams,
@@ -19,6 +20,33 @@ export const projectsKeys = {
     [...projectsKeys.all, "list", params] as const,
   detail: (id: string) => [...projectsKeys.all, "detail", id] as const,
   analytics: (id: string) => [...projectsKeys.all, "analytics", id] as const,
+  playback: (seriesId: string, episodeId: string) =>
+    [...projectsKeys.all, "playback", seriesId, episodeId] as const,
+}
+
+/** Refetch a signed URL this long before it expires. */
+const PLAYBACK_EXPIRY_MARGIN_MS = 5 * 60 * 1000
+
+export function useEpisodePlaybackQuery(
+  seriesId: string,
+  episodeId: string | null
+) {
+  return useQuery({
+    queryKey: projectsKeys.playback(seriesId, episodeId ?? ""),
+    queryFn: () => getEpisodePlayback(seriesId, episodeId as string),
+    enabled: Boolean(seriesId && episodeId),
+    staleTime: (query) => {
+      const expiresAt = query.state.data?.expiresAt
+      if (!expiresAt) return 0
+      return Math.max(
+        0,
+        new Date(expiresAt).getTime() - Date.now() - PLAYBACK_EXPIRY_MARGIN_MS
+      )
+    },
+    // A new URL mid-playback would restart the video.
+    refetchOnWindowFocus: false,
+    retry: false,
+  })
 }
 
 export function useProjectsQuery(params: ListProjectsParams) {

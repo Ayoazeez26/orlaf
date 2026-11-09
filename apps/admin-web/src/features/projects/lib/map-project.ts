@@ -56,6 +56,7 @@ export function mapDetailToProject(detail: AdminSeriesDetail): ProjectDetail {
           : episode.status === "pending_review"
             ? "pending_review"
             : "draft",
+      playable: episode.playable,
     })),
     topEpisodes: [],
     analytics: EMPTY_ANALYTICS,

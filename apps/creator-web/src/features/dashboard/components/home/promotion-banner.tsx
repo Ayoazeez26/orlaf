@@ -4,7 +4,7 @@ import { Megaphone } from "lucide-react"
 
 export function PromotionBanner() {
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-[#E2E4EA] border-dashed bg-[#EDEEFF66] p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+    <div className="flex flex-col gap-4 rounded-2xl border border-[#E2E4EA] border-dashed bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
       <div className="flex items-start gap-4">
         <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary">
           <Megaphone className="size-5 text-white" aria-hidden />

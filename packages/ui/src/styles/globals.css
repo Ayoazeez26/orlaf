@@ -104,15 +104,19 @@
   --popover-foreground: oklch(0.145 0 0);
   --text-strong: #17171c;
   --text-subtle: #6f6f7b;
-  --primary: #7e55f0;
+  /* Default brand colour; Settings -> Branding overrides it at runtime. Brand-derived tokens below use var(--primary) so they follow the override. */
+  --primary: #b67233;
   --primary-foreground: oklch(0.985 0 0);
-  --primary-gradient-from: #7e55f0;
-  --primary-gradient-to: oklch(0.626 0.162 313.4);
-  --wallet-balance-gradient-from: #7e55f0;
-  --wallet-balance-gradient-to: #6e21d2;
-  /* #7C51C8 → #C285E0 */
-  --revenue-breakdown-gradient-from: oklch(0.542 0.178 296.7);
-  --revenue-breakdown-gradient-to: oklch(0.711 0.143 314);
+  --primary-gradient-from: var(--primary);
+  --primary-gradient-to: color-mix(in oklch, var(--primary) 70%, white);
+  --wallet-balance-gradient-from: var(--primary);
+  --wallet-balance-gradient-to: color-mix(in oklch, var(--primary) 70%, black);
+  --revenue-breakdown-gradient-from: var(--primary);
+  --revenue-breakdown-gradient-to: color-mix(
+    in oklch,
+    var(--primary) 60%,
+    white
+  );
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
@@ -135,22 +139,28 @@
   --trend-negative-muted: oklch(0.579 0.214 27.2 / 0.15);
   /* #DC28284D */
   --danger-zone-border: oklch(0.579 0.214 27.2 / 0.302);
-  /* #7C51C8 / #C285E0 / #E0B8E0 */
-  --chart-device-mobile: oklch(0.542 0.178 296.7);
-  --chart-device-desktop: oklch(0.711 0.143 314);
-  --chart-device-tablet: oklch(0.83 0.07 326.2);
-  /* #8E4DFF #EC4899 #FBBF24 #38BDF8 #10B981 */
-  --revenue-coin-unlocks: oklch(0.596 0.247 294.4);
+  --chart-device-mobile: var(--primary);
+  --chart-device-desktop: color-mix(in oklch, var(--primary) 60%, white);
+  --chart-device-tablet: color-mix(in oklch, var(--primary) 30%, white);
+  /* Coin unlocks follow --primary · #EC4899 #FBBF24 #38BDF8 #10B981 */
+  --revenue-coin-unlocks: var(--primary);
   --revenue-memberships: oklch(0.656 0.212 354.3);
   --revenue-pending: oklch(0.837 0.164 84.4);
   --revenue-extras: oklch(0.754 0.139 232.7);
   --revenue-commission: oklch(0.696 0.149 162.5);
-  /* #F3EDFD4D */
-  --payout-schedule-info-bg: oklch(0.955 0.022 302.9 / 0.302);
+  --payout-schedule-info-bg: color-mix(
+    in oklch,
+    var(--primary) 6%,
+    transparent
+  );
   --payout-schedule-info-border: var(--border);
-  --payout-schedule-selected-bg: oklch(0.596 0.247 294.4 / 0.1);
-  --payout-schedule-selected-border: oklch(0.596 0.247 294.4);
-  --payout-accent-muted: oklch(0.596 0.247 294.4 / 0.1);
+  --payout-schedule-selected-bg: color-mix(
+    in oklch,
+    var(--primary) 10%,
+    transparent
+  );
+  --payout-schedule-selected-border: var(--primary);
+  --payout-accent-muted: color-mix(in oklch, var(--primary) 10%, transparent);
   --payout-account-row-bg: var(--card);
   --input: oklch(0.922 0 0);
   --input-bg: oklch(0.985 0 0);
@@ -163,7 +173,7 @@
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.542 0.178 296.7);
+  --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
@@ -181,14 +191,18 @@
   --popover-foreground: oklch(0.961 0 89.9);
   --text-strong: var(--foreground);
   --text-subtle: var(--muted-foreground);
-  --primary: #7e55f0;
+  --primary: #b67233;
   --primary-foreground: oklch(0.961 0 89.9);
-  --primary-gradient-from: #7e55f0;
-  --primary-gradient-to: oklch(0.626 0.162 313.4);
-  --wallet-balance-gradient-from: #7e55f0;
-  --wallet-balance-gradient-to: #6e21d2;
-  --revenue-breakdown-gradient-from: oklch(0.542 0.178 296.7);
-  --revenue-breakdown-gradient-to: oklch(0.711 0.143 314);
+  --primary-gradient-from: var(--primary);
+  --primary-gradient-to: color-mix(in oklch, var(--primary) 70%, white);
+  --wallet-balance-gradient-from: var(--primary);
+  --wallet-balance-gradient-to: color-mix(in oklch, var(--primary) 70%, black);
+  --revenue-breakdown-gradient-from: var(--primary);
+  --revenue-breakdown-gradient-to: color-mix(
+    in oklch,
+    var(--primary) 60%,
+    white
+  );
   --secondary: oklch(0.198 0.008 285.6);
   --secondary-foreground: oklch(0.961 0 89.9);
   --muted: oklch(0.198 0.008 285.6);
@@ -206,23 +220,39 @@
   --trend-negative: oklch(0.579 0.214 27.2);
   --trend-negative-muted: oklch(0.579 0.214 27.2 / 0.2);
   --danger-zone-border: oklch(0.579 0.214 27.2 / 0.302);
-  --chart-device-mobile: oklch(0.542 0.178 296.7);
-  --chart-device-desktop: oklch(0.711 0.143 314);
-  --chart-device-tablet: oklch(0.83 0.07 326.2);
-  --revenue-coin-unlocks: oklch(0.596 0.247 294.4);
+  --chart-device-mobile: var(--primary);
+  --chart-device-desktop: color-mix(in oklch, var(--primary) 60%, white);
+  --chart-device-tablet: color-mix(in oklch, var(--primary) 30%, white);
+  --revenue-coin-unlocks: var(--primary);
   --revenue-memberships: oklch(0.656 0.212 354.3);
   --revenue-pending: oklch(0.837 0.164 84.4);
   --revenue-extras: oklch(0.754 0.139 232.7);
   --revenue-commission: oklch(0.696 0.149 162.5);
-  --payout-schedule-info-bg: oklch(0.596 0.247 294.4 / 0.14);
-  --payout-schedule-info-border: oklch(0.596 0.247 294.4 / 0.32);
-  --payout-schedule-selected-bg: oklch(0.596 0.247 294.4 / 0.22);
-  --payout-schedule-selected-border: oklch(0.68 0.2 294.4);
-  --payout-accent-muted: oklch(0.596 0.247 294.4 / 0.2);
+  --payout-schedule-info-bg: color-mix(
+    in oklch,
+    var(--primary) 14%,
+    transparent
+  );
+  --payout-schedule-info-border: color-mix(
+    in oklch,
+    var(--primary) 32%,
+    transparent
+  );
+  --payout-schedule-selected-bg: color-mix(
+    in oklch,
+    var(--primary) 22%,
+    transparent
+  );
+  --payout-schedule-selected-border: color-mix(
+    in oklch,
+    var(--primary) 80%,
+    white
+  );
+  --payout-accent-muted: color-mix(in oklch, var(--primary) 20%, transparent);
   --payout-account-row-bg: oklch(0.252 0.012 286.4);
   --input: oklch(0.292 0.011 285.7);
   --input-bg: oklch(0.165 0.006 285.7);
-  --ring: oklch(0.591 0.159 298.4);
+  --ring: var(--primary);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -230,12 +260,12 @@
   --chart-5: oklch(0.269 0 0);
   --sidebar: oklch(0.198 0.008 285.6);
   --sidebar-foreground: oklch(0.961 0 89.9);
-  --sidebar-primary: oklch(0.591 0.159 298.4);
+  --sidebar-primary: var(--primary);
   --sidebar-primary-foreground: oklch(0.961 0 89.9);
   --sidebar-accent: oklch(0.198 0.008 285.6);
   --sidebar-accent-foreground: oklch(0.961 0 89.9);
   --sidebar-border: oklch(0.292 0.011 285.7);
-  --sidebar-ring: oklch(0.591 0.159 298.4);
+  --sidebar-ring: var(--primary);
   --scrollbar-thumb: oklch(0.552 0.013 286 / 0.55);
 }
 

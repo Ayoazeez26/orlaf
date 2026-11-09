@@ -170,7 +170,7 @@ export function MediaPreviewPlayPauseButton({
       type="button"
       onClick={onToggle}
       className={cn(
-        "flex size-11 items-center justify-center rounded-full bg-primary shadow-[0_8px_20px_rgba(124,58,237,0.35)]",
+        "flex size-11 items-center justify-center rounded-full bg-primary shadow-[0_8px_20px_color-mix(in_oklch,var(--primary)_35%,transparent)]",
         className
       )}
       aria-label={playing ? "Pause" : "Play"}

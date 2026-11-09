@@ -1,5 +1,6 @@
 import { Button } from "@workspace/ui/components/button"
 import { Check, MoreHorizontal, Play, X } from "lucide-react"
+import { useState } from "react"
 import {
   usePublishEpisode,
   useRejectEpisode,
@@ -7,40 +8,52 @@ import {
 import { formatProjectViews } from "../../../data/project-details"
 import type { ProjectDetail, ProjectEpisode } from "../../../types"
 import { PublishStatusBadge, ReviewStatusBadge } from "../../project-badges"
+import { EpisodePreviewDialog } from "../episode-preview-dialog"
 
 const HEAD_CLASS =
   "px-4 py-3 text-left font-medium text-muted-foreground text-xs uppercase tracking-wide"
 
 export function ProjectEpisodesTab({ project }: { project: ProjectDetail }) {
+  const [previewEpisodeId, setPreviewEpisodeId] = useState<string | null>(null)
+
   return (
-    <div className="overflow-hidden rounded-[16px] border bg-surface-frosted backdrop-blur-[24px]">
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-border border-b">
-              <th className={HEAD_CLASS}>Episode</th>
-              <th className={HEAD_CLASS}>Duration</th>
-              <th className={HEAD_CLASS}>Size</th>
-              <th className={HEAD_CLASS}>Views</th>
-              <th className={HEAD_CLASS}>Status</th>
-              <th className={HEAD_CLASS}>
-                <span className="sr-only">Actions</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {project.episodes.map((episode) => (
-              <EpisodeRow
-                key={episode.id}
-                projectId={project.id}
-                seriesPublished={project.publishStatus === "published"}
-                episode={episode}
-              />
-            ))}
-          </tbody>
-        </table>
+    <>
+      <div className="overflow-hidden rounded-[16px] border bg-surface-frosted backdrop-blur-[24px]">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-border border-b">
+                <th className={HEAD_CLASS}>Episode</th>
+                <th className={HEAD_CLASS}>Duration</th>
+                <th className={HEAD_CLASS}>Size</th>
+                <th className={HEAD_CLASS}>Views</th>
+                <th className={HEAD_CLASS}>Status</th>
+                <th className={HEAD_CLASS}>
+                  <span className="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {project.episodes.map((episode) => (
+                <EpisodeRow
+                  key={episode.id}
+                  projectId={project.id}
+                  seriesPublished={project.publishStatus === "published"}
+                  episode={episode}
+                  onPreview={() => setPreviewEpisodeId(episode.id)}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
+
+      <EpisodePreviewDialog
+        project={project}
+        episodeId={previewEpisodeId}
+        onEpisodeChange={setPreviewEpisodeId}
+      />
+    </>
   )
 }
 
@@ -48,10 +61,12 @@ function EpisodeRow({
   projectId,
   seriesPublished,
   episode,
+  onPreview,
 }: {
   projectId: string
   seriesPublished: boolean
   episode: ProjectEpisode
+  onPreview: () => void
 }) {
   const publish = usePublishEpisode(projectId, episode.id)
   const reject = useRejectEpisode(projectId, episode.id)
@@ -68,7 +83,10 @@ function EpisodeRow({
             variant="ghost"
             size="icon-sm"
             className="shrink-0 text-primary hover:bg-primary/10"
-            aria-label={`Play ${episode.title}`}
+            aria-label={`Preview ${episode.title}`}
+            title={episode.playable ? undefined : "Video is still processing"}
+            disabled={!episode.playable}
+            onClick={onPreview}
           >
             <Play className="size-4 fill-current" aria-hidden />
           </Button>

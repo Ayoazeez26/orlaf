@@ -10,7 +10,7 @@ const GENRE_COLORS = [
   ANALYTICS_SERIES_COLORS.primary,
   ANALYTICS_SERIES_COLORS.amber,
   ANALYTICS_SERIES_COLORS.green,
-  "#8b5cf6",
+  "#64748b",
   "#f43f5e",
   "#06b6d4",
 ]

@@ -26,6 +26,8 @@ export interface ProjectEpisode {
   views: number | null
   reviewStatus: ProjectReviewStatus
   status: "published" | "draft" | "pending_review"
+  /** Video finished processing and can be previewed. */
+  playable: boolean
 }
 
 export interface TopPerformingEpisode {

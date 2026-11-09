@@ -16,7 +16,7 @@ export const REVENUE_TABS = [
   { id: "settings", label: "Settings", icon: Settings, path: "settings" },
 ] as const
 
-/** Coin #8E4DFF · Memberships #EC4899 · Tips #FBBF24 · Extras #38BDF8 · Commission #10B981 */
+/** Coin = brand primary · Memberships #EC4899 · Tips #FBBF24 · Extras #38BDF8 · Commission #10B981 */
 export const REVENUE_SOURCE_COLORS: Record<RevenueSourceColorKey, string> = {
   coinUnlocks: "var(--revenue-coin-unlocks)",
   memberships: "var(--revenue-memberships)",

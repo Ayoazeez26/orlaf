@@ -368,14 +368,16 @@ export interface VerifyMfaResponse {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Password reset (creator-web)
+// Password reset (creator-web, admin-web, mobile)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export interface PasswordResetRequestBody {
   email: string
-  /** `mobile` resets viewer accounts; omitted resets creator accounts. */
-  surface?: "mobile" | "creator-web"
+  /** `mobile` resets viewer accounts, `admin-web` admin accounts; omitted resets creator accounts. */
+  surface?: PasswordResetSurface
 }
+
+export type PasswordResetSurface = "mobile" | "creator-web" | "admin-web"
 
 export interface PasswordResetRequestResponse {
   reset_id: string

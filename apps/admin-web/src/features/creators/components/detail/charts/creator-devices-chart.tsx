@@ -6,7 +6,11 @@ import {
 } from "@/features/analytics/constants"
 import type { DeviceShare } from "../../../types"
 
-const DEVICE_COLORS = [ANALYTICS_SERIES_COLORS.primary, "#a78bfa", "#ddd6fe"]
+const DEVICE_COLORS = [
+  ANALYTICS_SERIES_COLORS.primary,
+  "var(--chart-device-desktop)",
+  "var(--chart-device-tablet)",
+]
 
 interface CreatorDevicesChartProps {
   data: DeviceShare[]
