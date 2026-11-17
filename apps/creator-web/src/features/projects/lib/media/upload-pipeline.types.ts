@@ -1,8 +1,10 @@
 export type MediaJobPhase =
   | "idle"
   | "probing"
+  | "queued"
   | "converting"
   | "uploading"
+  | "paused"
   | "processing"
   | "ready"
   | "failed"
@@ -24,6 +26,8 @@ export interface ConvertForUploadOptions {
 export interface ConvertForUploadResult {
   blob: Blob
   fileName: string
+  /** False when the original file is uploaded untouched. */
+  converted: boolean
   durationSeconds: number | null
   width: number | null
   height: number | null

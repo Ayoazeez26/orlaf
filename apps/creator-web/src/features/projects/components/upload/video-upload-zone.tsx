@@ -8,9 +8,11 @@ import type { MediaJobStatus, UploadMediaAsset } from "../../types"
 const STATUS_LABELS: Record<MediaJobStatus, string> = {
   idle: "",
   probing: "Analyzing…",
-  converting: "Converting…",
+  queued: "Queued. Starts when another upload finishes.",
+  converting: "Preparing…",
   uploading: "Uploading…",
-  processing: "Processing…",
+  paused: "Paused. Resume it from the uploads panel.",
+  processing: "Processing. You can keep working.",
   ready: "Ready",
   failed: "Failed",
 }
@@ -139,6 +141,10 @@ export function VideoUploadZone({
                 <div className="space-y-1.5">
                   <p className="text-muted-foreground text-xs">
                     {STATUS_LABELS[media.status]}
+                    {media.status === "converting" ||
+                    media.status === "uploading"
+                      ? ` ${Math.round(media.progress * 100)}%`
+                      : ""}
                     {media.error ? `: ${media.error}` : ""}
                   </p>
                   {media.status !== "failed" ? (
@@ -150,11 +156,12 @@ export function VideoUploadZone({
             <button
               type="button"
               className="relative z-10 rounded-full bg-background/90 p-1.5"
-              disabled={isBusy}
               onClick={onClear}
             >
               <X className="size-4" aria-hidden />
-              <span className="sr-only">Remove file</span>
+              <span className="sr-only">
+                {isBusy ? "Cancel upload" : "Remove file"}
+              </span>
             </button>
           </div>
         )

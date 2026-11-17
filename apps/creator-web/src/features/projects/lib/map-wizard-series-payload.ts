@@ -39,5 +39,9 @@ export function buildSeriesPayload(
     autoCaptions: state.autoCaptionEnabled,
     posterUrl: state.poster?.remoteUrl,
     trailerUrl: state.trailerUrl ?? undefined,
+    // Still processing: the server fills trailerUrl when it is ready.
+    trailerVideoHostingId: state.trailerUrl
+      ? undefined
+      : state.trailer?.videoHostingId,
   }
 }

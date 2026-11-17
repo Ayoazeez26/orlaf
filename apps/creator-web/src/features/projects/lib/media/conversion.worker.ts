@@ -19,8 +19,7 @@ const INPUT_FORMATS = [MP4, QTFF, WEBM, MATROSKA]
 
 export interface WorkerConvertRequest {
   type: "convert"
-  fileBuffer: ArrayBuffer
-  fileName: string
+  file: File
   aiVerticalConversion: boolean
 }
 
@@ -60,17 +59,21 @@ async function ensureCodecs() {
   return codecsReady
 }
 
+class NoVideoTrackError extends Error {
+  constructor() {
+    super("This file has no video track. Choose a video file.")
+    this.name = "NoVideoTrackError"
+  }
+}
+
 self.onmessage = async (event: MessageEvent<WorkerConvertRequest>) => {
   if (event.data.type !== "convert") return
 
-  const { fileBuffer, fileName, aiVerticalConversion } = event.data
+  const { file, aiVerticalConversion } = event.data
   let input: Input | null = null
 
   try {
     await ensureCodecs()
-
-    const blob = new Blob([fileBuffer], { type: "application/octet-stream" })
-    const file = new File([blob], fileName, { type: blob.type })
 
     input = new Input({
       source: new BlobSource(file),
@@ -79,6 +82,9 @@ self.onmessage = async (event: MessageEvent<WorkerConvertRequest>) => {
 
     const sourceAudioTrack = await input.getPrimaryAudioTrack()
     const hadSourceAudio = sourceAudioTrack != null
+    if ((await input.getPrimaryVideoTrack()) == null) {
+      throw new NoVideoTrackError()
+    }
 
     const output = new Output({
       format: new Mp4OutputFormat(),
@@ -146,6 +152,20 @@ self.onmessage = async (event: MessageEvent<WorkerConvertRequest>) => {
         reasons
           ? `Conversion not possible: ${reasons}`
           : "Conversion not possible for this file"
+      )
+    }
+
+    // If this browser can't decode the picture (often HEVC/H.265 in Chrome or
+    // Firefox, or ProRes), Mediabunny drops the video track and still
+    // "converts" the audio. That audio-only MP4 is what Cloudflare rejects as
+    // "not recognized as a valid video file". Fail instead, so the caller can
+    // upload the original and let Cloudflare transcode it.
+    const discardedVideoTrack = conversion.discardedTracks.find(
+      (discarded) => discarded.track.type === "video"
+    )
+    if (discardedVideoTrack) {
+      throw new Error(
+        `This browser can't convert the video (${discardedVideoTrack.reason})`
       )
     }
 

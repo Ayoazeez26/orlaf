@@ -1,6 +1,7 @@
 import { Outlet } from "@tanstack/react-router"
 import { useAuth } from "@/features/auth/auth-context"
 import { useApplyCreatorPreferences } from "@/features/settings/hooks/use-apply-creator-preferences"
+import { UploadTray } from "@/features/uploads/components/upload-tray"
 import { useSessionAccountState } from "../../hooks/use-session-account-state"
 import { DashboardMobileHeader } from "./dashboard-mobile-header"
 import { DashboardSidebar } from "./dashboard-sidebar"
@@ -22,6 +23,7 @@ export function DashboardLayout() {
           <Outlet />
         </main>
       </div>
+      <UploadTray />
     </div>
   )
 }

@@ -3,13 +3,23 @@ import {
   type Dispatch,
   type ReactNode,
   useContext,
+  useEffect,
   useMemo,
   useReducer,
+  useState,
 } from "react"
+import {
+  findEpisodeJob,
+  findTrailerJob,
+} from "@/features/uploads/upload-runner"
+import { type UploadJob, useUploadJobs } from "@/features/uploads/upload-store"
 import { PROJECT_THUMBNAILS } from "../constants"
+import { formatDuration } from "../lib/media/format-duration"
 import type {
+  MediaJobStatus,
   PersonEntry,
   UploadEpisodeDraft,
+  UploadMediaAsset,
   UploadWizardAction,
   UploadWizardState,
 } from "../types"
@@ -205,23 +215,133 @@ function uploadWizardReducer(
 interface UploadWizardContextValue {
   state: UploadWizardState
   dispatch: Dispatch<UploadWizardAction>
+  wizardId: string
   previewImage: string
 }
 
 const UploadWizardContext = createContext<UploadWizardContextValue | null>(null)
 
+function jobStatus(job: UploadJob): MediaJobStatus {
+  return job.phase === "interrupted" ? "failed" : job.phase
+}
+
+function jobError(job: UploadJob) {
+  if (job.phase === "interrupted") {
+    return "Upload stopped when the page closed. Choose the file again to continue."
+  }
+  return job.phase === "failed" ? job.error : undefined
+}
+
+function mediaFromJob(
+  job: UploadJob,
+  current: UploadMediaAsset | null
+): UploadMediaAsset {
+  return {
+    file: current?.file ?? new File([], job.fileName),
+    status: jobStatus(job),
+    progress: job.phase === "ready" ? 1 : job.progress,
+    error: jobError(job),
+    durationSeconds: job.durationSeconds ?? current?.durationSeconds,
+    previewObjectUrl: current?.previewObjectUrl ?? job.previewObjectUrl,
+    episodeId: job.episodeId ?? current?.episodeId,
+    videoHostingId: job.videoId ?? current?.videoHostingId,
+    hlsUrl: job.hlsUrl ?? current?.hlsUrl,
+  }
+}
+
+function mediaChanged(
+  current: UploadMediaAsset | null,
+  next: UploadMediaAsset
+) {
+  return (
+    !current ||
+    current.status !== next.status ||
+    current.progress !== next.progress ||
+    current.error !== next.error ||
+    current.videoHostingId !== next.videoHostingId ||
+    current.hlsUrl !== next.hlsUrl ||
+    current.durationSeconds !== next.durationSeconds
+  )
+}
+
+/**
+ * Mirrors the app-wide upload jobs into the wizard, so episode cards show
+ * live progress — including for uploads started before the creator left and
+ * came back to this page.
+ */
+function useSyncUploadJobs(
+  state: UploadWizardState,
+  dispatch: Dispatch<UploadWizardAction>,
+  wizardId: string
+) {
+  const jobs = useUploadJobs()
+
+  useEffect(() => {
+    for (const episode of state.episodes) {
+      const job = findEpisodeJob(jobs, {
+        episodeId: episode.backendEpisodeId,
+        draftId: episode.id,
+      })
+      if (!job) continue
+      const media = mediaFromJob(job, episode.media)
+      if (!mediaChanged(episode.media, media)) continue
+      dispatch({
+        type: "UPDATE_EPISODE",
+        payload: {
+          id: episode.id,
+          patch: {
+            media,
+            ...(job.durationSeconds != null && {
+              duration: formatDuration(job.durationSeconds),
+            }),
+          },
+        },
+      })
+    }
+
+    const trailerJob = findTrailerJob(jobs, {
+      seriesId: state.seriesId,
+      wizardId,
+    })
+    if (trailerJob) {
+      const media = mediaFromJob(trailerJob, state.trailer)
+      if (mediaChanged(state.trailer, media)) {
+        dispatch({ type: "SET_TRAILER", payload: media })
+      }
+      if (trailerJob.hlsUrl && state.trailerUrl !== trailerJob.hlsUrl) {
+        dispatch({ type: "SET_TRAILER_URL", payload: trailerJob.hlsUrl })
+      }
+    }
+  }, [
+    jobs,
+    state.episodes,
+    state.trailer,
+    state.trailerUrl,
+    state.seriesId,
+    dispatch,
+    wizardId,
+  ])
+}
+
 export function UploadWizardProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(uploadWizardReducer, initialState)
+  // Identifies this wizard's trailer upload before the series exists.
+  const [wizardId] = useState(
+    () =>
+      `wizard-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+  )
+  useSyncUploadJobs(state, dispatch, wizardId)
   const value = useMemo(
     () => ({
       state,
       dispatch,
+      wizardId,
       previewImage:
         state.poster?.remoteUrl ??
         state.poster?.previewObjectUrl ??
         PROJECT_THUMBNAILS.theReturnees,
     }),
-    [state]
+    [state, wizardId]
   )
 
   return (

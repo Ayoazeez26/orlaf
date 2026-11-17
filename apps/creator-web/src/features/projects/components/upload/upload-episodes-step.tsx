@@ -84,6 +84,9 @@ export function UploadEpisodesStep({
   async function handleDeleteEpisode(episode: UploadEpisodeDraft) {
     if (deletingEpisodeId) return
 
+    // Stop its upload first so nothing keeps sending to a deleted episode.
+    clearEpisode(episode.id)
+
     const seriesId = state.seriesId
     const backendEpisodeId = episode.backendEpisodeId
 

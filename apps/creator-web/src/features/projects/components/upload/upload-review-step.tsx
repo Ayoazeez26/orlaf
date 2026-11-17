@@ -23,6 +23,7 @@ import { projectKeys } from "../../data/query-keys"
 import { useMediaUploadPipeline } from "../../hooks/use-media-upload-pipeline"
 import { useSaveUploadDraft } from "../../hooks/use-save-upload-draft"
 import { formatCoinAccessLabel } from "../../lib/coin-price"
+import { getSubmitBlocker } from "../../lib/episode-step-ready"
 import { formatUploadGenres } from "../../lib/format-upload-genres"
 import type { UploadEpisodeDraft, UploadWizardState } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
@@ -75,16 +76,19 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
     {
       id: "episode",
       label: "At least one episode video",
-      done: state.episodes.some((episode) => episode.media?.status === "ready"),
+      done: state.episodes.some(
+        (episode) =>
+          episode.media != null &&
+          episode.media.status !== "failed" &&
+          episode.media.status !== "idle"
+      ),
     },
   ] as const
 
   const checklistComplete = checklist.every((item) => item.done)
+  const submitBlocker = getSubmitBlocker(state)
   const canSubmit =
-    state.seriesId != null &&
-    checklistComplete &&
-    (state.episodes.length === 0 ||
-      state.episodes.every((episode) => episode.media?.status === "ready"))
+    state.seriesId != null && checklistComplete && submitBlocker == null
 
   async function handleSubmit() {
     try {
@@ -233,6 +237,12 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
                 </p>
                 <Progress value={progress.value * 100} />
               </div>
+            ) : null}
+
+            {checklistComplete && submitBlocker ? (
+              <p className="text-muted-foreground text-sm" role="status">
+                {submitBlocker}
+              </p>
             ) : null}
 
             <div className="flex flex-col gap-2">

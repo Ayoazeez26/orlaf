@@ -33,10 +33,13 @@ export async function probeMediaFile(file: File): Promise<ProbeMediaResult> {
       width = await videoTrack.getDisplayWidth()
       height = await videoTrack.getDisplayHeight()
 
-      const sink = new CanvasSink(videoTrack, { poolSize: 1 })
-      const wrapped = await sink.getCanvas(0)
-      if (wrapped?.canvas) {
-        const canvas = wrapped.canvas
+      // The thumbnail needs a decoded frame. Browsers that can't decode the
+      // codec (often HEVC/H.265) throw here; the file can still be uploaded
+      // as-is, so go without a preview.
+      try {
+        const sink = new CanvasSink(videoTrack, { poolSize: 1 })
+        const wrapped = await sink.getCanvas(0)
+        const canvas = wrapped?.canvas
         if (canvas instanceof HTMLCanvasElement) {
           thumbnailObjectUrl = await new Promise<string | null>((resolve) => {
             canvas.toBlob(
@@ -46,6 +49,8 @@ export async function probeMediaFile(file: File): Promise<ProbeMediaResult> {
             )
           })
         }
+      } catch {
+        thumbnailObjectUrl = null
       }
     }
 

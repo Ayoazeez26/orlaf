@@ -6,11 +6,18 @@
  * the DI binding in studio.module.ts.
  */
 
+export type VideoUploadProtocol = "tus" | "basic"
+
 export interface CreateVideoResult {
     /** Provider-specific video ID — stored on Episode.videoHostingId */
     videoId: string
     /** URL to upload the raw video file to (tus or direct) */
     uploadUrl: string
+    /**
+     * `tus` — resumable upload; the client PATCHes chunks to `uploadUrl`.
+     * `basic` — one multipart POST (Cloudflare caps these at 200 MB).
+     */
+    protocol: VideoUploadProtocol
     /** HLS playback URL — null until transcode completes */
     hlsUrl: string | null
 }
@@ -42,6 +49,11 @@ export interface IVideoHostingProvider {
     createVideo(input: {
         title: string
         creatorId: string
+        /**
+         * Size of the file in bytes. When set, the provider returns a
+         * resumable (tus) upload URL; otherwise a one-shot basic upload URL.
+         */
+        uploadLength?: number
     }): Promise<CreateVideoResult>
 
     /**

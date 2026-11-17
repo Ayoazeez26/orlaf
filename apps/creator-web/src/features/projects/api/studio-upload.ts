@@ -1,21 +1,13 @@
 /**
  * Studio upload service — direct uploads to R2 and Cloudflare Stream.
  * Files never pass through the backend; only signed URLs are minted via studio-api.
+ * Videos go through lib/media/video-upload.ts (resumable tus); the basic
+ * multipart upload here is only its fallback for servers without tus.
  */
 
-import type {
-  ImageUploadUrlResponse,
-  UploadUrlResponse,
-} from "@sable/contracts"
+import type { ImageUploadUrlResponse } from "@sable/contracts"
 import { toMp4FileName } from "../lib/media/upload-file-name"
-import {
-  getEpisodeUploadUrl,
-  getImageUploadUrl,
-  getSeriesImageUploadUrl,
-  getSeriesTrailerUploadUrl,
-  getTrailerStatus,
-  getWizardTrailerUploadUrl,
-} from "./studio-api"
+import { getImageUploadUrl, getSeriesImageUploadUrl } from "./studio-api"
 
 export type UploadProgressCallback = (progress: number) => void
 
@@ -167,20 +159,6 @@ export async function uploadPoster(
   return { imageUrl }
 }
 
-export async function uploadWizardTrailer(
-  file: Blob | File,
-  contentType: string,
-  onProgress?: UploadProgressCallback,
-  fileName?: string
-): Promise<{ videoId: string }> {
-  const { uploadUrl, videoId }: UploadUrlResponse =
-    await getWizardTrailerUploadUrl(contentType)
-
-  await uploadToCloudflareStream(uploadUrl, file, onProgress, fileName)
-
-  return { videoId }
-}
-
 export async function uploadSeriesPoster(
   seriesId: string,
   file: File,
@@ -194,56 +172,4 @@ export async function uploadSeriesPoster(
   await uploadWithPut(uploadUrl, file, file.type, onProgress)
 
   return { imageUrl }
-}
-
-export async function uploadSeriesTrailer(
-  seriesId: string,
-  file: Blob | File,
-  onProgress?: UploadProgressCallback,
-  fileName?: string
-): Promise<{ videoId: string }> {
-  const { uploadUrl, videoId }: UploadUrlResponse =
-    await getSeriesTrailerUploadUrl(seriesId)
-
-  await uploadToCloudflareStream(uploadUrl, file, onProgress, fileName)
-
-  return { videoId }
-}
-
-export async function uploadEpisodeVideo(
-  seriesId: string,
-  episodeId: string,
-  file: Blob | File,
-  onProgress?: UploadProgressCallback,
-  fileName?: string
-): Promise<{ videoId: string }> {
-  const { uploadUrl, videoId } = await getEpisodeUploadUrl(seriesId, episodeId)
-
-  await uploadToCloudflareStream(uploadUrl, file, onProgress, fileName)
-
-  return { videoId }
-}
-
-export async function waitForTrailerReady(
-  videoId: string,
-  options: { intervalMs?: number; timeoutMs?: number } = {}
-): Promise<string> {
-  const { intervalMs = 3000, timeoutMs = 120_000 } = options
-  const deadline = Date.now() + timeoutMs
-
-  while (Date.now() < deadline) {
-    const data = await getTrailerStatus(videoId)
-
-    if (data.status === "failed") {
-      throw new Error("Trailer processing failed")
-    }
-
-    if (data.status === "ready" && data.hlsUrl) {
-      return data.hlsUrl
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, intervalMs))
-  }
-
-  throw new Error("Trailer processing timed out")
 }

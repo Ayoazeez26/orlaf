@@ -2,6 +2,7 @@ import { useCallback, useState } from "react"
 import { fetchPreferences } from "@/features/settings/api/preferences-api"
 import { toast, toastMutationError } from "@/lib/toast"
 import { publishSeries } from "../api/studio-api"
+import { getSubmitBlocker } from "../lib/episode-step-ready"
 import { formatDuration } from "../lib/media/format-duration"
 import { probeMediaFile } from "../lib/media/probe-media"
 import type { UploadWizardState } from "../types"
@@ -21,13 +22,7 @@ function validateForPublish(state: UploadWizardState): string | null {
     return null
   }
 
-  const incomplete = state.episodes.filter((ep) => ep.media?.status !== "ready")
-
-  if (incomplete.length > 0) {
-    return "All episodes must finish uploading before publishing"
-  }
-
-  return null
+  return getSubmitBlocker(state)
 }
 
 export function useMediaUploadPipeline() {
@@ -65,9 +60,15 @@ export function useMediaUploadPipeline() {
     }
 
     try {
-      await publishSeries(seriesId)
+      const series = await publishSeries(seriesId)
       setProgress({ phase: "done", label: "Submitted", value: 1 })
-      toast.success("Submitted for review.")
+      if (series.submitRequestedAt) {
+        toast.success(
+          "Submitted. It goes to review as soon as your videos finish processing."
+        )
+      } else {
+        toast.success("Submitted for review.")
+      }
       return seriesId
     } catch (error) {
       toastMutationError(error, "Publish failed")
@@ -84,8 +85,22 @@ export function useMediaUploadPipeline() {
   }
 }
 
+/**
+ * Reads duration and a preview frame. Throws a readable error when the file
+ * isn't a video Cloudflare could accept.
+ */
 export async function probeAndCreateMediaAsset(file: File) {
-  const probe = await probeMediaFile(file)
+  let probe: Awaited<ReturnType<typeof probeMediaFile>>
+  try {
+    probe = await probeMediaFile(file)
+  } catch {
+    throw new Error(
+      "This file couldn't be read as a video. Export it as MP4 or MOV and try again."
+    )
+  }
+  if (!probe.hasVideo) {
+    throw new Error("This file has no video track. Choose a video file.")
+  }
   return {
     file,
     status: "idle" as const,

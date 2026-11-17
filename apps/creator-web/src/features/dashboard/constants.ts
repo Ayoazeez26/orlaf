@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Bell,
+  CloudUpload,
   DollarSign,
   FolderKanban,
   Home,
@@ -15,6 +16,7 @@ export const DASHBOARD_NAV_GROUPS: DashboardNavGroup[] = [
     items: [
       { label: "Home", to: "/dashboard", icon: Home },
       { label: "Projects", to: "/dashboard/projects", icon: FolderKanban },
+      { label: "Uploads", to: "/dashboard/uploads", icon: CloudUpload },
       { label: "Analytics", to: "/dashboard/analytics", icon: BarChart3 },
     ],
   },

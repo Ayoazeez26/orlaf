@@ -1,6 +1,7 @@
 import type {
   CreateEpisodeRequest,
   CreateSeriesRequest,
+  CreateVideoUploadRequest,
   EpisodeStatus,
   ImageUploadUrlResponse,
   PublicGenre,
@@ -120,11 +121,12 @@ export async function getEpisode(
 
 export async function getEpisodeUploadUrl(
   seriesId: string,
-  episodeId: string
+  episodeId: string,
+  body: CreateVideoUploadRequest = {}
 ): Promise<UploadUrlResponse> {
   return apiRequest<UploadUrlResponse>(
     studioPath(`/series/${seriesId}/episodes/${episodeId}/upload-url`),
-    { method: "POST" }
+    { method: "POST", body: JSON.stringify(body) }
   )
 }
 
@@ -140,11 +142,12 @@ export async function getImageUploadUrl(
 
 /** Wizard flow — no series exists yet. */
 export async function getWizardTrailerUploadUrl(
-  contentType: string
+  contentType: string,
+  body: CreateVideoUploadRequest = {}
 ): Promise<UploadUrlResponse> {
   return apiRequest<UploadUrlResponse>(studioPath("/upload/trailer"), {
     method: "POST",
-    body: JSON.stringify({ contentType }),
+    body: JSON.stringify({ ...body, contentType }),
   })
 }
 
@@ -164,11 +167,12 @@ export async function getSeriesImageUploadUrl(
 
 /** Edit flow — series already exists. */
 export async function getSeriesTrailerUploadUrl(
-  seriesId: string
+  seriesId: string,
+  body: CreateVideoUploadRequest = {}
 ): Promise<UploadUrlResponse> {
   return apiRequest<UploadUrlResponse>(
     studioPath(`/series/${seriesId}/upload/trailer`),
-    { method: "POST" }
+    { method: "POST", body: JSON.stringify(body) }
   )
 }
 

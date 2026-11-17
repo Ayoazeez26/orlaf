@@ -27,6 +27,7 @@ import { Route as DashboardPromotionsRouteImport } from './routes/dashboard/prom
 import { Route as DashboardRevenueRouteImport } from './routes/dashboard/revenue'
 import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
 import { Route as DashboardSupportRouteImport } from './routes/dashboard/support'
+import { Route as DashboardUploadsRouteImport } from './routes/dashboard/uploads'
 import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password/index'
 import { Route as ForgotPasswordVerifyRouteImport } from './routes/forgot-password/verify'
 import { Route as DashboardProjectsIndexRouteImport } from './routes/dashboard/projects/index'
@@ -139,6 +140,11 @@ const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
 const DashboardSupportRoute = DashboardSupportRouteImport.update({
   id: '/support',
   path: '/support',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardUploadsRoute = DashboardUploadsRouteImport.update({
+  id: '/uploads',
+  path: '/uploads',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const ForgotPasswordIndexRoute = ForgotPasswordIndexRouteImport.update({
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/revenue': typeof DashboardRevenueRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
   '/dashboard/support': typeof DashboardSupportRoute
+  '/dashboard/uploads': typeof DashboardUploadsRoute
   '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
@@ -326,6 +333,7 @@ export interface FileRoutesByTo {
   '/dashboard/analytics': typeof DashboardAnalyticsRoute
   '/dashboard/notifications': typeof DashboardNotificationsRoute
   '/dashboard/support': typeof DashboardSupportRoute
+  '/dashboard/uploads': typeof DashboardUploadsRoute
   '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
   '/dashboard': typeof DashboardIndexRoute
   '/forgot-password': typeof ForgotPasswordIndexRoute
@@ -369,6 +377,7 @@ export interface FileRoutesById {
   '/dashboard/revenue': typeof DashboardRevenueRouteWithChildren
   '/dashboard/settings': typeof DashboardSettingsRouteWithChildren
   '/dashboard/support': typeof DashboardSupportRoute
+  '/dashboard/uploads': typeof DashboardUploadsRoute
   '/forgot-password/verify': typeof ForgotPasswordVerifyRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
@@ -414,6 +423,7 @@ export interface FileRouteTypes {
     | '/dashboard/revenue'
     | '/dashboard/settings'
     | '/dashboard/support'
+    | '/dashboard/uploads'
     | '/forgot-password/verify'
     | '/dashboard/'
     | '/forgot-password/'
@@ -451,6 +461,7 @@ export interface FileRouteTypes {
     | '/dashboard/analytics'
     | '/dashboard/notifications'
     | '/dashboard/support'
+    | '/dashboard/uploads'
     | '/forgot-password/verify'
     | '/dashboard'
     | '/forgot-password'
@@ -493,6 +504,7 @@ export interface FileRouteTypes {
     | '/dashboard/revenue'
     | '/dashboard/settings'
     | '/dashboard/support'
+    | '/dashboard/uploads'
     | '/forgot-password/verify'
     | '/dashboard/'
     | '/forgot-password/'
@@ -658,6 +670,13 @@ declare module '@tanstack/react-router' {
       path: '/support'
       fullPath: '/dashboard/support'
       preLoaderRoute: typeof DashboardSupportRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/uploads': {
+      id: '/dashboard/uploads'
+      path: '/uploads'
+      fullPath: '/dashboard/uploads'
+      preLoaderRoute: typeof DashboardUploadsRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/forgot-password/': {
@@ -925,6 +944,7 @@ interface DashboardRouteRouteChildren {
   DashboardRevenueRoute: typeof DashboardRevenueRouteWithChildren
   DashboardSettingsRoute: typeof DashboardSettingsRouteWithChildren
   DashboardSupportRoute: typeof DashboardSupportRoute
+  DashboardUploadsRoute: typeof DashboardUploadsRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
@@ -936,6 +956,7 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardRevenueRoute: DashboardRevenueRouteWithChildren,
   DashboardSettingsRoute: DashboardSettingsRouteWithChildren,
   DashboardSupportRoute: DashboardSupportRoute,
+  DashboardUploadsRoute: DashboardUploadsRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 

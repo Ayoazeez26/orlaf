@@ -1,13 +1,15 @@
 import { useCallback, useRef } from "react"
+import {
+  cancelUpload,
+  findTrailerJob,
+  startTrailerUpload,
+} from "@/features/uploads/upload-runner"
+import { getJobs } from "@/features/uploads/upload-store"
 import { updateSeries } from "../api/studio-api"
 import {
   uploadPoster as uploadPosterToR2,
   uploadSeriesPoster,
-  uploadSeriesTrailer,
-  uploadWizardTrailer,
-  waitForTrailerReady,
 } from "../api/studio-upload"
-import { convertForUpload } from "../lib/media/convert-for-upload"
 import { probeMediaFile } from "../lib/media/probe-media"
 import {
   MAX_TRAILER_FILE_BYTES,
@@ -16,11 +18,13 @@ import {
 import { useUploadWizard } from "../upload/upload-wizard-context"
 
 export function usePosterTrailerUpload() {
-  const { state, dispatch } = useUploadWizard()
+  const { state, dispatch, wizardId } = useUploadWizard()
   const posterAbortRef = useRef<AbortController | null>(null)
-  const trailerAbortRef = useRef<AbortController | null>(null)
   const seriesIdRef = useRef(state.seriesId)
   seriesIdRef.current = state.seriesId
+  const stateRef = useRef(state)
+  stateRef.current = state
+  const latestTrailerPick = useRef<symbol | null>(null)
 
   const uploadPoster = useCallback(
     async (file: File, previewObjectUrl: string) => {
@@ -73,9 +77,19 @@ export function usePosterTrailerUpload() {
 
   const uploadTrailer = useCallback(
     async (file: File) => {
-      trailerAbortRef.current?.abort()
-      const abort = new AbortController()
-      trailerAbortRef.current = abort
+      // Drop the earlier trailer upload so its state isn't mirrored back
+      // over the new file.
+      const previousJob = findTrailerJob(getJobs(), {
+        seriesId: seriesIdRef.current,
+        wizardId,
+      })
+      if (previousJob) cancelUpload(previousJob.id)
+
+      // Checking the file takes a moment; a newer pick or a removal in the
+      // meantime wins.
+      const pick = Symbol(file.name)
+      latestTrailerPick.current = pick
+      const isStale = () => latestTrailerPick.current !== pick
 
       if (file.size > MAX_TRAILER_FILE_BYTES) {
         dispatch({
@@ -92,16 +106,19 @@ export function usePosterTrailerUpload() {
 
       dispatch({
         type: "SET_TRAILER",
-        payload: {
-          file,
-          status: "probing",
-          progress: 0,
-        },
+        payload: { file, status: "probing", progress: 0 },
       })
 
       try {
-        const probe = await probeMediaFile(file)
-        if (abort.signal.aborted) return
+        const probe = await probeMediaFile(file).catch(() => {
+          throw new Error(
+            "This file couldn't be read as a video. Export it as MP4 or MOV and try again."
+          )
+        })
+        if (isStale()) return
+        if (!probe.hasVideo) {
+          throw new Error("This file has no video track. Choose a video file.")
+        }
 
         if (
           probe.durationSeconds != null &&
@@ -122,88 +139,36 @@ export function usePosterTrailerUpload() {
         dispatch({
           type: "UPDATE_TRAILER",
           payload: {
-            status: "converting",
+            status: "queued",
             durationSeconds: probe.durationSeconds ?? undefined,
             previewObjectUrl: probe.thumbnailObjectUrl ?? undefined,
           },
         })
+        dispatch({ type: "SET_TRAILER_URL", payload: null })
 
-        const converted = await convertForUpload(file, {
-          aiVerticalConversion: state.aiConversionEnabled,
-          signal: abort.signal,
-          onProgress: (update) => {
-            if (update.phase === "converting") {
-              dispatch({
-                type: "UPDATE_TRAILER",
-                payload: { progress: update.value },
-              })
-            }
-          },
+        // Runs in the background; useSyncUploadJobs mirrors its progress
+        // into the wizard and the upload tray shows it everywhere else.
+        const title = stateRef.current.title.trim()
+        startTrailerUpload({
+          seriesId: seriesIdRef.current,
+          wizardId,
+          title: title ? `${title} · Trailer` : "Trailer",
+          file,
+          aiVerticalConversion: stateRef.current.aiConversionEnabled,
+          previewObjectUrl: probe.thumbnailObjectUrl ?? undefined,
+          durationSeconds: probe.durationSeconds ?? undefined,
         })
-
-        if (
-          converted.durationSeconds != null &&
-          converted.durationSeconds > MAX_VIDEO_DURATION_SECONDS
-        ) {
-          throw new Error("Trailer exceeds the 5 minute duration limit")
-        }
-
-        if (abort.signal.aborted) return
-
-        dispatch({ type: "UPDATE_TRAILER", payload: { status: "uploading" } })
-
-        const seriesId = seriesIdRef.current
-        const { videoId } = seriesId
-          ? await uploadSeriesTrailer(
-              seriesId,
-              converted.blob,
-              (progress) => {
-                dispatch({ type: "UPDATE_TRAILER", payload: { progress } })
-              },
-              converted.fileName
-            )
-          : await uploadWizardTrailer(
-              converted.blob,
-              "video/mp4",
-              (progress) => {
-                dispatch({ type: "UPDATE_TRAILER", payload: { progress } })
-              },
-              converted.fileName
-            )
-
-        if (abort.signal.aborted) return
-
-        dispatch({
-          type: "UPDATE_TRAILER",
-          payload: { status: "processing", videoHostingId: videoId },
-        })
-
-        const hlsUrl = await waitForTrailerReady(videoId, {
-          timeoutMs: 600_000,
-        })
-        if (abort.signal.aborted) return
-
-        if (seriesId) {
-          await updateSeries(seriesId, { trailerUrl: hlsUrl })
-        }
-
-        dispatch({
-          type: "UPDATE_TRAILER",
-          payload: { status: "ready", progress: 1 },
-        })
-        dispatch({ type: "SET_TRAILER_URL", payload: hlsUrl })
       } catch (error) {
-        if (abort.signal.aborted) return
+        if (isStale()) return
         const message =
           error instanceof Error ? error.message : "Trailer upload failed"
         dispatch({
           type: "UPDATE_TRAILER",
           payload: { status: "failed", error: message },
         })
-        dispatch({ type: "SET_TRAILER_URL", payload: null })
       }
     },
-    [dispatch, state.aiConversionEnabled]
+    [dispatch, wizardId]
   )
 
   const clearPoster = useCallback(() => {
@@ -212,10 +177,15 @@ export function usePosterTrailerUpload() {
   }, [dispatch])
 
   const clearTrailer = useCallback(() => {
-    trailerAbortRef.current?.abort()
+    latestTrailerPick.current = null
+    const job = findTrailerJob(getJobs(), {
+      seriesId: seriesIdRef.current,
+      wizardId,
+    })
+    if (job) cancelUpload(job.id)
     dispatch({ type: "SET_TRAILER", payload: null })
     dispatch({ type: "SET_TRAILER_URL", payload: null })
-  }, [dispatch])
+  }, [dispatch, wizardId])
 
   return { uploadPoster, uploadTrailer, clearPoster, clearTrailer }
 }

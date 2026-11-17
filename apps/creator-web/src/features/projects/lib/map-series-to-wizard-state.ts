@@ -71,16 +71,19 @@ function mapEpisode(episode: StudioEpisode): UploadEpisodeDraft {
     Boolean(episode.hlsUrl) ||
     Boolean(episode.videoHostingId)
 
+  // "pending" means no upload was ever started, so there's no video yet.
+  // "uploading" may be a finished or an abandoned upload; the server checks
+  // which when the creator submits.
   const mediaStatus =
     episode.status === "failed"
       ? "failed"
-      : episode.status === "processing" ||
-          episode.status === "uploading" ||
-          episode.status === "pending"
-        ? "processing"
-        : hasVideo
-          ? "ready"
-          : null
+      : episode.status === "pending"
+        ? null
+        : episode.status === "processing" || episode.status === "uploading"
+          ? "processing"
+          : hasVideo
+            ? "ready"
+            : null
 
   return {
     id: episode.id,

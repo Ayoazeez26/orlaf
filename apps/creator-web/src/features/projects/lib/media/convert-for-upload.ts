@@ -12,24 +12,33 @@ import type {
 /** Containers Cloudflare Stream ingests directly and transcodes itself. */
 const STREAM_INGESTIBLE_TYPES = new Set(["video/mp4", "video/quicktime"])
 
-let worker: Worker | null = null
+/**
+ * Codecs Cloudflare Stream accepts as-is. Phones record H.264 or HEVC with
+ * AAC, so most uploads skip the slow in-browser re-encode entirely.
+ */
+const PASSTHROUGH_VIDEO_CODECS = new Set(["avc", "hevc"])
+const PASSTHROUGH_AUDIO_CODECS = new Set(["aac", "mp3"])
 
-function getWorker(): Worker {
-  if (!worker) {
-    worker = new Worker(new URL("./conversion.worker.ts", import.meta.url), {
-      type: "module",
-    })
-  }
-  return worker
-}
+/** How far from 9:16 a video may be and still count as vertical. */
+const VERTICAL_RATIO_TOLERANCE = 0.02
 
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError"
 }
 
-async function readOriginalMetadata(
-  file: File
-): Promise<Omit<ConvertForUploadResult, "blob" | "fileName">> {
+function abortError() {
+  return new DOMException("Conversion aborted", "AbortError")
+}
+
+interface OriginalInfo {
+  durationSeconds: number | null
+  width: number | null
+  height: number | null
+  videoCodec: string | null
+  audioCodec: string | null
+}
+
+async function readOriginal(file: File): Promise<OriginalInfo | null> {
   const input = new Input({
     source: new BlobSource(file),
     formats: [MP4, QTFF],
@@ -37,34 +46,96 @@ async function readOriginalMetadata(
   try {
     const duration = await input.computeDuration()
     const videoTrack = await input.getPrimaryVideoTrack()
+    const audioTrack = await input.getPrimaryAudioTrack()
     return {
       durationSeconds: Number.isFinite(duration) ? duration : null,
       width: videoTrack ? await videoTrack.getDisplayWidth() : null,
       height: videoTrack ? await videoTrack.getDisplayHeight() : null,
+      videoCodec: videoTrack ? await videoTrack.getCodec() : null,
+      audioCodec: audioTrack ? await audioTrack.getCodec() : null,
     }
   } catch {
-    return { durationSeconds: null, width: null, height: null }
+    return null
   } finally {
     input.dispose()
   }
 }
 
+function isVertical(width: number | null, height: number | null) {
+  if (!width || !height) return false
+  return Math.abs(width / height - 9 / 16) <= VERTICAL_RATIO_TOLERANCE
+}
+
+/** True when Cloudflare can take the original file without a re-encode. */
+export function canUploadOriginal(
+  info: OriginalInfo,
+  aiVerticalConversion: boolean
+): boolean {
+  if (!info.videoCodec || !PASSTHROUGH_VIDEO_CODECS.has(info.videoCodec)) {
+    return false
+  }
+  if (info.audioCodec && !PASSTHROUGH_AUDIO_CODECS.has(info.audioCodec)) {
+    return false
+  }
+  // AI vertical conversion crops to 9:16 here, so only skip it when the
+  // video already is 9:16.
+  if (aiVerticalConversion && !isVertical(info.width, info.height)) {
+    return false
+  }
+  return true
+}
+
+function originalResult(
+  file: File,
+  info: Pick<OriginalInfo, "durationSeconds" | "width" | "height"> | null
+): ConvertForUploadResult {
+  return {
+    blob: file,
+    fileName: file.name,
+    converted: false,
+    durationSeconds: info?.durationSeconds ?? null,
+    width: info?.width ?? null,
+    height: info?.height ?? null,
+  }
+}
+
 /**
- * Converts a video in the browser before upload. Some WebKit builds (iOS
- * Safari, and Chrome on iOS which uses WebKit) advertise a WebCodecs
- * VideoEncoder that then fails mid-encode ("Encoding task did not
- * complete"). When that happens and the source is already an MP4/MOV,
- * upload the original instead — Cloudflare Stream transcodes it server-side
- * and the player cover-fits non-vertical sources.
+ * Prepares a video for upload. Files Cloudflare Stream can ingest as-is are
+ * uploaded untouched — it transcodes server-side anyway, and re-encoding in
+ * the browser is the slowest part of an upload. Other files are converted in
+ * a worker.
+ *
+ * Some WebKit builds (iOS Safari, and Chrome on iOS which uses WebKit)
+ * advertise a WebCodecs VideoEncoder that then fails mid-encode ("Encoding
+ * task did not complete"). When that happens and the source is already an
+ * MP4/MOV, the original is uploaded instead.
  */
 export async function convertForUpload(
   file: File,
   options: ConvertForUploadOptions
 ): Promise<ConvertForUploadResult> {
+  const ingestible = STREAM_INGESTIBLE_TYPES.has(file.type)
+  const info = ingestible ? await readOriginal(file) : null
+  if (options.signal?.aborted) throw abortError()
+
+  if (info && !info.videoCodec) {
+    // An audio file in an MP4/MOV wrapper; Cloudflare would reject it.
+    throw new Error("This file has no video track. Choose a video file.")
+  }
+
+  if (info && canUploadOriginal(info, options.aiVerticalConversion)) {
+    options.onProgress?.({ phase: "converting", value: 1 })
+    return originalResult(file, info)
+  }
+
   try {
     return await convertInWorker(file, options)
   } catch (error) {
-    if (isAbortError(error) || !STREAM_INGESTIBLE_TYPES.has(file.type)) {
+    if (
+      isAbortError(error) ||
+      !ingestible ||
+      (error instanceof Error && error.message.includes("no video track"))
+    ) {
       throw error
     }
     console.warn(
@@ -72,14 +143,15 @@ export async function convertForUpload(
       error
     )
     options.onProgress?.({ phase: "converting", value: 1 })
-    return {
-      blob: file,
-      fileName: file.name,
-      ...(await readOriginalMetadata(file)),
-    }
+    return originalResult(file, info)
   }
 }
 
+/**
+ * Runs one conversion in its own worker. A worker per conversion keeps two
+ * concurrent conversions from reading each other's messages, and terminating
+ * it on abort actually stops the encode and frees its memory.
+ */
 function convertInWorker(
   file: File,
   options: ConvertForUploadOptions
@@ -88,70 +160,71 @@ function convertInWorker(
 
   return new Promise((resolve, reject) => {
     if (signal?.aborted) {
-      reject(new DOMException("Conversion aborted", "AbortError"))
+      reject(abortError())
       return
     }
 
-    const w = getWorker()
+    const worker = new Worker(
+      new URL("./conversion.worker.ts", import.meta.url),
+      { type: "module" }
+    )
+
+    const finish = () => {
+      signal?.removeEventListener("abort", onAbort)
+      worker.terminate()
+    }
 
     const onAbort = () => {
-      cleanup()
-      reject(new DOMException("Conversion aborted", "AbortError"))
+      finish()
+      reject(abortError())
     }
 
     signal?.addEventListener("abort", onAbort)
 
-    const handleMessage = (event: MessageEvent<WorkerOutMessage>) => {
-      const data = event.data
+    worker.addEventListener("error", (event) => {
+      finish()
+      reject(new Error(event.message || "Conversion worker crashed"))
+    })
 
-      if (data.type === "progress") {
-        onProgress?.({ phase: "converting", value: data.value })
-        return
+    worker.addEventListener(
+      "message",
+      (event: MessageEvent<WorkerOutMessage>) => {
+        const data = event.data
+
+        if (data.type === "progress") {
+          onProgress?.({ phase: "converting", value: data.value })
+          return
+        }
+
+        if (data.type === "error") {
+          finish()
+          reject(new Error(data.message))
+          return
+        }
+
+        if (data.type === "done") {
+          finish()
+          resolve({
+            blob: new Blob([data.buffer], { type: "video/mp4" }),
+            fileName: toMp4FileName(file.name),
+            converted: true,
+            durationSeconds: data.durationSeconds,
+            width: data.width,
+            height: data.height,
+          })
+        }
       }
-
-      if (data.type === "error") {
-        cleanup()
-        reject(new Error(data.message))
-        return
-      }
-
-      if (data.type === "done") {
-        cleanup()
-        const blob = new Blob([data.buffer], { type: "video/mp4" })
-        resolve({
-          blob,
-          fileName: toMp4FileName(file.name),
-          durationSeconds: data.durationSeconds,
-          width: data.width,
-          height: data.height,
-        })
-      }
-    }
-
-    const cleanup = () => {
-      w.removeEventListener("message", handleMessage)
-      signal?.removeEventListener("abort", onAbort)
-    }
-
-    w.addEventListener("message", handleMessage)
+    )
 
     onProgress?.({ phase: "converting", value: 0 })
 
-    file.arrayBuffer().then((fileBuffer) => {
-      if (signal?.aborted) {
-        cleanup()
-        reject(new DOMException("Conversion aborted", "AbortError"))
-        return
-      }
-
-      const request: WorkerConvertRequest = {
-        type: "convert",
-        fileBuffer,
-        fileName: file.name,
-        aiVerticalConversion,
-      }
-
-      w.postMessage(request, [fileBuffer])
-    }, reject)
+    // A File is passed by reference, so the worker reads it from disk instead
+    // of holding a second in-memory copy of the whole video.
+    const request: WorkerConvertRequest = {
+      type: "convert",
+      file,
+      aiVerticalConversion,
+    }
+    worker.postMessage(request)
   })
 }

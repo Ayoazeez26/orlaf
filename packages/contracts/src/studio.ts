@@ -54,6 +54,8 @@ export interface CreateSeriesRequest {
   autoCaptions?: boolean
   posterUrl?: string
   trailerUrl?: string
+  /** Stream uid of a trailer still processing; the server fills trailerUrl when it is ready. */
+  trailerVideoHostingId?: string
 }
 
 export interface UpdateSeriesRequest {
@@ -64,6 +66,8 @@ export interface UpdateSeriesRequest {
   tags?: string[]
   posterUrl?: string
   trailerUrl?: string
+  /** Stream uid of a trailer still processing; the server fills trailerUrl when it is ready. */
+  trailerVideoHostingId?: string
   subtitleLanguages?: string[]
   cast?: CastMember[]
   crew?: CrewMember[]
@@ -92,9 +96,55 @@ export interface ReorderEpisodesRequest {
   episodeIds: string[]
 }
 
+/**
+ * Body for the video upload-url endpoints. Sending `size` returns a resumable
+ * tus upload URL; without it the server falls back to a basic upload URL.
+ */
+export interface CreateVideoUploadRequest {
+  /** File size in bytes. */
+  size?: number
+  fileName?: string
+  /** Kept for the wizard trailer endpoint, which validates it. */
+  contentType?: string
+}
+
 export interface UploadUrlResponse {
   uploadUrl: string
   videoId: string
+  protocol: "tus" | "basic"
+}
+
+/** GET /studio/uploads — one episode or trailer video and where it stands. */
+export interface StudioUploadItem {
+  kind: "episode" | "trailer"
+  /** Episode id, or the series id for a trailer. */
+  id: string
+  seriesId: string
+  seriesTitle: string
+  title: string
+  /**
+   * `uploading` means the upload was started but Cloudflare hasn't received
+   * the whole file (it may still be uploading in another tab or device, or
+   * have been abandoned).
+   */
+  status: "uploading" | "processing" | "ready" | "failed"
+  thumbnailUrl: string | null
+  durationSeconds: number | null
+  updatedAt: string
+}
+
+/** A submission waiting for its episodes to finish processing. */
+export interface StudioPendingSubmission {
+  seriesId: string
+  seriesTitle: string
+  submitRequestedAt: string
+  /** Episodes not yet ready. */
+  episodesRemaining: number
+}
+
+export interface StudioUploadsResponse {
+  items: StudioUploadItem[]
+  pendingSubmissions: StudioPendingSubmission[]
 }
 
 export interface ImageUploadUrlResponse {
@@ -140,6 +190,8 @@ export interface StudioSeries {
   posterUrl: string | null
   trailerUrl: string | null
   trailerVideoHostingId: string | null
+  /** Set while a submission waits for episodes to finish processing. */
+  submitRequestedAt: string | null
   isPublic: boolean
   listedInSearch: boolean
   commentsEnabled: boolean
