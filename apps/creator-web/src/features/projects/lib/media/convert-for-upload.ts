@@ -4,9 +4,10 @@ import type {
   WorkerOutMessage,
 } from "./conversion.worker"
 import { toMp4FileName } from "./upload-file-name"
-import type {
-  ConvertForUploadOptions,
-  ConvertForUploadResult,
+import {
+  type ConvertForUploadOptions,
+  type ConvertForUploadResult,
+  MAX_IN_BROWSER_CONVERT_BYTES,
 } from "./upload-pipeline.types"
 
 /** Containers Cloudflare Stream ingests directly and transcodes itself. */
@@ -124,6 +125,19 @@ export async function convertForUpload(
   }
 
   if (info && canUploadOriginal(info, options.aiVerticalConversion)) {
+    options.onProgress?.({ phase: "converting", value: 1 })
+    return originalResult(file, info)
+  }
+
+  // Converting holds the whole output in memory, which can crash the tab for
+  // very large files. Cloudflare transcodes MP4/MOV itself, so send those
+  // as they are.
+  if (file.size > MAX_IN_BROWSER_CONVERT_BYTES) {
+    if (!ingestible) {
+      throw new Error(
+        "This file is too large to convert in the browser. Export it as MP4 or MOV and try again."
+      )
+    }
     options.onProgress?.({ phase: "converting", value: 1 })
     return originalResult(file, info)
   }

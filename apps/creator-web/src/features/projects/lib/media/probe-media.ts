@@ -8,6 +8,7 @@ import {
   WEBM,
 } from "mediabunny"
 import { ensureMediabunnyCodecs } from "./register-codecs"
+import { previewFrameTime } from "./stream-thumbnail"
 import type { ProbeMediaResult } from "./upload-pipeline.types"
 
 const INPUT_FORMATS = [MP4, QTFF, WEBM, MATROSKA]
@@ -38,7 +39,9 @@ export async function probeMediaFile(file: File): Promise<ProbeMediaResult> {
       // as-is, so go without a preview.
       try {
         const sink = new CanvasSink(videoTrack, { poolSize: 1 })
-        const wrapped = await sink.getCanvas(0)
+        const wrapped =
+          (await sink.getCanvas(previewFrameTime(durationSeconds))) ??
+          (await sink.getCanvas(0))
         const canvas = wrapped?.canvas
         if (canvas instanceof HTMLCanvasElement) {
           thumbnailObjectUrl = await new Promise<string | null>((resolve) => {

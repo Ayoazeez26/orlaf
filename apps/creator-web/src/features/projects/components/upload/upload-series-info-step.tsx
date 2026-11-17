@@ -31,7 +31,7 @@ import {
   Trash2,
   Users,
 } from "lucide-react"
-import { useLayoutEffect, useRef } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 import { SelectionCard } from "@/features/onboarding/components/selection-card"
 import {
   LANGUAGE_OPTIONS,
@@ -45,9 +45,12 @@ import {
 } from "../../hooks/use-continue-from-info"
 import { usePosterTrailerUpload } from "../../hooks/use-poster-trailer-upload"
 import { usePublicGenres } from "../../hooks/use-public-genres"
+import { supportsAutoCaptions } from "../../lib/auto-captions"
+import { formatUploadGenres } from "../../lib/format-upload-genres"
 import { MAX_TRAILER_FILE_BYTES } from "../../lib/media/upload-pipeline.types"
 import type { PersonEntry } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
+import { MobileSeriesPreview } from "./mobile-series-preview"
 import { UploadInfoSectionCard } from "./upload-info-section-card"
 import { ImageUploadZone, VideoUploadZone } from "./video-upload-zone"
 
@@ -56,11 +59,37 @@ interface UploadSeriesInfoStepProps {
 }
 
 export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
-  const { state, dispatch } = useUploadWizard()
+  const { state, dispatch, previewImage } = useUploadWizard()
   const { data: genreOptions = [], isLoading: genresLoading } =
     usePublicGenres()
-  const { uploadPoster, uploadTrailer, clearPoster, clearTrailer } =
-    usePosterTrailerUpload()
+  const {
+    uploadPoster,
+    uploadTrailer,
+    posterFromTrailer,
+    clearPoster,
+    clearTrailer,
+  } = usePosterTrailerUpload()
+  const [posterFrameError, setPosterFrameError] = useState<string | null>(null)
+  const [grabbingPosterFrame, setGrabbingPosterFrame] = useState(false)
+  const trailerFrameAvailable = Boolean(
+    state.trailer?.previewObjectUrl || state.trailerUrl
+  )
+
+  async function handlePosterFromTrailer() {
+    setPosterFrameError(null)
+    setGrabbingPosterFrame(true)
+    try {
+      await posterFromTrailer()
+    } catch (error) {
+      setPosterFrameError(
+        error instanceof Error
+          ? error.message
+          : "Couldn't use the trailer frame"
+      )
+    } finally {
+      setGrabbingPosterFrame(false)
+    }
+  }
   const { continueFromInfo } = useContinueFromInfo()
 
   const canContinue = canContinueFromInfo(state)
@@ -150,22 +179,43 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
           subtitle="Vertical poster and optional trailer."
         >
           <div className="grid gap-4 md:grid-cols-2">
-            <ImageUploadZone
-              label="Film poster"
-              hint="9:16 vertical · JPG / PNG · up to 10MB"
-              aspectRatio="9/16"
-              previewUrl={state.poster?.previewObjectUrl ?? null}
-              status={state.poster?.status}
-              progress={state.poster?.progress}
-              error={state.poster?.error}
-              onSelect={(file, previewUrl) =>
-                void uploadPoster(file, previewUrl)
-              }
-              onClear={clearPoster}
-            />
+            <div className="space-y-2">
+              <ImageUploadZone
+                label="Film poster"
+                hint="9:16 vertical · JPG / PNG · up to 10MB"
+                aspectRatio="9/16"
+                previewUrl={state.poster?.previewObjectUrl ?? null}
+                status={state.poster?.status}
+                progress={state.poster?.progress}
+                error={state.poster?.error}
+                onSelect={(file, previewUrl) => {
+                  setPosterFrameError(null)
+                  void uploadPoster(file, previewUrl)
+                }}
+                onClear={clearPoster}
+              />
+              {!state.poster && trailerFrameAvailable ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={grabbingPosterFrame}
+                  onClick={() => void handlePosterFromTrailer()}
+                >
+                  {grabbingPosterFrame
+                    ? "Grabbing frame…"
+                    : "Use a frame from the trailer"}
+                </Button>
+              ) : null}
+              {posterFrameError ? (
+                <p className="text-destructive text-xs" role="alert">
+                  {posterFrameError}
+                </p>
+              ) : null}
+            </div>
             <VideoUploadZone
               label="Trailer"
-              hint="9:16 vertical · MP4 / MOV · up to 100MB"
+              hint="9:16 vertical · MP4 / MOV · up to 2GB"
               aspectRatio="9/16"
               media={state.trailer}
               maxBytes={MAX_TRAILER_FILE_BYTES}
@@ -230,6 +280,13 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
               <p className="text-muted-foreground text-xs">
                 Let Sable AI generate subtitles automatically.
               </p>
+              {state.autoCaptionEnabled &&
+              !supportsAutoCaptions(state.language) ? (
+                <p className="text-muted-foreground text-xs">
+                  Not available for {state.language} yet. You can upload
+                  subtitle files for each episode instead.
+                </p>
+              ) : null}
               <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
                 <div className="flex items-center gap-2">
                   <Keyboard className="size-4 text-primary" aria-hidden />
@@ -304,6 +361,21 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
       </div>
 
       <aside className="flex min-w-0 flex-col gap-6 xl:sticky xl:top-8">
+        {/* On phones the settings below matter more; the preview goes last. */}
+        <div className="order-last xl:order-first">
+          <p className="mb-3 font-medium text-muted-foreground text-sm xl:sr-only">
+            Series preview
+          </p>
+          <MobileSeriesPreview
+            title={state.title}
+            genre={formatUploadGenres(state.genres)}
+            synopsis={state.synopsis}
+            posterUrl={previewImage}
+            trailerUrl={state.trailerUrl}
+            trailerFile={state.trailer?.file}
+            episodes={state.episodes}
+          />
+        </div>
         <SidebarOptionCard
           icon={Lock}
           title="Access"

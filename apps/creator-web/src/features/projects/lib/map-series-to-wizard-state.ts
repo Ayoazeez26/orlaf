@@ -10,9 +10,11 @@ import type {
   PersonEntry,
   SeriesAccess,
   UploadEpisodeDraft,
+  UploadMediaAsset,
   UploadWizardState,
 } from "../types"
 import { formatDuration } from "./media/format-duration"
+import { previewFrameTime, streamThumbnailUrl } from "./media/stream-thumbnail"
 
 type StudioSeriesWithExtras = StudioSeries & {
   cast?: CastMember[]
@@ -106,12 +108,42 @@ function mapEpisode(episode: StudioEpisode): UploadEpisodeDraft {
                 ? "Episode processing failed"
                 : undefined,
             durationSeconds: episode.durationSeconds ?? undefined,
-            previewObjectUrl: episode.thumbnailUrl ?? undefined,
+            previewObjectUrl:
+              episode.thumbnailUrl ??
+              streamThumbnailUrl(episode.hlsUrl, {
+                timeSeconds: previewFrameTime(episode.durationSeconds),
+              }) ??
+              undefined,
             episodeId: episode.id,
             videoHostingId: episode.videoHostingId ?? undefined,
             hlsUrl: episode.hlsUrl ?? undefined,
           },
   }
+}
+
+function mapTrailer(series: StudioSeries): UploadMediaAsset | null {
+  if (series.trailerUrl) {
+    return {
+      file: placeholderFile("trailer.mp4"),
+      status: "ready",
+      progress: 1,
+      hlsUrl: series.trailerUrl,
+      previewObjectUrl:
+        streamThumbnailUrl(series.trailerUrl, { timeSeconds: 1 }) ?? undefined,
+      videoHostingId: series.trailerVideoHostingId ?? undefined,
+    }
+  }
+  // Uploaded but Cloudflare hasn't finished with it yet. Keeping the id lets
+  // the next save leave it in place; the server fills trailerUrl when ready.
+  if (series.trailerVideoHostingId) {
+    return {
+      file: placeholderFile("trailer.mp4"),
+      status: "processing",
+      progress: 0.5,
+      videoHostingId: series.trailerVideoHostingId,
+    }
+  }
+  return null
 }
 
 export function mapSeriesEpisodes(
@@ -150,13 +182,7 @@ export function mapSeriesToWizardFields(
           remoteUrl: series.posterUrl,
         }
       : null,
-    trailer: series.trailerUrl
-      ? {
-          file: placeholderFile("trailer.mp4"),
-          status: "ready",
-          progress: 1,
-        }
-      : null,
+    trailer: mapTrailer(series),
     trailerUrl: series.trailerUrl ?? null,
   }
 }

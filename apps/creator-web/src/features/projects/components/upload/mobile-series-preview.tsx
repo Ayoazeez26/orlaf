@@ -15,6 +15,8 @@ interface MobileSeriesPreviewProps {
   synopsis: string
   posterUrl: string
   trailerUrl?: string | null
+  /** The picked trailer file, played until Cloudflare has a stream ready. */
+  trailerFile?: File | null
   episodes: UploadEpisodeDraft[]
   activeEpisodeId?: string
   className?: string
@@ -64,10 +66,12 @@ export function MobileSeriesPreview({
   synopsis,
   posterUrl,
   trailerUrl,
+  trailerFile,
   episodes,
   activeEpisodeId,
   className,
 }: MobileSeriesPreviewProps) {
+  const trailerObjectUrl = useEpisodeObjectUrl(trailerUrl ? null : trailerFile)
   const displayTitle = title.trim() || "Your Series Title"
   const [source, setSource] = useState<PreviewSource>({ kind: "trailer" })
 
@@ -92,9 +96,9 @@ export function MobileSeriesPreview({
   )
 
   const playbackSrc = useMemo(() => {
-    if (source.kind === "trailer") return trailerUrl ?? ""
+    if (source.kind === "trailer") return trailerUrl || trailerObjectUrl || ""
     return activeEpisode?.media?.hlsUrl ?? episodeObjectUrl ?? ""
-  }, [source, trailerUrl, activeEpisode, episodeObjectUrl])
+  }, [source, trailerUrl, trailerObjectUrl, activeEpisode, episodeObjectUrl])
 
   const player = useMediaPreviewPlayer({ src: playbackSrc })
 

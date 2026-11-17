@@ -42,6 +42,17 @@ export interface ProbeMediaResult {
   thumbnailObjectUrl: string | null
 }
 
-export const MAX_EPISODE_FILE_BYTES = 500 * 1024 * 1024
-export const MAX_TRAILER_FILE_BYTES = 100 * 1024 * 1024
-export const MAX_VIDEO_DURATION_SECONDS = 5 * 60
+/**
+ * Match the server: the upload-url endpoint accepts up to 2 GB, and Cloudflare
+ * Stream is told to reject anything over 10 minutes (MAX_DURATION_SECONDS in
+ * the backend's Cloudflare provider).
+ */
+export const MAX_EPISODE_FILE_BYTES = 2 * 1024 * 1024 * 1024
+export const MAX_TRAILER_FILE_BYTES = 2 * 1024 * 1024 * 1024
+export const MAX_VIDEO_DURATION_SECONDS = 10 * 60
+
+/**
+ * In-browser conversion holds the whole output in memory. Above this size,
+ * upload the original and let Cloudflare transcode it instead.
+ */
+export const MAX_IN_BROWSER_CONVERT_BYTES = 750 * 1024 * 1024

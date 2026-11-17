@@ -17,6 +17,11 @@ const STATUS_LABELS: Record<MediaJobStatus, string> = {
   failed: "Failed",
 }
 
+function formatLimit(bytes: number) {
+  const mb = bytes / (1024 * 1024)
+  return mb >= 1024 ? `${Math.round(mb / 1024)}GB` : `${Math.round(mb)}MB`
+}
+
 interface VideoUploadZoneProps {
   label: string
   hint: string
@@ -53,9 +58,7 @@ export function VideoUploadZone({
     const file = files?.[0]
     if (!file) return
     if (file.size > maxBytes) {
-      alert(
-        `File exceeds the size limit (${Math.round(maxBytes / (1024 * 1024))}MB)`
-      )
+      alert(`File exceeds the size limit (${formatLimit(maxBytes)})`)
       return
     }
     onSelect(file)
@@ -115,11 +118,36 @@ export function VideoUploadZone({
             onDrop={handleDrop}
             className={dropZoneClassName}
           >
-            <Check className="size-6 text-primary" aria-hidden />
-            <p className="max-w-full truncate font-semibold text-foreground text-sm">
-              {media.file.name}
-            </p>
-            <p className="text-muted-foreground text-xs">Click to replace</p>
+            {media.previewObjectUrl ? (
+              <>
+                <img
+                  src={media.previewObjectUrl}
+                  alt=""
+                  className="absolute inset-0 size-full object-cover"
+                />
+                <span className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent" />
+                <span className="relative z-10 mt-auto flex max-w-full flex-col items-center gap-1 text-white">
+                  <span className="flex items-center gap-1 rounded-full bg-background/90 px-2.5 py-0.5 font-medium text-primary text-xs">
+                    <Check className="size-3.5" aria-hidden />
+                    Ready
+                    {media.durationSeconds
+                      ? ` · ${formatMediaDuration(media.durationSeconds)}`
+                      : ""}
+                  </span>
+                  <span className="text-xs">Click to replace</span>
+                </span>
+              </>
+            ) : (
+              <>
+                <Check className="size-6 text-primary" aria-hidden />
+                <p className="max-w-full truncate font-semibold text-foreground text-sm">
+                  {media.file.name}
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  Click to replace
+                </p>
+              </>
+            )}
           </button>
         ) : (
           <div className={dropZoneClassName}>

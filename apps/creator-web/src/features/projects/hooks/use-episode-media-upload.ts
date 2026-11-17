@@ -96,7 +96,7 @@ export function useEpisodeMediaUpload() {
       const isStale = () => latestPick.get(episodeId) !== pick
 
       if (file.size > MAX_EPISODE_FILE_BYTES) {
-        failEpisode(episodeId, file, "File exceeds the 500MB limit")
+        failEpisode(episodeId, file, "File exceeds the 2GB limit")
         return
       }
 
@@ -129,7 +129,7 @@ export function useEpisodeMediaUpload() {
         failEpisode(
           episodeId,
           file,
-          "Video exceeds the 5 minute duration limit",
+          "Video exceeds the 10 minute duration limit",
           asset
         )
         dispatch({

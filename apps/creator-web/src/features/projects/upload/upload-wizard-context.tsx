@@ -15,6 +15,10 @@ import {
 import { type UploadJob, useUploadJobs } from "@/features/uploads/upload-store"
 import { PROJECT_THUMBNAILS } from "../constants"
 import { formatDuration } from "../lib/media/format-duration"
+import {
+  previewFrameTime,
+  streamThumbnailUrl,
+} from "../lib/media/stream-thumbnail"
 import type {
   MediaJobStatus,
   PersonEntry,
@@ -242,7 +246,15 @@ function mediaFromJob(
     progress: job.phase === "ready" ? 1 : job.progress,
     error: jobError(job),
     durationSeconds: job.durationSeconds ?? current?.durationSeconds,
-    previewObjectUrl: current?.previewObjectUrl ?? job.previewObjectUrl,
+    // A browser that can't decode the codec makes no local preview; use
+    // Cloudflare's still once the video is ready.
+    previewObjectUrl:
+      current?.previewObjectUrl ??
+      job.previewObjectUrl ??
+      streamThumbnailUrl(job.hlsUrl, {
+        timeSeconds: previewFrameTime(job.durationSeconds),
+      }) ??
+      undefined,
     episodeId: job.episodeId ?? current?.episodeId,
     videoHostingId: job.videoId ?? current?.videoHostingId,
     hlsUrl: job.hlsUrl ?? current?.hlsUrl,
@@ -260,6 +272,7 @@ function mediaChanged(
     current.error !== next.error ||
     current.videoHostingId !== next.videoHostingId ||
     current.hlsUrl !== next.hlsUrl ||
+    current.previewObjectUrl !== next.previewObjectUrl ||
     current.durationSeconds !== next.durationSeconds
   )
 }

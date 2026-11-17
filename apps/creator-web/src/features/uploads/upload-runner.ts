@@ -210,7 +210,7 @@ async function convertAndUpload(
       converted.durationSeconds != null &&
       converted.durationSeconds > MAX_VIDEO_DURATION_SECONDS
     ) {
-      throw new Error("Video exceeds the 5 minute duration limit")
+      throw new Error("Video exceeds the 10 minute duration limit")
     }
 
     updateJob(jobId, {

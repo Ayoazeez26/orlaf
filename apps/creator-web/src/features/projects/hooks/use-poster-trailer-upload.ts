@@ -12,6 +12,10 @@ import {
 } from "../api/studio-upload"
 import { probeMediaFile } from "../lib/media/probe-media"
 import {
+  previewFrameTime,
+  streamThumbnailUrl,
+} from "../lib/media/stream-thumbnail"
+import {
   MAX_TRAILER_FILE_BYTES,
   MAX_VIDEO_DURATION_SECONDS,
 } from "../lib/media/upload-pipeline.types"
@@ -98,7 +102,7 @@ export function usePosterTrailerUpload() {
             file,
             status: "failed",
             progress: 0,
-            error: "Trailer exceeds the 100MB limit",
+            error: "Trailer exceeds the 2GB limit",
           },
         })
         return
@@ -130,7 +134,7 @@ export function usePosterTrailerUpload() {
               status: "failed",
               durationSeconds: probe.durationSeconds,
               previewObjectUrl: probe.thumbnailObjectUrl ?? undefined,
-              error: "Trailer exceeds the 5 minute duration limit",
+              error: "Trailer exceeds the 10 minute duration limit",
             },
           })
           return
@@ -171,6 +175,36 @@ export function usePosterTrailerUpload() {
     [dispatch, wizardId]
   )
 
+  /**
+   * Uses a still from the trailer as the poster: Cloudflare's full-size frame
+   * once the trailer is ready, otherwise the frame read from the local file.
+   */
+  const posterFromTrailer = useCallback(async () => {
+    const trailer = stateRef.current.trailer
+    const source =
+      streamThumbnailUrl(trailer?.hlsUrl ?? stateRef.current.trailerUrl, {
+        timeSeconds: previewFrameTime(trailer?.durationSeconds),
+        width: 1080,
+        height: 1920,
+      }) ?? trailer?.previewObjectUrl
+    if (!source) return
+
+    let blob: Blob
+    try {
+      const response = await fetch(source)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      blob = await response.blob()
+    } catch {
+      throw new Error(
+        "Couldn't grab a frame from the trailer. Upload a poster image instead."
+      )
+    }
+    const file = new File([blob], "poster.jpg", {
+      type: blob.type || "image/jpeg",
+    })
+    await uploadPoster(file, URL.createObjectURL(blob))
+  }, [uploadPoster])
+
   const clearPoster = useCallback(() => {
     posterAbortRef.current?.abort()
     dispatch({ type: "SET_POSTER", payload: null })
@@ -187,5 +221,11 @@ export function usePosterTrailerUpload() {
     dispatch({ type: "SET_TRAILER_URL", payload: null })
   }, [dispatch, wizardId])
 
-  return { uploadPoster, uploadTrailer, clearPoster, clearTrailer }
+  return {
+    uploadPoster,
+    uploadTrailer,
+    posterFromTrailer,
+    clearPoster,
+    clearTrailer,
+  }
 }

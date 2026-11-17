@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import { Progress } from "@workspace/ui/components/progress"
+import { cn } from "@workspace/ui/lib/utils"
 import { ChevronDown, ChevronUp } from "lucide-react"
 import { useEffect, useState } from "react"
 import { clearFinishedUploads } from "../upload-runner"
@@ -31,13 +32,22 @@ function useTicker(active: boolean) {
   }, [active])
 }
 
+function isSmallScreen() {
+  return (
+    typeof window !== "undefined" &&
+    window.matchMedia("(max-width: 639px)").matches
+  )
+}
+
 /**
  * Floating panel listing every video upload. Uploads keep running while the
  * creator works elsewhere in the dashboard; this is where they check on them.
  */
 export function UploadTray() {
   const jobs = useUploadJobs()
-  const [collapsed, setCollapsed] = useState(false)
+  // Phones start with just the summary bar so the tray doesn't take over the
+  // screen; tapping it opens the list.
+  const [collapsed, setCollapsed] = useState(isSmallScreen)
   const onUploadsPage = useRouterState({
     select: (state) => state.location.pathname === "/dashboard/uploads",
   })
@@ -80,11 +90,26 @@ export function UploadTray() {
   return (
     <section
       aria-label="Video uploads"
-      className="fixed inset-x-4 bottom-4 z-50 overflow-hidden rounded-[16px] border bg-background shadow-lg sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[380px]"
+      // Phones: docked under the page so it never covers buttons. Larger
+      // screens: a floating panel in the corner.
+      className="z-40 shrink-0 overflow-hidden border-t bg-background pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_rgba(0,0,0,0.06)] sm:fixed sm:right-6 sm:bottom-6 sm:z-50 sm:w-[380px] sm:rounded-[16px] sm:border sm:pb-0 sm:shadow-lg"
     >
-      <header className="flex items-center gap-2 border-b px-4 py-3">
-        <div className="min-w-0 flex-1">
-          <p className="font-semibold text-foreground text-sm" role="status">
+      <header
+        className={cn(
+          "flex items-center gap-2 px-4 py-2.5 sm:py-3",
+          !collapsed && "border-b"
+        )}
+      >
+        <button
+          type="button"
+          className="min-w-0 flex-1 text-left"
+          onClick={() => setCollapsed((value) => !value)}
+          aria-expanded={!collapsed}
+        >
+          <p
+            className="truncate font-semibold text-foreground text-sm"
+            role="status"
+          >
             {title}
           </p>
           {activeCount > 0 ? (
@@ -92,18 +117,24 @@ export function UploadTray() {
               Keep this tab open until uploads finish.
             </p>
           ) : null}
-        </div>
-        <Button variant="ghost" size="xs" asChild>
+        </button>
+        <Button variant="ghost" size="xs" className="max-sm:h-9" asChild>
           <Link to="/dashboard/uploads">See all</Link>
         </Button>
         {readyCount > 0 && activeCount === 0 ? (
-          <Button variant="ghost" size="xs" onClick={clearFinishedUploads}>
+          <Button
+            variant="ghost"
+            size="xs"
+            className="max-sm:h-9"
+            onClick={clearFinishedUploads}
+          >
             Clear
           </Button>
         ) : null}
         <Button
           variant="ghost"
           size="icon-xs"
+          className="max-sm:size-9"
           onClick={() => setCollapsed((value) => !value)}
           aria-expanded={!collapsed}
           aria-label={collapsed ? "Show uploads" : "Hide uploads"}
@@ -120,7 +151,7 @@ export function UploadTray() {
           />
         ) : null
       ) : (
-        <ul className="max-h-[50vh] divide-y overflow-y-auto">
+        <ul className="max-h-[40svh] divide-y overflow-y-auto overscroll-contain sm:max-h-[50vh]">
           {[...jobs].reverse().map((job) => (
             <UploadRow key={job.id} job={job} />
           ))}

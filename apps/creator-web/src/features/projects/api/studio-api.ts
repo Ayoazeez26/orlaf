@@ -2,6 +2,7 @@ import type {
   CreateEpisodeRequest,
   CreateSeriesRequest,
   CreateVideoUploadRequest,
+  EpisodeCaptionsResponse,
   EpisodeStatus,
   ImageUploadUrlResponse,
   PublicGenre,
@@ -11,6 +12,7 @@ import type {
   TrailerStatusResponse,
   UpdateEpisodeRequest,
   UpdateSeriesRequest,
+  UploadEpisodeCaptionsRequest,
   UploadUrlResponse,
 } from "@sable/contracts"
 import { apiRequest } from "@/lib/http-client"
@@ -116,6 +118,53 @@ export async function getEpisode(
 ): Promise<StudioEpisode> {
   return apiRequest<StudioEpisode>(
     studioPath(`/series/${seriesId}/episodes/${episodeId}`)
+  )
+}
+
+function captionsPath(seriesId: string, episodeId: string, suffix = "") {
+  return studioPath(
+    `/series/${seriesId}/episodes/${episodeId}/captions${suffix}`
+  )
+}
+
+export async function getEpisodeCaptions(
+  seriesId: string,
+  episodeId: string
+): Promise<EpisodeCaptionsResponse> {
+  return apiRequest<EpisodeCaptionsResponse>(captionsPath(seriesId, episodeId))
+}
+
+/** `language` may be a name ("French") or a tag ("fr"). */
+export async function uploadEpisodeCaptions(
+  seriesId: string,
+  episodeId: string,
+  language: string,
+  body: UploadEpisodeCaptionsRequest
+): Promise<EpisodeCaptionsResponse> {
+  return apiRequest<EpisodeCaptionsResponse>(
+    captionsPath(seriesId, episodeId, `/${encodeURIComponent(language)}`),
+    { method: "PUT", body: JSON.stringify(body) }
+  )
+}
+
+export async function deleteEpisodeCaptions(
+  seriesId: string,
+  episodeId: string,
+  language: string
+): Promise<EpisodeCaptionsResponse> {
+  return apiRequest<EpisodeCaptionsResponse>(
+    captionsPath(seriesId, episodeId, `/${encodeURIComponent(language)}`),
+    { method: "DELETE" }
+  )
+}
+
+export async function generateEpisodeCaptions(
+  seriesId: string,
+  episodeId: string
+): Promise<EpisodeCaptionsResponse> {
+  return apiRequest<EpisodeCaptionsResponse>(
+    captionsPath(seriesId, episodeId, "/generate"),
+    { method: "POST" }
   )
 }
 

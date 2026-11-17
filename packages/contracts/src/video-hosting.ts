@@ -34,6 +34,17 @@ export interface VideoMetadata {
     status: "pending" | "processing" | "ready" | "failed"
 }
 
+export interface VideoCaption {
+    /** BCP 47 language tag, e.g. "en". */
+    language: string
+    /** Human-readable name the player shows, e.g. "English". */
+    label: string
+    /** True when the provider's AI generated it; false for uploaded files. */
+    generated: boolean
+    /** For generated captions: still being made, done, or failed. */
+    status: "inprogress" | "ready" | "error"
+}
+
 export interface CreateImageUploadResult {
     /** Presigned URL to PUT the image to */
     uploadUrl: string
@@ -65,6 +76,22 @@ export interface IVideoHostingProvider {
      * Delete a video from the provider.
      */
     deleteVideo(videoId: string): Promise<void>
+
+    /**
+     * Ask the provider to transcribe the video's audio into captions in
+     * `language` (BCP 47). Resolves to "exists" when that language already
+     * has a caption track.
+     */
+    generateCaptions(videoId: string, language: string): Promise<"requested" | "exists">
+
+    /** Add or replace the caption track for `language` with a WebVTT file. */
+    uploadCaptions(videoId: string, language: string, vtt: string): Promise<void>
+
+    /** Caption tracks attached to a video. */
+    listCaptions(videoId: string): Promise<VideoCaption[]>
+
+    /** Remove the caption track for `language`. */
+    deleteCaptions(videoId: string, language: string): Promise<void>
 
     /**
      * Generate a signed playback URL for private/coin-gated content.

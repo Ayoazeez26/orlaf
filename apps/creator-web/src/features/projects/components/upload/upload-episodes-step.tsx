@@ -23,7 +23,6 @@ import {
   Subtitles,
   Trash2,
   Volume2,
-  X,
 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { ConfirmDeleteDialog } from "@/features/settings/components/confirm-delete-dialog"
@@ -38,6 +37,7 @@ import { formatUploadGenres } from "../../lib/format-upload-genres"
 import { MAX_EPISODE_FILE_BYTES } from "../../lib/media/upload-pipeline.types"
 import type { EpisodeAccess, UploadEpisodeDraft } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
+import { EpisodeSubtitlesField } from "./episode-subtitles-field"
 import { UploadSeriesPreviewAside } from "./upload-series-preview-aside"
 import { UploadEpisodesStepNav } from "./upload-step-nav"
 import { VideoUploadZone } from "./video-upload-zone"
@@ -256,7 +256,7 @@ export function UploadEpisodesStep({
                       </Label>
                       <VideoUploadZone
                         label=""
-                        hint="MP4, MOV • Max 500MB"
+                        hint="MP4, MOV • Max 2GB"
                         aspectRatio="9/16"
                         media={episode.media}
                         maxBytes={MAX_EPISODE_FILE_BYTES}
@@ -308,9 +308,12 @@ export function UploadEpisodesStep({
                         />
                       </div>
 
-                      {state.autoCaptionEnabled ? (
-                        <EpisodeSubtitleUploadField />
-                      ) : null}
+                      <EpisodeSubtitlesField
+                        seriesId={state.seriesId}
+                        episode={episode}
+                        seriesLanguage={state.language}
+                        autoCaptionEnabled={state.autoCaptionEnabled}
+                      />
                     </div>
                   </div>
 
@@ -456,6 +459,7 @@ export function UploadEpisodesStep({
           synopsis={state.synopsis}
           posterUrl={previewImage}
           trailerUrl={state.trailerUrl}
+          trailerFile={state.trailer?.file}
           episodes={state.episodes}
           activeEpisodeId={expandedEpisode}
         />
@@ -491,64 +495,6 @@ export function UploadEpisodesStep({
 }
 
 /** UI-only subtitle file picker — not wired to upload/API yet. */
-function EpisodeSubtitleUploadField() {
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [fileName, setFileName] = useState<string | null>(null)
-
-  return (
-    <div className="space-y-2">
-      <div>
-        <p className="font-medium text-sm text-text-strong">Subtitles</p>
-        <p className="text-muted-foreground text-xs">
-          SRT or VTT file (optional). Duration is auto-detected from the
-          uploaded video.
-        </p>
-      </div>
-      <input
-        ref={inputRef}
-        type="file"
-        accept=".srt,.vtt,text/vtt,application/x-subrip"
-        className="sr-only"
-        onChange={(e) => {
-          const file = e.target.files?.[0]
-          if (file) setFileName(file.name)
-          e.target.value = ""
-        }}
-      />
-      {fileName ? (
-        <div className="flex items-center gap-2">
-          <div className="flex min-w-0 flex-1 items-center justify-center gap-2 rounded-2xl border border-primary/30 bg-primary/5 px-4 py-3">
-            <Subtitles
-              className="size-4 shrink-0 text-foreground"
-              aria-hidden
-            />
-            <span className="truncate font-medium text-foreground text-sm">
-              {fileName}
-            </span>
-          </div>
-          <button
-            type="button"
-            className="flex size-11 shrink-0 items-center justify-center rounded-2xl border border-primary/30 bg-primary/5 text-muted-foreground transition-colors hover:bg-primary/10"
-            onClick={() => setFileName(null)}
-            aria-label="Remove subtitle file"
-          >
-            <X className="size-4" aria-hidden />
-          </button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border bg-input-bg/50 px-4 py-3 text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/5"
-        >
-          <Subtitles className="size-4 shrink-0" aria-hidden />
-          <span className="text-sm">Upload .srt or .vtt</span>
-        </button>
-      )}
-    </div>
-  )
-}
-
 function UploadGuideCard() {
   const sections = [
     {
@@ -557,7 +503,7 @@ function UploadGuideCard() {
       items: [
         "Vertical 9:16 (1080×1920px)",
         "MP4/MOV, H.264/H.265",
-        "Max 500MB per episode",
+        "Max 2GB, up to 10 min per episode",
         "1-10 min recommended",
       ],
     },

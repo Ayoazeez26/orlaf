@@ -103,11 +103,11 @@ function ServerItemIcon({ item }: { item: StudioUploadItem }) {
 function ServerItemRow({ item }: { item: StudioUploadItem }) {
   const needsUpload = item.status === "failed" || item.status === "uploading"
   return (
-    <li className="flex items-start gap-3 px-4 py-3">
+    <li className="flex flex-wrap items-start gap-x-3 gap-y-2 px-4 py-3">
       <div className="pt-0.5">
         <ServerItemIcon item={item} />
       </div>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-[55%] flex-1">
         <p className="truncate font-medium text-foreground text-sm">
           {item.seriesTitle} · {item.title}
         </p>
@@ -124,7 +124,12 @@ function ServerItemRow({ item }: { item: StudioUploadItem }) {
         </p>
       </div>
       {needsUpload ? (
-        <Button variant="outline" size="xs" asChild>
+        <Button
+          variant="outline"
+          size="xs"
+          className="ml-auto max-sm:h-9"
+          asChild
+        >
           <Link
             to="/dashboard/projects/new"
             search={{
@@ -136,7 +141,12 @@ function ServerItemRow({ item }: { item: StudioUploadItem }) {
           </Link>
         </Button>
       ) : (
-        <Button variant="ghost" size="xs" asChild>
+        <Button
+          variant="ghost"
+          size="xs"
+          className="ml-auto max-sm:h-9"
+          asChild
+        >
           <Link
             to="/dashboard/projects/$projectId"
             params={{ projectId: item.seriesId }}
@@ -156,11 +166,11 @@ function PendingSubmissionRow({
 }) {
   const remaining = submission.episodesRemaining
   return (
-    <li className="flex items-start gap-3 px-4 py-3">
+    <li className="flex flex-wrap items-start gap-x-3 gap-y-2 px-4 py-3">
       <div className="pt-0.5">
         <Clock className="size-4 text-muted-foreground" aria-hidden />
       </div>
-      <div className="min-w-0 flex-1">
+      <div className="min-w-[55%] flex-1">
         <p className="truncate font-medium text-foreground text-sm">
           {submission.seriesTitle}
         </p>
@@ -171,7 +181,7 @@ function PendingSubmissionRow({
           Submitted {formatWhen(submission.submitRequestedAt)}.
         </p>
       </div>
-      <Button variant="ghost" size="xs" asChild>
+      <Button variant="ghost" size="xs" className="ml-auto max-sm:h-9" asChild>
         <Link
           to="/dashboard/projects/$projectId"
           params={{ projectId: submission.seriesId }}

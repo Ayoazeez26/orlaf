@@ -2,6 +2,8 @@
  * Studio API types — shared between creator-web and backend.
  */
 
+import type { VideoCaption } from "./video-hosting.js"
+
 export type SeriesType = "short_series" | "short_film"
 
 export type SeriesStatus =
@@ -334,4 +336,25 @@ export interface PublicSeriesSearchFilters {
   /** Match series that include any of these genres */
   genres?: string[]
   type?: SeriesType
+}
+
+/** GET/PUT /studio/series/:seriesId/episodes/:episodeId/captions */
+export interface EpisodeCaptionsResponse {
+  captions: VideoCaption[]
+  /**
+   * False until the episode has an uploaded video. Captions belong to the
+   * video, so they can only be added after it is uploaded.
+   */
+  videoAttached: boolean
+  /**
+   * The language Cloudflare will transcribe automatic captions in, or null
+   * when the series' language isn't supported.
+   */
+  autoCaptionLanguage: string | null
+}
+
+/** PUT /studio/series/:seriesId/episodes/:episodeId/captions/:language */
+export interface UploadEpisodeCaptionsRequest {
+  /** Text of an .srt or .vtt file. */
+  content: string
 }

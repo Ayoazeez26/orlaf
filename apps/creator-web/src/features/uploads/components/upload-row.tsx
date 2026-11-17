@@ -118,11 +118,13 @@ export function UploadRow({ job }: { job: UploadJob }) {
 
   return (
     <li className="space-y-2 px-4 py-3">
-      <div className="flex items-start gap-3">
+      {/* On narrow screens the buttons drop below the text instead of
+          squeezing the title. */}
+      <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
         <div className="pt-0.5">
           <JobIcon job={job} />
         </div>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-[55%] flex-1">
           <p className="truncate font-medium text-foreground text-sm">
             {job.title}
           </p>
@@ -142,11 +144,12 @@ export function UploadRow({ job }: { job: UploadJob }) {
             </p>
           ) : null}
         </div>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="ml-auto flex shrink-0 items-center gap-1">
           {job.phase === "uploading" ? (
             <Button
               variant="ghost"
               size="icon-xs"
+              className="max-sm:size-9"
               onClick={() => pauseUpload(job.id)}
               aria-label={`Pause ${job.title}`}
             >
@@ -157,6 +160,7 @@ export function UploadRow({ job }: { job: UploadJob }) {
             <Button
               variant="outline"
               size="xs"
+              className="max-sm:h-9"
               onClick={() => void resumeUpload(job.id)}
               aria-label={`Resume ${job.title}`}
             >
@@ -168,6 +172,7 @@ export function UploadRow({ job }: { job: UploadJob }) {
             <Button
               variant="outline"
               size="xs"
+              className="max-sm:h-9"
               onClick={retry}
               aria-label={`Retry ${job.title}`}
             >
@@ -176,7 +181,7 @@ export function UploadRow({ job }: { job: UploadJob }) {
             </Button>
           ) : null}
           {job.phase === "ready" && job.seriesId ? (
-            <Button variant="ghost" size="xs" asChild>
+            <Button variant="ghost" size="xs" className="max-sm:h-9" asChild>
               <Link
                 to="/dashboard/projects/$projectId"
                 params={{ projectId: job.seriesId }}
@@ -188,6 +193,7 @@ export function UploadRow({ job }: { job: UploadJob }) {
           <Button
             variant="ghost"
             size="icon-xs"
+            className="max-sm:size-9"
             onClick={() =>
               isJobActive(job) ? cancelUpload(job.id) : dismissUpload(job.id)
             }
