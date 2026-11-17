@@ -17,17 +17,11 @@ const STATUS_LABELS: Record<MediaJobStatus, string> = {
   failed: "Failed",
 }
 
-function formatLimit(bytes: number) {
-  const mb = bytes / (1024 * 1024)
-  return mb >= 1024 ? `${Math.round(mb / 1024)}GB` : `${Math.round(mb)}MB`
-}
-
 interface VideoUploadZoneProps {
   label: string
   hint: string
   accept?: string
   media: UploadMediaAsset | null
-  maxBytes: number
   onSelect: (file: File) => void
   onClear: () => void
   disabled?: boolean
@@ -40,7 +34,6 @@ export function VideoUploadZone({
   hint,
   accept = "video/*",
   media,
-  maxBytes,
   onSelect,
   onClear,
   disabled,
@@ -57,10 +50,6 @@ export function VideoUploadZone({
   const handleFiles = (files: FileList | null) => {
     const file = files?.[0]
     if (!file) return
-    if (file.size > maxBytes) {
-      alert(`File exceeds the size limit (${formatLimit(maxBytes)})`)
-      return
-    }
     onSelect(file)
   }
 

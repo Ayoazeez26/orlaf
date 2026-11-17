@@ -34,7 +34,6 @@ import { useSaveUploadDraft } from "../../hooks/use-save-upload-draft"
 import { formatCoinUsdHint, parseCoinPriceInput } from "../../lib/coin-price"
 import { getEpisodesStepBlocker } from "../../lib/episode-step-ready"
 import { formatUploadGenres } from "../../lib/format-upload-genres"
-import { MAX_EPISODE_FILE_BYTES } from "../../lib/media/upload-pipeline.types"
 import type { EpisodeAccess, UploadEpisodeDraft } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
 import { EpisodeSubtitlesField } from "./episode-subtitles-field"
@@ -256,10 +255,9 @@ export function UploadEpisodesStep({
                       </Label>
                       <VideoUploadZone
                         label=""
-                        hint="MP4, MOV • Max 2GB"
+                        hint="MP4, MOV"
                         aspectRatio="9/16"
                         media={episode.media}
-                        maxBytes={MAX_EPISODE_FILE_BYTES}
                         onSelect={(file) =>
                           void uploadEpisode(episode.id, file)
                         }

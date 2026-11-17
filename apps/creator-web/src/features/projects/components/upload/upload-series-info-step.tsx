@@ -47,7 +47,6 @@ import { usePosterTrailerUpload } from "../../hooks/use-poster-trailer-upload"
 import { usePublicGenres } from "../../hooks/use-public-genres"
 import { supportsAutoCaptions } from "../../lib/auto-captions"
 import { formatUploadGenres } from "../../lib/format-upload-genres"
-import { MAX_TRAILER_FILE_BYTES } from "../../lib/media/upload-pipeline.types"
 import type { PersonEntry } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
 import { MobileSeriesPreview } from "./mobile-series-preview"
@@ -215,10 +214,9 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
             </div>
             <VideoUploadZone
               label="Trailer"
-              hint="9:16 vertical · MP4 / MOV · up to 2GB"
+              hint="9:16 vertical · MP4 / MOV"
               aspectRatio="9/16"
               media={state.trailer}
-              maxBytes={MAX_TRAILER_FILE_BYTES}
               onSelect={(file) => void uploadTrailer(file)}
               onClear={clearTrailer}
             />

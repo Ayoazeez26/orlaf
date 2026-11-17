@@ -68,10 +68,15 @@ function UploadNewSeriesContent() {
   const isEditing = Boolean(seriesId)
 
   function goToStep(next: UploadWizardState["step"]) {
+    // Once the series exists, keep its id in the URL so a reload restores it
+    // from the backend instead of leaving later steps without a series.
+    const nextSeriesId = seriesId ?? state.seriesId ?? undefined
+    // The wizard already holds this series' data; don't refetch over it.
+    if (nextSeriesId) prefilledSeriesId.current = nextSeriesId
     dispatch({ type: "SET_STEP", payload: next })
     navigate({
       to: "/dashboard/projects/new",
-      search: { step: next, seriesId },
+      search: { step: next, seriesId: nextSeriesId },
     })
   }
 

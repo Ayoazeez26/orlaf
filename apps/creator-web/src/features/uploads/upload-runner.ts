@@ -8,7 +8,6 @@ import {
   updateSeries,
 } from "@/features/projects/api/studio-api"
 import { convertForUpload } from "@/features/projects/lib/media/convert-for-upload"
-import { MAX_VIDEO_DURATION_SECONDS } from "@/features/projects/lib/media/upload-pipeline.types"
 import {
   isAbortError,
   PauseGate,
@@ -200,18 +199,19 @@ async function convertAndUpload(
   try {
     updateJob(jobId, { phase: "converting", progress: 0 })
 
+    // Like byte progress below: a tray and wizard re-render every ~0.25s is
+    // plenty, and updating on every event overwhelms React on long videos.
+    let lastConvertProgressAt = 0
     const converted = await convertForUpload(media.file, {
       aiVerticalConversion: media.aiVerticalConversion,
       signal,
-      onProgress: (update) => updateJob(jobId, { progress: update.value }),
+      onProgress: (update) => {
+        const now = Date.now()
+        if (update.value < 1 && now - lastConvertProgressAt < 250) return
+        lastConvertProgressAt = now
+        updateJob(jobId, { progress: update.value })
+      },
     })
-
-    if (
-      converted.durationSeconds != null &&
-      converted.durationSeconds > MAX_VIDEO_DURATION_SECONDS
-    ) {
-      throw new Error("Video exceeds the 10 minute duration limit")
-    }
 
     updateJob(jobId, {
       phase: "uploading",

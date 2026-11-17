@@ -96,8 +96,7 @@ export async function probeAndCreateMediaAsset(file: File) {
   } catch (error) {
     if (error instanceof ProbeTimeoutError) {
       // Don't leave the creator stuck on "Analyzing…": upload without a
-      // preview. Cloudflare still validates the file and enforces the
-      // duration limit.
+      // preview. Cloudflare still validates the file.
       return {
         file,
         status: "idle" as const,

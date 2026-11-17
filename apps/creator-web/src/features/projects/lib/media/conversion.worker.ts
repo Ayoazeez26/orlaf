@@ -178,7 +178,14 @@ self.onmessage = async (event: MessageEvent<WorkerConvertRequest>) => {
       )
     }
 
+    // Progress fires per encoded sample — thousands of times a second on a
+    // long video. Posting each one floods the page with re-renders, so send at
+    // most ~10 updates a second.
+    let lastProgressAt = 0
     conversion.onProgress = (value: number) => {
+      const now = Date.now()
+      if (value < 1 && now - lastProgressAt < 100) return
+      lastProgressAt = now
       const message: WorkerProgressMessage = { type: "progress", value }
       self.postMessage(message)
     }

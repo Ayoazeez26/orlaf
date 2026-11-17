@@ -15,10 +15,6 @@ import {
   previewFrameTime,
   streamThumbnailUrl,
 } from "../lib/media/stream-thumbnail"
-import {
-  MAX_TRAILER_FILE_BYTES,
-  MAX_VIDEO_DURATION_SECONDS,
-} from "../lib/media/upload-pipeline.types"
 import { useUploadWizard } from "../upload/upload-wizard-context"
 
 export function usePosterTrailerUpload() {
@@ -95,19 +91,6 @@ export function usePosterTrailerUpload() {
       latestTrailerPick.current = pick
       const isStale = () => latestTrailerPick.current !== pick
 
-      if (file.size > MAX_TRAILER_FILE_BYTES) {
-        dispatch({
-          type: "SET_TRAILER",
-          payload: {
-            file,
-            status: "failed",
-            progress: 0,
-            error: "Trailer exceeds the 2GB limit",
-          },
-        })
-        return
-      }
-
       dispatch({
         type: "SET_TRAILER",
         payload: { file, status: "probing", progress: 0 },
@@ -134,22 +117,6 @@ export function usePosterTrailerUpload() {
         if (isStale()) return
         if (!probe.hasVideo) {
           throw new Error("This file has no video track. Choose a video file.")
-        }
-
-        if (
-          probe.durationSeconds != null &&
-          probe.durationSeconds > MAX_VIDEO_DURATION_SECONDS
-        ) {
-          dispatch({
-            type: "UPDATE_TRAILER",
-            payload: {
-              status: "failed",
-              durationSeconds: probe.durationSeconds,
-              previewObjectUrl: probe.thumbnailObjectUrl ?? undefined,
-              error: "Trailer exceeds the 10 minute duration limit",
-            },
-          })
-          return
         }
 
         dispatch({

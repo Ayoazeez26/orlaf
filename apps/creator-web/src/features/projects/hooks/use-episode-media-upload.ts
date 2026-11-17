@@ -6,10 +6,6 @@ import {
 } from "@/features/uploads/upload-runner"
 import { getJobs } from "@/features/uploads/upload-store"
 import { createEpisode } from "../api/studio-api"
-import {
-  MAX_EPISODE_FILE_BYTES,
-  MAX_VIDEO_DURATION_SECONDS,
-} from "../lib/media/upload-pipeline.types"
 import type { EpisodeAccess } from "../types"
 import { useUploadWizard } from "../upload/upload-wizard-context"
 import {
@@ -75,13 +71,18 @@ export function useEpisodeMediaUpload() {
 
   const uploadEpisode = useCallback(
     async (episodeId: string, file: File) => {
-      const seriesId = seriesIdRef.current
-      if (!seriesId) {
-        throw new Error("Series must be created before uploading episodes")
-      }
-
       const draft = episodesRef.current.find((ep) => ep.id === episodeId)
       if (!draft) return
+
+      const seriesId = seriesIdRef.current
+      if (!seriesId) {
+        failEpisode(
+          episodeId,
+          file,
+          "This series hasn't been saved yet. Go back to Series Info and click Continue."
+        )
+        return
+      }
 
       // Drop any earlier upload for this episode first; otherwise its state
       // (say, a failure) would be mirrored back over the new file.
@@ -94,11 +95,6 @@ export function useEpisodeMediaUpload() {
       const pick = Symbol(file.name)
       latestPick.set(episodeId, pick)
       const isStale = () => latestPick.get(episodeId) !== pick
-
-      if (file.size > MAX_EPISODE_FILE_BYTES) {
-        failEpisode(episodeId, file, "File exceeds the 2GB limit")
-        return
-      }
 
       dispatch({
         type: "UPDATE_EPISODE",
@@ -121,26 +117,6 @@ export function useEpisodeMediaUpload() {
         return
       }
       if (isStale()) return
-
-      if (
-        asset.durationSeconds != null &&
-        asset.durationSeconds > MAX_VIDEO_DURATION_SECONDS
-      ) {
-        failEpisode(
-          episodeId,
-          file,
-          "Video exceeds the 10 minute duration limit",
-          asset
-        )
-        dispatch({
-          type: "UPDATE_EPISODE",
-          payload: {
-            id: episodeId,
-            patch: { duration: formatMediaDuration(asset.durationSeconds) },
-          },
-        })
-        return
-      }
 
       dispatch({
         type: "UPDATE_EPISODE",

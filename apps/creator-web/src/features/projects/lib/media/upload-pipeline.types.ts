@@ -43,15 +43,6 @@ export interface ProbeMediaResult {
 }
 
 /**
- * Match the server: the upload-url endpoint accepts up to 2 GB, and Cloudflare
- * Stream is told to reject anything over 10 minutes (MAX_DURATION_SECONDS in
- * the backend's Cloudflare provider).
- */
-export const MAX_EPISODE_FILE_BYTES = 2 * 1024 * 1024 * 1024
-export const MAX_TRAILER_FILE_BYTES = 2 * 1024 * 1024 * 1024
-export const MAX_VIDEO_DURATION_SECONDS = 10 * 60
-
-/**
  * In-browser conversion re-encodes every frame and holds the whole output in
  * memory. A 500 MB, 9-minute 1080p file took over 3 minutes on a fast laptop
  * before any byte reached Cloudflare, and slower machines look frozen or run
