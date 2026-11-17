@@ -3,11 +3,13 @@ import type {
   WorkerConvertRequest,
   WorkerOutMessage,
 } from "./conversion.worker"
+import { withTimeout } from "./probe-media"
 import { toMp4FileName } from "./upload-file-name"
 import {
   type ConvertForUploadOptions,
   type ConvertForUploadResult,
   MAX_IN_BROWSER_CONVERT_BYTES,
+  PROBE_METADATA_TIMEOUT_MS,
 } from "./upload-pipeline.types"
 
 /** Containers Cloudflare Stream ingests directly and transcodes itself. */
@@ -45,16 +47,24 @@ async function readOriginal(file: File): Promise<OriginalInfo | null> {
     formats: [MP4, QTFF],
   })
   try {
-    const duration = await input.computeDuration()
-    const videoTrack = await input.getPrimaryVideoTrack()
-    const audioTrack = await input.getPrimaryAudioTrack()
-    return {
-      durationSeconds: Number.isFinite(duration) ? duration : null,
-      width: videoTrack ? await videoTrack.getDisplayWidth() : null,
-      height: videoTrack ? await videoTrack.getDisplayHeight() : null,
-      videoCodec: videoTrack ? await videoTrack.getCodec() : null,
-      audioCodec: audioTrack ? await audioTrack.getCodec() : null,
-    }
+    // Unknown (null) when reading takes too long; the caller then uploads
+    // large files as they are instead of waiting.
+    return await withTimeout(
+      (async (): Promise<OriginalInfo> => {
+        const duration = await input.computeDuration()
+        const videoTrack = await input.getPrimaryVideoTrack()
+        const audioTrack = await input.getPrimaryAudioTrack()
+        return {
+          durationSeconds: Number.isFinite(duration) ? duration : null,
+          width: videoTrack ? await videoTrack.getDisplayWidth() : null,
+          height: videoTrack ? await videoTrack.getDisplayHeight() : null,
+          videoCodec: videoTrack ? await videoTrack.getCodec() : null,
+          audioCodec: audioTrack ? await audioTrack.getCodec() : null,
+        }
+      })(),
+      PROBE_METADATA_TIMEOUT_MS,
+      () => null
+    )
   } catch {
     return null
   } finally {

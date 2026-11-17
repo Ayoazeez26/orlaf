@@ -3,11 +3,12 @@ import type {
   StudioUploadItem,
 } from "@sable/contracts"
 import { useQuery } from "@tanstack/react-query"
-import { Link } from "@tanstack/react-router"
+import { Link, useCanGoBack, useRouter } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
 import {
   AlertCircle,
+  ArrowLeft,
   CheckCircle2,
   Clapperboard,
   Clock,
@@ -253,6 +254,7 @@ export function UploadsPage() {
   return (
     <div className="space-y-6 p-4 sm:space-y-8 sm:p-6 lg:p-8">
       <div>
+        <BackButton />
         <h1 className="font-semibold text-2xl tracking-tight sm:text-3xl">
           Uploads
         </h1>
@@ -360,5 +362,37 @@ export function UploadsPage() {
         </div>
       ) : null}
     </div>
+  )
+}
+
+/**
+ * Returns to wherever the creator came from (often the upload wizard, whose
+ * state is kept), or to Projects when the page was opened directly.
+ */
+function BackButton() {
+  const router = useRouter()
+  const canGoBack = useCanGoBack()
+  const className = "-ml-2 mb-2 gap-1.5 text-muted-foreground"
+
+  if (canGoBack) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className={className}
+        onClick={() => router.history.back()}
+      >
+        <ArrowLeft className="size-4" aria-hidden />
+        Back
+      </Button>
+    )
+  }
+  return (
+    <Button variant="ghost" size="sm" className={className} asChild>
+      <Link to="/dashboard/projects">
+        <ArrowLeft className="size-4" aria-hidden />
+        Back to projects
+      </Link>
+    </Button>
   )
 }

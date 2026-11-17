@@ -10,7 +10,7 @@ import {
   uploadPoster as uploadPosterToR2,
   uploadSeriesPoster,
 } from "../api/studio-upload"
-import { probeMediaFile } from "../lib/media/probe-media"
+import { ProbeTimeoutError, probeMediaFile } from "../lib/media/probe-media"
 import {
   previewFrameTime,
   streamThumbnailUrl,
@@ -114,7 +114,19 @@ export function usePosterTrailerUpload() {
       })
 
       try {
-        const probe = await probeMediaFile(file).catch(() => {
+        const probe = await probeMediaFile(file).catch((error: unknown) => {
+          // Too slow to read: upload without a preview rather than leave the
+          // creator on "Analyzing…". Cloudflare still validates the file.
+          if (error instanceof ProbeTimeoutError) {
+            return {
+              durationSeconds: null,
+              width: null,
+              height: null,
+              hasVideo: true,
+              hasAudio: true,
+              thumbnailObjectUrl: null,
+            }
+          }
           throw new Error(
             "This file couldn't be read as a video. Export it as MP4 or MOV and try again."
           )

@@ -4,7 +4,7 @@ import { toast, toastMutationError } from "@/lib/toast"
 import { publishSeries } from "../api/studio-api"
 import { getSubmitBlocker } from "../lib/episode-step-ready"
 import { formatDuration } from "../lib/media/format-duration"
-import { probeMediaFile } from "../lib/media/probe-media"
+import { ProbeTimeoutError, probeMediaFile } from "../lib/media/probe-media"
 import type { UploadWizardState } from "../types"
 
 export interface PublishProgress {
@@ -93,7 +93,19 @@ export async function probeAndCreateMediaAsset(file: File) {
   let probe: Awaited<ReturnType<typeof probeMediaFile>>
   try {
     probe = await probeMediaFile(file)
-  } catch {
+  } catch (error) {
+    if (error instanceof ProbeTimeoutError) {
+      // Don't leave the creator stuck on "Analyzing…": upload without a
+      // preview. Cloudflare still validates the file and enforces the
+      // duration limit.
+      return {
+        file,
+        status: "idle" as const,
+        progress: 0,
+        durationSeconds: undefined,
+        previewObjectUrl: undefined,
+      }
+    }
     throw new Error(
       "This file couldn't be read as a video. Export it as MP4 or MOV and try again."
     )
