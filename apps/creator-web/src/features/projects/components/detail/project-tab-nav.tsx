@@ -13,9 +13,14 @@ const TABS = [
 
 interface ProjectTabNavProps {
   projectId: string
+  /** Short films hold one video, so the episodes tab reads "Film". */
+  isFilm?: boolean
 }
 
-export function ProjectTabNav({ projectId }: ProjectTabNavProps) {
+export function ProjectTabNav({
+  projectId,
+  isFilm = false,
+}: ProjectTabNavProps) {
   const pathname = useRouterState({ select: (s) => s.location.pathname })
 
   return (
@@ -50,7 +55,7 @@ export function ProjectTabNav({ projectId }: ProjectTabNavProps) {
               )}
             >
               <Icon className="size-4" aria-hidden />
-              {tab.label}
+              {isFilm && tab.id === "episodes" ? "Film" : tab.label}
             </Link>
           )
         })}

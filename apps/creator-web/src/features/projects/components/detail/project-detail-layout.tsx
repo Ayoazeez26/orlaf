@@ -33,7 +33,10 @@ export function ProjectDetailLayout() {
     <div className="space-y-6 p-4 sm:p-6 lg:p-8">
       <BackToProjectsLink />
       <ProjectHeroCard project={project} />
-      <ProjectTabNav projectId={project.id} />
+      <ProjectTabNav
+        projectId={project.id}
+        isFilm={project.type === "Short film"}
+      />
       <Outlet />
     </div>
   )

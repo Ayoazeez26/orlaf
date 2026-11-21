@@ -45,6 +45,7 @@ import {
 } from "../../hooks/use-continue-from-info"
 import { usePosterTrailerUpload } from "../../hooks/use-poster-trailer-upload"
 import { usePublicGenres } from "../../hooks/use-public-genres"
+import { useSeriesInfoAutosave } from "../../hooks/use-series-info-autosave"
 import { supportsAutoCaptions } from "../../lib/auto-captions"
 import { formatUploadGenres } from "../../lib/format-upload-genres"
 import type { PersonEntry } from "../../types"
@@ -90,6 +91,7 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
     }
   }
   const { continueFromInfo } = useContinueFromInfo()
+  useSeriesInfoAutosave(state)
 
   const canContinue = canContinueFromInfo(state)
 
@@ -362,7 +364,9 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
         {/* On phones the settings below matter more; the preview goes last. */}
         <div className="order-last xl:order-first">
           <p className="mb-3 font-medium text-muted-foreground text-sm xl:sr-only">
-            Series preview
+            {state.projectType === "short-film"
+              ? "Film preview"
+              : "Series preview"}
           </p>
           <MobileSeriesPreview
             title={state.title}
@@ -372,6 +376,7 @@ export function UploadSeriesInfoStep({ onNext }: UploadSeriesInfoStepProps) {
             trailerUrl={state.trailerUrl}
             trailerFile={state.trailer?.file}
             episodes={state.episodes}
+            isFilm={state.projectType === "short-film"}
           />
         </div>
         <SidebarOptionCard

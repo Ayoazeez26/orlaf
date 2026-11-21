@@ -35,17 +35,19 @@ export function UploadEpisodesStepNav({
 
 interface UploadReviewStepNavProps {
   onBack: () => void
+  backLabel?: string
   className?: string
 }
 
 export function UploadReviewStepNav({
   onBack,
+  backLabel = "Episodes",
   className,
 }: UploadReviewStepNavProps) {
   return (
     <div className={cn("flex justify-between", className)}>
       <Button variant="outline" onClick={onBack}>
-        ← Back to Episodes
+        ← Back to {backLabel}
       </Button>
     </div>
   )

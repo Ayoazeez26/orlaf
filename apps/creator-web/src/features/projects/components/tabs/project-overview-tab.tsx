@@ -18,6 +18,7 @@ export function ProjectOverviewTab() {
 
   if (!project) return null
 
+  const isFilm = project.type === "Short film"
   const viewsByEpisode = new Map(
     (analytics?.episodeViews ?? []).map((row) => [row.episodeId, row.views])
   )
@@ -62,8 +63,12 @@ export function ProjectOverviewTab() {
               />
               <MetadataItem
                 icon={Clapperboard}
-                label="Episodes"
-                value={String(project.episodeCount)}
+                label={isFilm ? "Duration" : "Episodes"}
+                value={
+                  isFilm
+                    ? (project.duration ?? "—")
+                    : String(project.episodeCount ?? 0)
+                }
               />
             </div>
             <div className="flex flex-wrap gap-2">
@@ -82,7 +87,7 @@ export function ProjectOverviewTab() {
         <Card className={cn(FROSTED_CARD_SURFACE_CLASS, "py-6")}>
           <CardHeader className="pb-2">
             <p className="font-semibold text-foreground text-sm">
-              Recent Episodes
+              {isFilm ? "Film" : "Recent Episodes"}
             </p>
           </CardHeader>
           <CardContent className="space-y-4">

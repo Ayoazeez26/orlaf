@@ -18,7 +18,7 @@ import {
 import { useUploadWizard } from "../upload/upload-wizard-context"
 
 export function usePosterTrailerUpload() {
-  const { state, dispatch, wizardId } = useUploadWizard()
+  const { state, dispatch, wizardId, ensureSeriesId } = useUploadWizard()
   const posterAbortRef = useRef<AbortController | null>(null)
   const seriesIdRef = useRef(state.seriesId)
   seriesIdRef.current = state.seriesId
@@ -129,11 +129,22 @@ export function usePosterTrailerUpload() {
         })
         dispatch({ type: "SET_TRAILER_URL", payload: null })
 
+        // Upload against the real series (created as a draft if needed), so
+        // the server links the trailer itself and fills in its URL when
+        // Cloudflare finishes — even if the creator has moved on to episodes
+        // or closed the tab by then.
+        const seriesId = await ensureSeriesId().catch(() => {
+          throw new Error(
+            "Couldn't save your project to start the trailer upload. Try again."
+          )
+        })
+        if (isStale()) return
+
         // Runs in the background; useSyncUploadJobs mirrors its progress
         // into the wizard and the upload tray shows it everywhere else.
         const title = stateRef.current.title.trim()
         startTrailerUpload({
-          seriesId: seriesIdRef.current,
+          seriesId,
           wizardId,
           title: title ? `${title} · Trailer` : "Trailer",
           file,
@@ -151,7 +162,7 @@ export function usePosterTrailerUpload() {
         })
       }
     },
-    [dispatch, wizardId]
+    [dispatch, wizardId, ensureSeriesId]
   )
 
   /**

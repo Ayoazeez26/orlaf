@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { useNavigate, useSearch } from "@tanstack/react-router"
 import { Button } from "@workspace/ui/components/button"
 import { Save } from "lucide-react"
-import { useEffect, useLayoutEffect, useRef } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { usePreferences } from "@/features/settings/hooks/use-preferences"
 import { getSeries } from "../api/studio-api"
 import { BackToProjectsLink } from "../components/shared/back-to-projects-link"
@@ -50,7 +50,8 @@ function UploadNewSeriesContent() {
       payload: mapSeriesToWizardFields(seriesQuery.data),
     })
 
-    if (search.addEpisode) {
+    // A short film holds exactly one video — never add a second slot.
+    if (search.addEpisode && seriesQuery.data.type !== "short_film") {
       dispatch({ type: "ADD_EPISODES", payload: 1 })
     }
   }, [seriesQuery.data, seriesId, search.addEpisode, dispatch])
@@ -65,12 +66,30 @@ function UploadNewSeriesContent() {
   }, [seriesId, preferences, dispatch])
 
   const step = search.step ?? state.step
-  const isEditing = Boolean(seriesId)
+  // Fixed at mount: a new project gains a seriesId once its draft is saved,
+  // but it is still being created, not edited.
+  const [isEditing] = useState(() => Boolean(search.seriesId))
+  const projectNoun = state.projectType === "short-film" ? "film" : "series"
+
+  // The draft series is created mid-step (e.g. when the trailer is picked).
+  // Put its id in the URL right away so a reload restores it from the
+  // backend instead of starting a second, empty project.
+  const latestSeriesId = useRef(state.seriesId)
+  latestSeriesId.current = state.seriesId
+  useEffect(() => {
+    if (!state.seriesId || seriesId) return
+    prefilledSeriesId.current = state.seriesId
+    navigate({
+      to: "/dashboard/projects/new",
+      search: { step, seriesId: state.seriesId },
+      replace: true,
+    })
+  }, [state.seriesId, seriesId, step, navigate])
 
   function goToStep(next: UploadWizardState["step"]) {
-    // Once the series exists, keep its id in the URL so a reload restores it
-    // from the backend instead of leaving later steps without a series.
-    const nextSeriesId = seriesId ?? state.seriesId ?? undefined
+    // Read the id through a ref: Continue creates or saves the series and
+    // then calls this from a closure made before that render.
+    const nextSeriesId = seriesId ?? latestSeriesId.current ?? undefined
     // The wizard already holds this series' data; don't refetch over it.
     if (nextSeriesId) prefilledSeriesId.current = nextSeriesId
     dispatch({ type: "SET_STEP", payload: next })
@@ -128,11 +147,11 @@ function UploadNewSeriesContent() {
           </h1>
           <p className="mt-1 text-muted-foreground text-sm">
             {isEditing
-              ? "Update your series details and publish changes to Sable."
-              : "Set up your series and publish it to Sable."}
+              ? `Update your ${projectNoun} details and publish changes to Sable.`
+              : `Set up your ${projectNoun} and publish it to Sable.`}
           </p>
         </div>
-        <UploadStepper currentStep={step} />
+        <UploadStepper currentStep={step} projectType={state.projectType} />
       </div>
 
       {step === "info" && (

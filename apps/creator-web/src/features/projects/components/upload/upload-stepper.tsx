@@ -1,15 +1,20 @@
 import { cn } from "@workspace/ui/lib/utils"
 import { Check } from "lucide-react"
 import { SCROLLABLE_HORIZONTAL_CLASS } from "@/lib/scrollable-tab-nav"
-import { UPLOAD_WIZARD_STEPS } from "../../constants"
-import type { UploadWizardState } from "../../types"
+import { getUploadWizardSteps } from "../../constants"
+import type { ProjectType, UploadWizardState } from "../../types"
 
 interface UploadStepperProps {
   currentStep: UploadWizardState["step"]
+  projectType: ProjectType
 }
 
-export function UploadStepper({ currentStep }: UploadStepperProps) {
-  const stepOrder = UPLOAD_WIZARD_STEPS.map((s) => s.id)
+export function UploadStepper({
+  currentStep,
+  projectType,
+}: UploadStepperProps) {
+  const steps = getUploadWizardSteps(projectType)
+  const stepOrder = steps.map((s) => s.id)
   const currentIndex = stepOrder.indexOf(currentStep)
 
   return (
@@ -20,7 +25,7 @@ export function UploadStepper({ currentStep }: UploadStepperProps) {
       )}
       aria-label="Upload progress"
     >
-      {UPLOAD_WIZARD_STEPS.map((step, index) => {
+      {steps.map((step, index) => {
         const isComplete = index < currentIndex
         const isActive = step.id === currentStep
 

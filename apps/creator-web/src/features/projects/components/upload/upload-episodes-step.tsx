@@ -32,7 +32,10 @@ import { useEpisodeAutosave } from "../../hooks/use-episode-autosave"
 import { useEpisodeMediaUpload } from "../../hooks/use-episode-media-upload"
 import { useSaveUploadDraft } from "../../hooks/use-save-upload-draft"
 import { formatCoinUsdHint, parseCoinPriceInput } from "../../lib/coin-price"
-import { getEpisodesStepBlocker } from "../../lib/episode-step-ready"
+import {
+  getEpisodesStepBlocker,
+  isEmptyEpisodeSlot,
+} from "../../lib/episode-step-ready"
 import { formatUploadGenres } from "../../lib/format-upload-genres"
 import type { EpisodeAccess, UploadEpisodeDraft } from "../../types"
 import { useUploadWizard } from "../../upload/upload-wizard-context"
@@ -71,6 +74,40 @@ export function UploadEpisodesStep({
   )
   const [episodeToDelete, setEpisodeToDelete] =
     useState<UploadEpisodeDraft | null>(null)
+
+  const isFilm = state.projectType === "short-film"
+  const filmEpisode = isFilm ? state.episodes[0] : undefined
+
+  // A short film is a single video: keep exactly one slot, drop extra empty
+  // slots left over from switching type, and mirror the film's details onto it.
+  useEffect(() => {
+    if (!isFilm) return
+    if (state.episodes.length === 0) {
+      dispatch({ type: "ADD_EPISODES", payload: 1 })
+      return
+    }
+    state.episodes.slice(1).forEach((episode) => {
+      if (isEmptyEpisodeSlot(episode)) {
+        dispatch({ type: "REMOVE_EPISODE", payload: { id: episode.id } })
+      }
+    })
+  }, [isFilm, state.episodes, dispatch])
+
+  const filmTitle = state.title.trim()
+  useEffect(() => {
+    if (!filmEpisode) return
+    const patch: Partial<UploadEpisodeDraft> = {}
+    if (filmTitle && filmEpisode.title !== filmTitle) patch.title = filmTitle
+    if (filmEpisode.synopsis !== state.synopsis) {
+      patch.synopsis = state.synopsis
+    }
+    if (Object.keys(patch).length > 0) {
+      dispatch({
+        type: "UPDATE_EPISODE",
+        payload: { id: filmEpisode.id, patch },
+      })
+    }
+  }, [filmEpisode, filmTitle, state.synopsis, dispatch])
 
   useEffect(() => {
     if (state.episodes.length > episodeCountRef.current) {
@@ -111,7 +148,10 @@ export function UploadEpisodesStep({
   const toolbarButtonClassName =
     "text-text-strong hover:text-text-strong aria-expanded:text-text-strong px-3 py-2"
 
-  const nextDisabledReason = getEpisodesStepBlocker(state.episodes)
+  const nextDisabledReason = getEpisodesStepBlocker(
+    state.episodes,
+    state.projectType
+  )
   const nextDisabled = nextDisabledReason != null
 
   function handleNext() {
@@ -128,7 +168,9 @@ export function UploadEpisodesStep({
               {displayTitle}
             </h2>
             <p className="text-sm text-text-subtle">
-              {state.episodes.length} episodes added
+              {isFilm
+                ? "Upload your short film"
+                : `${state.episodes.length} episodes added`}
             </p>
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">
@@ -159,44 +201,48 @@ export function UploadEpisodesStep({
               <FileText className="size-4" aria-hidden />
               Save Draft
             </Button>
-            <Button
-              size="lg"
-              onClick={() => dispatch({ type: "ADD_EPISODES", payload: 1 })}
-            >
-              <Plus className="size-4" aria-hidden />
-              Add New Episode
-            </Button>
+            {!isFilm && (
+              <Button
+                size="lg"
+                onClick={() => dispatch({ type: "ADD_EPISODES", payload: 1 })}
+              >
+                <Plus className="size-4" aria-hidden />
+                Add New Episode
+              </Button>
+            )}
           </div>
         </div>
 
-        {state.guideVisible && <UploadGuideCard />}
+        {state.guideVisible && <UploadGuideCard isFilm={isFilm} />}
 
-        <Card className="border-dashed py-4 shadow-none">
-          <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-semibold text-foreground text-sm">
-                Add Bulk Episodes
-              </p>
-              <p className="mt-1 text-muted-foreground text-xs">
-                Quickly add multiple episode slots
-              </p>
-            </div>
-            <div className="flex gap-2">
-              {[5, 10, 20].map((count) => (
-                <Button
-                  key={count}
-                  variant="outline"
-                  className="rounded-lg px-3 py-2"
-                  onClick={() =>
-                    dispatch({ type: "ADD_EPISODES", payload: count })
-                  }
-                >
-                  +{count}
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        {!isFilm && (
+          <Card className="border-dashed py-4 shadow-none">
+            <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-semibold text-foreground text-sm">
+                  Add Bulk Episodes
+                </p>
+                <p className="mt-1 text-muted-foreground text-xs">
+                  Quickly add multiple episode slots
+                </p>
+              </div>
+              <div className="flex gap-2">
+                {[5, 10, 20].map((count) => (
+                  <Button
+                    key={count}
+                    variant="outline"
+                    className="rounded-lg px-3 py-2"
+                    onClick={() =>
+                      dispatch({ type: "ADD_EPISODES", payload: count })
+                    }
+                  >
+                    +{count}
+                  </Button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Accordion
           type="single"
@@ -219,11 +265,12 @@ export function UploadEpisodesStep({
                     </span>
                     <div className="min-w-0 space-y-1 text-left">
                       <p className="truncate font-semibold text-[15px] text-text-strong">
-                        {episode.title}
+                        {isFilm ? displayTitle : episode.title}
                       </p>
                       <div className="flex flex-wrap items-center gap-2 text-sm text-text-subtle">
                         <span>
-                          Ep {index + 1} · {episode.duration}
+                          {isFilm ? "Film" : `Ep ${index + 1}`} ·{" "}
+                          {episode.duration}
                         </span>
                         <span className="rounded-full bg-primary/10 px-2.5 py-1 font-semibold text-primary text-xs">
                           9:16 Vertical
@@ -232,26 +279,30 @@ export function UploadEpisodesStep({
                     </div>
                   </div>
                 </AccordionTrigger>
-                <button
-                  type="button"
-                  onClick={() => setEpisodeToDelete(episode)}
-                  disabled={deletingEpisodeId === episode.id}
-                  aria-label={`Delete ${episode.title}`}
-                  className="mr-6 flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-50"
-                >
-                  {deletingEpisodeId === episode.id ? (
-                    <Loader2 className="size-4 animate-spin" aria-hidden />
-                  ) : (
-                    <Trash2 className="size-4" aria-hidden />
-                  )}
-                </button>
+                {isFilm && state.episodes.length === 1 ? (
+                  <span className="mr-6" />
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setEpisodeToDelete(episode)}
+                    disabled={deletingEpisodeId === episode.id}
+                    aria-label={`Delete ${episode.title}`}
+                    className="mr-6 flex size-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:pointer-events-none disabled:opacity-50"
+                  >
+                    {deletingEpisodeId === episode.id ? (
+                      <Loader2 className="size-4 animate-spin" aria-hidden />
+                    ) : (
+                      <Trash2 className="size-4" aria-hidden />
+                    )}
+                  </button>
+                )}
               </div>
               <AccordionContent className="border-t px-6 pt-6 pb-6">
                 <div className="space-y-5">
                   <div className="grid gap-6 lg:grid-cols-[240px_minmax(0,1fr)]">
                     <div className="space-y-3">
                       <Label className="font-medium text-sm text-text-strong">
-                        Upload Episode
+                        {isFilm ? "Upload Film" : "Upload Episode"}
                       </Label>
                       <VideoUploadZone
                         label=""
@@ -266,45 +317,49 @@ export function UploadEpisodesStep({
                     </div>
 
                     <div className="space-y-5">
-                      <div className="space-y-3">
-                        <Label className="font-medium text-sm text-text-strong">
-                          Episode Title
-                        </Label>
-                        <Input
-                          className="mt-2 h-[52px] rounded-2xl bg-input-bg text-base text-text-strong dark:bg-input-bg"
-                          value={episode.title}
-                          onChange={(e) =>
-                            dispatch({
-                              type: "UPDATE_EPISODE",
-                              payload: {
-                                id: episode.id,
-                                patch: { title: e.target.value },
-                              },
-                            })
-                          }
-                        />
-                      </div>
+                      {!isFilm && (
+                        <>
+                          <div className="space-y-3">
+                            <Label className="font-medium text-sm text-text-strong">
+                              Episode Title
+                            </Label>
+                            <Input
+                              className="mt-2 h-[52px] rounded-2xl bg-input-bg text-base text-text-strong dark:bg-input-bg"
+                              value={episode.title}
+                              onChange={(e) =>
+                                dispatch({
+                                  type: "UPDATE_EPISODE",
+                                  payload: {
+                                    id: episode.id,
+                                    patch: { title: e.target.value },
+                                  },
+                                })
+                              }
+                            />
+                          </div>
 
-                      <div className="space-y-3">
-                        <Label className="font-medium text-sm text-text-strong">
-                          Synopsis
-                        </Label>
-                        <Textarea
-                          rows={4}
-                          placeholder="what happens in this episode"
-                          className="mt-2 min-h-[104px] rounded-2xl bg-input-bg px-4 py-3 text-base text-text-strong dark:bg-input-bg"
-                          value={episode.synopsis}
-                          onChange={(e) =>
-                            dispatch({
-                              type: "UPDATE_EPISODE",
-                              payload: {
-                                id: episode.id,
-                                patch: { synopsis: e.target.value },
-                              },
-                            })
-                          }
-                        />
-                      </div>
+                          <div className="space-y-3">
+                            <Label className="font-medium text-sm text-text-strong">
+                              Synopsis
+                            </Label>
+                            <Textarea
+                              rows={4}
+                              placeholder="what happens in this episode"
+                              className="mt-2 min-h-[104px] rounded-2xl bg-input-bg px-4 py-3 text-base text-text-strong dark:bg-input-bg"
+                              value={episode.synopsis}
+                              onChange={(e) =>
+                                dispatch({
+                                  type: "UPDATE_EPISODE",
+                                  payload: {
+                                    id: episode.id,
+                                    patch: { synopsis: e.target.value },
+                                  },
+                                })
+                              }
+                            />
+                          </div>
+                        </>
+                      )}
 
                       <EpisodeSubtitlesField
                         seriesId={state.seriesId}
@@ -460,6 +515,7 @@ export function UploadEpisodesStep({
           trailerFile={state.trailer?.file}
           episodes={state.episodes}
           activeEpisodeId={expandedEpisode}
+          isFilm={isFilm}
         />
         <UploadEpisodesStepNav
           onBack={onBack}
@@ -493,7 +549,7 @@ export function UploadEpisodesStep({
 }
 
 /** UI-only subtitle file picker — not wired to upload/API yet. */
-function UploadGuideCard() {
+function UploadGuideCard({ isFilm }: { isFilm: boolean }) {
   const sections = [
     {
       title: "Video",
@@ -501,8 +557,8 @@ function UploadGuideCard() {
       items: [
         "Vertical 9:16 (1080×1920px)",
         "MP4/MOV, H.264/H.265",
-        "Max 2GB, up to 10 min per episode",
-        "1-10 min recommended",
+        isFilm ? "Max 2GB per film" : "Max 2GB, up to 10 min per episode",
+        isFilm ? "Keep it short and vertical" : "1-10 min recommended",
       ],
     },
     {
@@ -523,7 +579,7 @@ function UploadGuideCard() {
         "Multi-language supported",
       ],
     },
-  ] as const
+  ]
 
   return (
     <div className="rounded-3xl border bg-background p-4 sm:p-5">

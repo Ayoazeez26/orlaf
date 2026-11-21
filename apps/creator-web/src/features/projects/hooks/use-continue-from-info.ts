@@ -1,13 +1,12 @@
 import { useCallback, useState } from "react"
-import { attachSeriesToTrailerUpload } from "@/features/uploads/upload-runner"
 import { toastMutationError } from "@/lib/toast"
-import { createSeries, updateSeries } from "../api/studio-api"
-import { buildSeriesPayload } from "../lib/map-wizard-series-payload"
+import { updateSeries } from "../api/studio-api"
+import { buildSeriesUpdatePayload } from "../lib/map-wizard-series-payload"
 import type { UploadWizardState } from "../types"
 import { useUploadWizard } from "../upload/upload-wizard-context"
 
 export function useContinueFromInfo() {
-  const { state, dispatch, wizardId } = useUploadWizard()
+  const { state, dispatch, ensureSeriesId } = useUploadWizard()
   const [isContinuing, setIsContinuing] = useState(false)
 
   const continueFromInfo = useCallback(async (): Promise<boolean> => {
@@ -16,19 +15,10 @@ export function useContinueFromInfo() {
     dispatch({ type: "SET_FIELD", payload: { isContinuing: true } })
 
     try {
-      const payload = buildSeriesPayload(state)
-
-      if (state.seriesId) {
-        await updateSeries(state.seriesId, payload)
-      } else {
-        const series = await createSeries(payload)
-        dispatch({ type: "SET_SERIES_ID", payload: series.id })
-        // The trailer may still be uploading or processing; link it so it
-        // lands on the series whenever it finishes.
-        await attachSeriesToTrailerUpload(series.id, wizardId).catch(
-          () => undefined
-        )
-      }
+      // Normally the draft already exists (picking the trailer creates it);
+      // either way, save everything entered so far onto it.
+      const seriesId = await ensureSeriesId()
+      await updateSeries(seriesId, buildSeriesUpdatePayload(state))
 
       return true
     } catch (error) {
@@ -38,7 +28,7 @@ export function useContinueFromInfo() {
       setIsContinuing(false)
       dispatch({ type: "SET_FIELD", payload: { isContinuing: false } })
     }
-  }, [dispatch, state, wizardId])
+  }, [dispatch, state, ensureSeriesId])
 
   return { continueFromInfo, isContinuing }
 }

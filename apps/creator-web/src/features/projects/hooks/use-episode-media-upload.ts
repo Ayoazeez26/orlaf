@@ -161,14 +161,18 @@ export function useEpisodeMediaUpload() {
         }
         if (isStale()) return
 
-        const title = draft.title.trim() || "Untitled episode"
+        const seriesTitle = state.title.trim()
+        // A film's video carries the project's own title, so label it like
+        // the trailer ("Title · Film") instead of repeating the name.
+        const title =
+          state.projectType === "short-film"
+            ? "Film"
+            : draft.title.trim() || "Untitled episode"
         startEpisodeUpload({
           seriesId,
           episodeId: backendEpisodeId,
           draftId: episodeId,
-          title: state.title.trim()
-            ? `${state.title.trim()} · ${title}`
-            : title,
+          title: seriesTitle ? `${seriesTitle} · ${title}` : title,
           file,
           aiVerticalConversion: state.aiConversionEnabled,
           previewObjectUrl: asset.previewObjectUrl,
@@ -184,7 +188,13 @@ export function useEpisodeMediaUpload() {
         )
       }
     },
-    [dispatch, failEpisode, state.aiConversionEnabled, state.title]
+    [
+      dispatch,
+      failEpisode,
+      state.aiConversionEnabled,
+      state.title,
+      state.projectType,
+    ]
   )
 
   const clearEpisode = useCallback(

@@ -19,6 +19,8 @@ interface MobileSeriesPreviewProps {
   trailerFile?: File | null
   episodes: UploadEpisodeDraft[]
   activeEpisodeId?: string
+  /** Short film: one video, so film wording and no episode list. */
+  isFilm?: boolean
   className?: string
 }
 
@@ -69,10 +71,13 @@ export function MobileSeriesPreview({
   trailerFile,
   episodes,
   activeEpisodeId,
+  isFilm = false,
   className,
 }: MobileSeriesPreviewProps) {
   const trailerObjectUrl = useEpisodeObjectUrl(trailerUrl ? null : trailerFile)
-  const displayTitle = title.trim() || "Your Series Title"
+  const noun = isFilm ? "film" : "series"
+  const displayTitle =
+    title.trim() || (isFilm ? "Your Film Title" : "Your Series Title")
   const [source, setSource] = useState<PreviewSource>({ kind: "trailer" })
 
   useEffect(() => {
@@ -151,7 +156,7 @@ export function MobileSeriesPreview({
               </div>
               <p className="line-clamp-2 max-w-[220px] text-sm text-white/70 leading-6">
                 {synopsis.trim() ||
-                  "Your series synopsis will appear here as you fill in the details...."}
+                  `Your ${noun} synopsis will appear here as you fill in the details....`}
               </p>
             </div>
 
@@ -213,9 +218,11 @@ export function MobileSeriesPreview({
               <div className="flex items-center gap-2 text-white/90">
                 <Play className="size-3.5 text-primary" aria-hidden />
                 <span className="font-medium text-sm">
-                  {source.kind === "episode"
-                    ? `EP.${activeIndex + 1} / EP.${episodes.length}`
-                    : "Trailer"}
+                  {source.kind !== "episode"
+                    ? "Trailer"
+                    : isFilm
+                      ? "Film"
+                      : `EP.${activeIndex + 1} / EP.${episodes.length}`}
                 </span>
                 <ChevronUp className="size-4" aria-hidden />
               </div>
@@ -231,16 +238,18 @@ export function MobileSeriesPreview({
           <p className="font-semibold text-primary text-sm">Synopsis</p>
           <p className="mt-1 line-clamp-2 text-sm text-text-subtle leading-6">
             {synopsis.trim() ||
-              "Your series synopsis will appear here as you...."}
+              `Your ${noun} synopsis will appear here as you....`}
           </p>
         </div>
         <div>
           <div className="mb-3 flex items-center justify-between">
-            <p className="font-semibold text-sm text-text-strong">Episodes</p>
-            <p className="text-sm text-text-subtle">Season 1</p>
+            <p className="font-semibold text-sm text-text-strong">
+              {isFilm ? "Film" : "Episodes"}
+            </p>
+            {!isFilm && <p className="text-sm text-text-subtle">Season 1</p>}
           </div>
           <ul className="space-y-3">
-            {episodes.slice(0, 4).map((ep, index) => {
+            {episodes.slice(0, isFilm ? 1 : 4).map((ep, index) => {
               const playable = hasPlayableMedia(ep)
               const isActive =
                 source.kind === "episode" && index === activeIndex
@@ -263,7 +272,7 @@ export function MobileSeriesPreview({
                       <Play className="size-3 text-text-subtle" aria-hidden />
                       <span className="min-w-0">
                         <span className="block truncate font-medium text-[15px] text-text-strong">
-                          {ep.title}
+                          {isFilm ? displayTitle : ep.title}
                         </span>
                         <span className="block text-sm text-text-subtle">
                           {ep.duration}

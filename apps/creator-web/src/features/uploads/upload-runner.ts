@@ -460,18 +460,7 @@ async function runTrailerUpload(
             })
     )
 
-    // Mark processing first so attachSeriesToTrailerUpload, if it runs from
-    // here on, links the video itself.
     updateJob(jobId, { phase: "processing", progress: 1 })
-
-    // The series may have been created while this uploaded; tell it which
-    // video is its trailer so the server can finish without this tab.
-    const seriesId = getJob(jobId)?.seriesId
-    if (seriesId && seriesId !== createdForSeries) {
-      await updateSeries(seriesId, { trailerVideoHostingId: videoId }).catch(
-        () => undefined
-      )
-    }
 
     const deadline = Date.now() + PROCESSING_POLL_LIMIT_MS
     while (Date.now() < deadline) {
@@ -502,24 +491,6 @@ async function runTrailerUpload(
     })
   } finally {
     controllers.delete(jobId)
-  }
-}
-
-/**
- * Links a wizard trailer upload to the series once the series is created.
- * Safe to call at any point in the upload.
- */
-export async function attachSeriesToTrailerUpload(
-  seriesId: string,
-  wizardId: string
-) {
-  const job = findTrailerJob(getJobs(), { seriesId: null, wizardId })
-  if (!job) return
-  updateJob(job.id, { seriesId })
-  if (job.phase === "ready" && job.hlsUrl) {
-    await updateSeries(seriesId, { trailerUrl: job.hlsUrl })
-  } else if (job.videoId && job.phase === "processing") {
-    await updateSeries(seriesId, { trailerVideoHostingId: job.videoId })
   }
 }
 

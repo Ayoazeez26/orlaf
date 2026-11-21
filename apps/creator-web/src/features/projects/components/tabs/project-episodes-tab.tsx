@@ -132,19 +132,21 @@ export function ProjectEpisodesTab() {
             {project.episodes.length} episodes
           </p>
         </div>
-        <Button asChild className="shrink-0 gap-2">
-          <Link
-            to="/dashboard/projects/new"
-            search={{
-              seriesId: project.id,
-              step: "episodes",
-              addEpisode: true,
-            }}
-          >
-            <Plus className="size-4" aria-hidden />
-            Add Episode
-          </Link>
-        </Button>
+        {project.type !== "Short film" && (
+          <Button asChild className="shrink-0 gap-2">
+            <Link
+              to="/dashboard/projects/new"
+              search={{
+                seriesId: project.id,
+                step: "episodes",
+                addEpisode: true,
+              }}
+            >
+              <Plus className="size-4" aria-hidden />
+              Add Episode
+            </Link>
+          </Button>
+        )}
       </div>
 
       <div>

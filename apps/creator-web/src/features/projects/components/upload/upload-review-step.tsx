@@ -46,8 +46,8 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
 
   const displayTitle = state.title.trim() || "Untitled"
   const seriesTitle = state.title.trim() || "—"
-  const projectTypeLabel =
-    state.projectType === "short-film" ? "Short film" : "Short series"
+  const isFilm = state.projectType === "short-film"
+  const projectTypeLabel = isFilm ? "Short film" : "Short series"
   const accessLabel = state.access === "coins" ? "Coin-gated" : "Free"
   const genresLabel = formatUploadGenres(state.genres) || "—"
   const subtitlesLabel =
@@ -75,7 +75,7 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
     { id: "poster", label: "Film poster", done: posterReady },
     {
       id: "episode",
-      label: "At least one episode video",
+      label: isFilm ? "Film video" : "At least one episode video",
       done: state.episodes.some(
         (episode) =>
           episode.media != null &&
@@ -104,7 +104,10 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
   return (
     <div className="flex flex-col gap-8 xl:grid xl:grid-cols-[minmax(0,1fr)_300px] xl:items-start">
       <div className="w-full min-w-0 max-w-[740px] space-y-6">
-        <ReviewSectionCard icon={FileText} title="Series Info">
+        <ReviewSectionCard
+          icon={FileText}
+          title={isFilm ? "Film Info" : "Series Info"}
+        >
           <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
             <DetailRow label="Title" value={seriesTitle} />
             <DetailRow label="Type" value={projectTypeLabel} />
@@ -129,7 +132,7 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
 
         <ReviewSectionCard
           icon={Clapperboard}
-          title={`Episodes (${state.episodes.length})`}
+          title={isFilm ? "Film" : `Episodes (${state.episodes.length})`}
         >
           <ul className="space-y-2">
             {state.episodes.map((episode, index) => (
@@ -137,6 +140,7 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
                 key={episode.id}
                 episode={episode}
                 index={index}
+                filmTitle={isFilm ? displayTitle : undefined}
               />
             ))}
           </ul>
@@ -185,7 +189,11 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
           </div>
         </ReviewSectionCard>
 
-        <UploadReviewStepNav onBack={onBack} className="hidden xl:flex" />
+        <UploadReviewStepNav
+          onBack={onBack}
+          backLabel={isFilm ? "Film" : "Episodes"}
+          className="hidden xl:flex"
+        />
       </div>
 
       <div className="flex flex-col gap-6">
@@ -273,10 +281,12 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
             <dl className="space-y-3">
               <SummaryRow label="Project" value={displayTitle} />
               <SummaryRow label="Type" value={projectTypeLabel} />
-              <SummaryRow
-                label="Episodes"
-                value={String(state.episodes.length)}
-              />
+              {!isFilm && (
+                <SummaryRow
+                  label="Episodes"
+                  value={String(state.episodes.length)}
+                />
+              )}
               <SummaryRow label="Access" value={accessLabel} />
               <SummaryRow
                 label="Go-live"
@@ -288,7 +298,11 @@ export function UploadReviewStep({ onBack }: UploadReviewStepProps) {
           </CardContent>
         </Card>
 
-        <UploadReviewStepNav onBack={onBack} className="xl:hidden" />
+        <UploadReviewStepNav
+          onBack={onBack}
+          backLabel={isFilm ? "Film" : "Episodes"}
+          className="xl:hidden"
+        />
       </div>
     </div>
   )
@@ -412,9 +426,12 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
 function EpisodeReviewRow({
   episode,
   index,
+  filmTitle,
 }: {
   episode: UploadEpisodeDraft
   index: number
+  /** Set for a short film: its one video is shown under the film's title. */
+  filmTitle?: string
 }) {
   const hasVideo = episode.media?.status === "ready"
   const accessLabel =
@@ -431,7 +448,7 @@ function EpisodeReviewRow({
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium text-foreground text-sm">
-          {episode.title || `Episode ${index + 1}`}
+          {filmTitle ?? (episode.title || `Episode ${index + 1}`)}
         </p>
         <p className="text-muted-foreground text-xs">
           {episode.duration || "—"} ·{" "}

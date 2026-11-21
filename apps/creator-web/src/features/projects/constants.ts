@@ -1,3 +1,5 @@
+import type { ProjectType } from "./types"
+
 export const PROJECT_IMAGE_BASE = "/images/projects"
 
 export const PROJECT_THUMBNAILS = {
@@ -102,3 +104,13 @@ export const UPLOAD_WIZARD_STEPS = [
   { id: "episodes" as const, label: "Episodes", number: 2 },
   { id: "review" as const, label: "Review", number: 3 },
 ]
+
+/** A short film is one video, so its wizard talks about "Film", not episodes. */
+export function getUploadWizardSteps(projectType: ProjectType) {
+  if (projectType !== "short-film") return UPLOAD_WIZARD_STEPS
+  return [
+    { id: "info" as const, label: "Film Info", number: 1 },
+    { id: "episodes" as const, label: "Film", number: 2 },
+    { id: "review" as const, label: "Review", number: 3 },
+  ]
+}

@@ -138,8 +138,8 @@ export function EpisodeSubtitlesField({
 
       {!enabled ? (
         <p className="rounded-2xl border border-dashed px-4 py-3 text-muted-foreground text-sm">
-          Upload the episode video first. Subtitles are added to the video once
-          it has finished sending.
+          Upload the video first. Subtitles are added to it once it has finished
+          sending.
         </p>
       ) : (
         <>

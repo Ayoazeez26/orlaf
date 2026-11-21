@@ -45,3 +45,32 @@ export function buildSeriesPayload(
       : state.trailer?.videoHostingId,
   }
 }
+
+/** Title a draft gets when it is created before the creator has named it. */
+export const UNTITLED_PROJECT_TITLE = "Untitled project"
+
+/** Payload for creating the draft series as soon as the wizard needs an id. */
+export function buildSeriesCreatePayload(
+  state: UploadWizardState
+): CreateSeriesRequest {
+  const payload = buildSeriesPayload(state)
+  return { ...payload, title: payload.title || UNTITLED_PROJECT_TITLE }
+}
+
+/**
+ * Payload for saving the wizard's details onto an existing series. Leaves
+ * out the trailer: its upload links itself to the series on the server, and
+ * sending the wizard's copy could undo a newer trailer the creator just
+ * picked. Leaves out an empty title so a draft keeps its placeholder name.
+ */
+export function buildSeriesUpdatePayload(
+  state: UploadWizardState
+): UpdateSeriesRequest {
+  const {
+    trailerUrl: _trailerUrl,
+    trailerVideoHostingId: _trailerVideoHostingId,
+    title,
+    ...rest
+  } = buildSeriesPayload(state)
+  return title ? { ...rest, title } : rest
+}

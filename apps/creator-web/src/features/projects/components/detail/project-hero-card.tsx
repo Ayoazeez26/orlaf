@@ -12,6 +12,7 @@ interface ProjectHeroCardProps {
 }
 
 export function ProjectHeroCard({ project }: ProjectHeroCardProps) {
+  const isFilm = project.type === "Short film"
   return (
     <div className={cn(FROSTED_CARD_CLASS, "flex items-center gap-4")}>
       <ProjectListThumbnail
@@ -27,7 +28,8 @@ export function ProjectHeroCard({ project }: ProjectHeroCardProps) {
           <ProjectStatusBadge status={project.status} />
         </div>
         <p className="mt-1 text-muted-foreground text-sm">
-          {project.type} · {project.genre} · {project.episodeCount} episodes
+          {project.type} · {project.genre}
+          {isFilm ? "" : ` · ${project.episodeCount} episodes`}
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-3">
@@ -40,19 +42,21 @@ export function ProjectHeroCard({ project }: ProjectHeroCardProps) {
             Edit
           </Link>
         </Button>
-        <Button asChild>
-          <Link
-            to="/dashboard/projects/new"
-            search={{
-              seriesId: project.id,
-              step: "episodes",
-              addEpisode: true,
-            }}
-          >
-            <Plus className="size-4" aria-hidden />
-            New Episode
-          </Link>
-        </Button>
+        {!isFilm && (
+          <Button asChild>
+            <Link
+              to="/dashboard/projects/new"
+              search={{
+                seriesId: project.id,
+                step: "episodes",
+                addEpisode: true,
+              }}
+            >
+              <Plus className="size-4" aria-hidden />
+              New Episode
+            </Link>
+          </Button>
+        )}
       </div>
     </div>
   )

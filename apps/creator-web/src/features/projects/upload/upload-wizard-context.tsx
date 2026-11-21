@@ -2,10 +2,12 @@ import {
   createContext,
   type Dispatch,
   type ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
   useReducer,
+  useRef,
   useState,
 } from "react"
 import {
@@ -13,7 +15,9 @@ import {
   findTrailerJob,
 } from "@/features/uploads/upload-runner"
 import { type UploadJob, useUploadJobs } from "@/features/uploads/upload-store"
+import { createSeries } from "../api/studio-api"
 import { PROJECT_THUMBNAILS } from "../constants"
+import { buildSeriesCreatePayload } from "../lib/map-wizard-series-payload"
 import { formatDuration } from "../lib/media/format-duration"
 import {
   previewFrameTime,
@@ -221,6 +225,12 @@ interface UploadWizardContextValue {
   dispatch: Dispatch<UploadWizardAction>
   wizardId: string
   previewImage: string
+  /**
+   * The series this wizard edits, created as a draft the first time anything
+   * needs it (a trailer upload, Continue). Concurrent callers share one
+   * creation.
+   */
+  ensureSeriesId: () => Promise<string>
 }
 
 const UploadWizardContext = createContext<UploadWizardContextValue | null>(null)
@@ -344,17 +354,44 @@ export function UploadWizardProvider({ children }: { children: ReactNode }) {
       `wizard-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
   )
   useSyncUploadJobs(state, dispatch, wizardId)
+
+  const stateRef = useRef(state)
+  stateRef.current = state
+  const creatingSeries = useRef<Promise<string> | null>(null)
+
+  const ensureSeriesId = useCallback(async () => {
+    const existing = stateRef.current.seriesId
+    if (existing) return existing
+    if (!creatingSeries.current) {
+      creatingSeries.current = createSeries(
+        buildSeriesCreatePayload(stateRef.current)
+      )
+        .then((series) => {
+          dispatch({ type: "SET_SERIES_ID", payload: series.id })
+          return series.id
+        })
+        .catch((error: unknown) => {
+          // Let the next caller try again. On success the promise stays
+          // cached: state.seriesId only updates on the next render.
+          creatingSeries.current = null
+          throw error
+        })
+    }
+    return creatingSeries.current
+  }, [])
+
   const value = useMemo(
     () => ({
       state,
       dispatch,
       wizardId,
+      ensureSeriesId,
       previewImage:
         state.poster?.remoteUrl ??
         state.poster?.previewObjectUrl ??
         PROJECT_THUMBNAILS.theReturnees,
     }),
-    [state, wizardId]
+    [state, wizardId, ensureSeriesId]
   )
 
   return (

@@ -1,4 +1,4 @@
-import type { UploadEpisodeDraft } from "../types"
+import type { ProjectType, UploadEpisodeDraft } from "../types"
 
 /** Slot added with +N / Add Episode that was never uploaded. */
 export function isEmptyEpisodeSlot(episode: UploadEpisodeDraft): boolean {
@@ -40,10 +40,14 @@ export function isEpisodeVideoSending(episode: UploadEpisodeDraft) {
 export function getSubmitBlocker(state: {
   episodes: UploadEpisodeDraft[]
   trailer: { status: string } | null
+  projectType?: ProjectType
 }): string | null {
+  const isFilm = state.projectType === "short-film"
   const required = episodesRequiringVideo(state.episodes)
   if (required.some((episode) => episode.media?.status === "failed")) {
-    return "Fix failed episode uploads before submitting."
+    return isFilm
+      ? "Fix the failed film upload before submitting."
+      : "Fix failed episode uploads before submitting."
   }
   if (state.trailer?.status === "failed") {
     return "Fix the failed trailer upload before submitting."
@@ -57,23 +61,31 @@ export function getSubmitBlocker(state: {
       : `Waiting for ${sending} uploads to finish…`
   }
   if (required.some((episode) => !episode.media)) {
-    return "Every episode needs a video. Remove unused slots to submit."
+    return isFilm
+      ? "Upload your film to submit."
+      : "Every episode needs a video. Remove unused slots to submit."
   }
   return null
 }
 
 export function getEpisodesStepBlocker(
-  episodes: UploadEpisodeDraft[]
+  episodes: UploadEpisodeDraft[],
+  projectType: ProjectType = "short-series"
 ): string | null {
+  const isFilm = projectType === "short-film"
   const required = episodesRequiringVideo(episodes)
 
   if (required.length === 0) {
-    return "Upload at least one episode to continue."
+    return isFilm
+      ? "Upload your film to continue."
+      : "Upload at least one episode to continue."
   }
 
   // Uploads keep running in the background, so only problems block.
   if (required.some((episode) => episode.media?.status === "failed")) {
-    return "Fix failed episode uploads before continuing."
+    return isFilm
+      ? "Fix the failed film upload before continuing."
+      : "Fix failed episode uploads before continuing."
   }
   if (required.some((episode) => episode.media?.status === "probing")) {
     return "Checking your video…"
@@ -83,7 +95,9 @@ export function getEpisodesStepBlocker(
       (episode) => !IN_FLIGHT_STATUSES.has(episode.media?.status ?? "")
     )
   ) {
-    return "Every episode needs a video. Remove unused slots to continue."
+    return isFilm
+      ? "Upload your film to continue."
+      : "Every episode needs a video. Remove unused slots to continue."
   }
 
   const missingPrice = required.filter(
@@ -92,7 +106,9 @@ export function getEpisodesStepBlocker(
       (episode.coinPrice == null || episode.coinPrice < 1)
   )
   if (missingPrice.length > 0) {
-    return "Set coins to unlock on every coin-gated episode, or switch those episodes to Free."
+    return isFilm
+      ? "Set coins to unlock the film, or switch it to Free."
+      : "Set coins to unlock on every coin-gated episode, or switch those episodes to Free."
   }
 
   return null
