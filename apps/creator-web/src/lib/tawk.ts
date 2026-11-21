@@ -90,6 +90,8 @@ export function useTawkStatus(): TawkStatus {
 }
 
 export function openTawkChat() {
+  // The widget is kept hidden; it must be shown before it can open.
+  window.Tawk_API?.showWidget?.()
   window.Tawk_API?.maximize?.()
 }
 

@@ -29,10 +29,20 @@ const tawkSrc = import.meta.env.VITE_TAWK_SRC ?? ""
 const tawkBootstrapScript = tawkSrc
   ? `
     var Tawk_API = Tawk_API || {};
+    function hideTawkWidget() {
+      if (typeof Tawk_API.hideWidget === "function") Tawk_API.hideWidget();
+    }
+    // onLoad fires after the bubble has already painted, so hiding only there
+    // flashes it on every page load. onBeforeLoad runs before the first render.
+    Tawk_API.onBeforeLoad = hideTawkWidget;
     Tawk_API.onLoad = function () {
-      Tawk_API.hideWidget();
+      hideTawkWidget();
       window.dispatchEvent(new Event("tawk:loaded"));
     };
+    // Minimizing or ending a chat would otherwise leave the floating bubble
+    // on screen; the Support tab is the only way in.
+    Tawk_API.onChatMinimized = hideTawkWidget;
+    Tawk_API.onChatEnded = hideTawkWidget;
     Tawk_API.onStatusChange = function (status) {
       window.dispatchEvent(new CustomEvent("tawk:status", { detail: status }));
     };
