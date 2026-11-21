@@ -29,6 +29,10 @@ export function SettingsTeamTab() {
     email: string
   } | null>(null)
 
+  const pendingInvites = (data?.invites ?? []).filter(
+    (invite) => invite.status === "sent" || invite.status === "expired"
+  )
+
   const members: TeamMember[] = (data?.members ?? []).map((member) => ({
     id: member.id,
     firstName: member.firstName,
@@ -130,50 +134,51 @@ export function SettingsTeamTab() {
           </div>
         )}
 
-        {(data?.invites.length ?? 0) > 0 ? (
+        {pendingInvites.length > 0 ? (
           <div className="mt-6 space-y-2">
             <h4 className="font-medium text-foreground text-sm">
               Pending invites
             </h4>
             <ul className="space-y-1 text-muted-foreground text-sm">
-              {data?.invites
-                .filter((invite) => invite.status === "sent")
-                .map((invite) => (
-                  <li
-                    key={invite.id}
-                    className="flex items-center justify-between gap-3"
-                  >
-                    <span>
-                      {invite.email} ·{" "}
-                      {TEAM_ROLE_LABEL[invite.role] ?? invite.role}
-                    </span>
-                    <span className="flex shrink-0 items-center gap-1">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        disabled={resendInvite.isPending}
-                        onClick={() => resendInvite.mutate(invite.id)}
-                      >
-                        Resend
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        disabled={revokeInvite.isPending}
-                        onClick={() =>
-                          setInviteToRevoke({
-                            id: invite.id,
-                            email: invite.email,
-                          })
-                        }
-                      >
-                        Revoke
-                      </Button>
-                    </span>
-                  </li>
-                ))}
+              {pendingInvites.map((invite) => (
+                <li
+                  key={invite.id}
+                  className="flex items-center justify-between gap-3"
+                >
+                  <span>
+                    {invite.email} ·{" "}
+                    {TEAM_ROLE_LABEL[invite.role] ?? invite.role}
+                    {invite.status === "expired" ? (
+                      <span className="text-destructive"> · Expired</span>
+                    ) : null}
+                  </span>
+                  <span className="flex shrink-0 items-center gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={resendInvite.isPending}
+                      onClick={() => resendInvite.mutate(invite.id)}
+                    >
+                      Resend
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={revokeInvite.isPending}
+                      onClick={() =>
+                        setInviteToRevoke({
+                          id: invite.id,
+                          email: invite.email,
+                        })
+                      }
+                    >
+                      Revoke
+                    </Button>
+                  </span>
+                </li>
+              ))}
             </ul>
           </div>
         ) : null}

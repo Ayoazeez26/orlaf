@@ -1,4 +1,6 @@
 import type {
+  AcceptAdminInviteRequest,
+  AdminInviteDetails,
   AdminPasswordChangeRequest,
   AdminSessionResponse,
   AdminSignInRequest,
@@ -144,3 +146,71 @@ export async function logout(): Promise<void> {
 }
 
 export { ApiError }
+
+export type GetAdminInviteResult =
+  | { outcome: "found"; data: AdminInviteDetails }
+  | { outcome: "not_found" }
+  | { outcome: "error"; message: string }
+
+export async function getAdminInvite(
+  token: string
+): Promise<GetAdminInviteResult> {
+  try {
+    const response = await apiFetch(
+      `/api/v1/auth/admin/invites/${encodeURIComponent(token)}`
+    )
+    if (response.status === 404) return { outcome: "not_found" }
+    const data = await parseJsonBody(response)
+    if (!response.ok) {
+      return {
+        outcome: "error",
+        message: parseErrorMessage(
+          data,
+          `Could not load invite (${response.status})`
+        ),
+      }
+    }
+    return { outcome: "found", data: data as unknown as AdminInviteDetails }
+  } catch {
+    return {
+      outcome: "error",
+      message: "Unable to reach the server. Check your connection and API URL.",
+    }
+  }
+}
+
+export type AcceptAdminInviteResult =
+  | { outcome: "success"; data: AdminSignInResponse }
+  | { outcome: "error"; message: string }
+
+export async function acceptAdminInvite(
+  token: string,
+  body: AcceptAdminInviteRequest
+): Promise<AcceptAdminInviteResult> {
+  try {
+    const response = await apiFetch(
+      `/api/v1/auth/admin/invites/${encodeURIComponent(token)}/accept`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      }
+    )
+    const data = await parseJsonBody(response)
+    if (!response.ok) {
+      return {
+        outcome: "error",
+        message: parseErrorMessage(
+          data,
+          `Could not accept invite (${response.status})`
+        ),
+      }
+    }
+    return { outcome: "success", data: data as unknown as AdminSignInResponse }
+  } catch {
+    return {
+      outcome: "error",
+      message: "Unable to reach the server. Check your connection and API URL.",
+    }
+  }
+}

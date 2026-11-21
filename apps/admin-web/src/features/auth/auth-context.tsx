@@ -14,8 +14,13 @@ import {
   setOnSessionExpired,
 } from "@/lib/http-client"
 import { getRouter } from "@/router"
-import type { SignInAdminResult, VerifyAdminMfaResult } from "./api/auth-api"
+import type {
+  AcceptAdminInviteResult,
+  SignInAdminResult,
+  VerifyAdminMfaResult,
+} from "./api/auth-api"
 import {
+  acceptAdminInvite as acceptAdminInviteApi,
   changeAdminPassword as changeAdminPasswordApi,
   logout as logoutApi,
   signInAdmin as signInAdminApi,
@@ -45,6 +50,10 @@ interface AuthContextValue {
   changePassword: (
     input: Parameters<typeof changeAdminPasswordApi>[0]
   ) => Promise<void>
+  acceptInvite: (
+    token: string,
+    input: Parameters<typeof acceptAdminInviteApi>[1]
+  ) => Promise<AcceptAdminInviteResult>
   updateSession: (patch: Partial<AdminSession>) => void
   signOut: () => Promise<void>
 }
@@ -160,6 +169,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     [completeSignIn]
   )
 
+  const acceptInvite = useCallback(
+    async (
+      token: string,
+      input: Parameters<typeof acceptAdminInviteApi>[1]
+    ) => {
+      const result = await acceptAdminInviteApi(token, input)
+
+      if (result.outcome === "success") {
+        await completeSignIn(result.data)
+      }
+
+      return result
+    },
+    [completeSignIn]
+  )
+
   const changePassword = useCallback(
     async (input: Parameters<typeof changeAdminPasswordApi>[0]) => {
       await changeAdminPasswordApi(input)
@@ -194,6 +219,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signInWithEmail,
       verifyMfaAndSignIn,
       changePassword,
+      acceptInvite,
       updateSession,
       signOut,
     }),
@@ -203,6 +229,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       signInWithEmail,
       verifyMfaAndSignIn,
       changePassword,
+      acceptInvite,
       updateSession,
       signOut,
     ]

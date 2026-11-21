@@ -33,6 +33,7 @@ export function DashboardSidebarContent({
           user={config.user}
           roleName={config.name}
           roleId={config.id}
+          onNavigate={onNavigate}
         />
       </div>
     </>

@@ -35,3 +35,19 @@ export interface CreateAdminStaffInviteRequest {
 export interface UpdateAdminTeamMemberRequest {
   role: AdminRole
 }
+
+/** Result of opening an admin invite link (public, by token). */
+export interface AdminInviteDetails {
+  email: string
+  role: AdminRole
+  /** `valid` means the invite can be accepted now. */
+  status: "valid" | "expired" | "revoked" | "accepted"
+  invitedByName: string
+  expiresAt: string
+}
+
+export interface AcceptAdminInviteRequest {
+  firstName: string
+  lastName: string
+  password: string
+}
